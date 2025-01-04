@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Set base URL for API requests
-const API_BASE_URL = "http://localhost:8090/api/v1";
+const API_BASE_URL = "http://NuralLiteAPI.nuralservice.com/api/v1";
 
 
 const api = axios.create({
@@ -257,7 +257,7 @@ export const getCityList = async () => {
   try {
     const response = await api.get("/cities", {
       params: {
-        limit: 1000, // Set this to a value high enough to fetch all cities
+        limit: 10, // Set this to a value high enough to fetch all cities
       },
     });
     return response.data;

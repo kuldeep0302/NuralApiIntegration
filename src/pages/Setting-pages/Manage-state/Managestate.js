@@ -33,7 +33,8 @@ import inactiveIcon from "../../../Assests/inactiveIcon.svg";
 import editIcon from "../../../Assests/editIcon.svg";
 import Subheader from "../../../Componants/Common/Subheader";
 import config from "../../../Componants/Common/config";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
+import Loader from "../../../Componants/Loader/Loader";
 
 const stateHeaders = [
   { label: "Country", key: "countryName" },
@@ -115,8 +116,8 @@ const [filteredZones, setFilteredZones] = useState([])
 
   const fetchState = async () => {
     try {
+      setLoading(true);
       const response = await getStateList(searchParams);
-
       setStates(response.data.states);
       console.log("response.data", response.data);
       setTotalRecords(response.data.totalStates);
@@ -125,6 +126,7 @@ const [filteredZones, setFilteredZones] = useState([])
     } catch (error) {
       console.error("Error fetching countries:", error);
     }
+    setLoading(false);
   };
 
   const [postData, setPostData] = useState({
@@ -137,7 +139,7 @@ const [filteredZones, setFilteredZones] = useState([])
 
   const handleStatus = async (_id) => {
     try {
-      setLoading();
+      setLoading(true);
       const response = await updateStateStatus({ id: _id });
       console.log(`status resposne : ${response.data.message}`);
 
@@ -156,7 +158,7 @@ const [filteredZones, setFilteredZones] = useState([])
 
   const handlePostRequest = async () => {
     try {
-      setLoading();
+      setLoading(true);
       let response;
       if (editIndex) {
         // Include `_id` in the `postData` for update
@@ -190,6 +192,9 @@ const [filteredZones, setFilteredZones] = useState([])
       console.error("Error making POST request:", error);
       alert("Error making POST request. Please try again.");
     }
+    fetchState();
+    setLoading(false);
+    
   };
 
 
@@ -277,6 +282,8 @@ const [filteredZones, setFilteredZones] = useState([])
   };
   return (
     <div className="Managestate-container">
+      {loading && <Loader />}
+      <Toaster position="top-center" reverseOrder={false} />
       <HeaderNavigation value={"Location > State"} />
       <div className="autocompleteform-Managestate">
         <Subheader heading={"Add State"} />

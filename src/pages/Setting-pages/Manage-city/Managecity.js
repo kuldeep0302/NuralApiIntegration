@@ -33,7 +33,8 @@ import inactiveIcon from "../../../Assests/inactiveIcon.svg";
 import editIcon from "../../../Assests/editIcon.svg";
 import Subheader from "../../../Componants/Common/Subheader";
 import config from "../../../Componants/Common/config";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
+import Loader from "../../../Componants/Loader/Loader";
 
 const cityHeaders = [
   { label: "S. No.", key: "serialNumber" },
@@ -111,7 +112,6 @@ const Managecity = () => {
    const fetchState = async () => {
       try {
         const response = await getStateList(searchParams);
-  
         setStates(response.data.states);
         console.log("response.data", response.data);
         // setTotalRecords(response.data.totalStates);
@@ -123,11 +123,12 @@ const Managecity = () => {
     };
   const fetchCities= async () => {
     try {
+      setLoading(true);
       const response = await getCityList(searchParams);
-
       setCities(response.data.cities);
       console.log("response.data", response.data);
       setTotalRecords(response.data.totalCities);
+      setLoading(false);
       // setFilteredZones(response.data.zones);
       // setFilteredCountries(response.data.countries);
     } catch (error) {
@@ -151,7 +152,7 @@ const Managecity = () => {
 
   const handleStatus = async (_id) => {
     try {
-      setLoading();
+      setLoading(true);
       const response = await updateCityStatus({ id: _id });
       console.log(`status resposne : ${response.data.message}`);
 
@@ -183,6 +184,7 @@ const Managecity = () => {
   const handlePostRequest = async () => {
     console.log("Post Data is:", postData);
     try {
+      setLoading(true);
       const isStateExists = states.some((state) => {
         return (
           state.stateName === postData.stateName &&
@@ -204,7 +206,6 @@ const Managecity = () => {
         console.log("Update response:", response);
         alert("City updated successfully!");
         setEditIndex(false); // Reset the `editIndex` after update
-        fetchCities();
       } else {
         response = await createCity(postData);
       }
@@ -229,6 +230,8 @@ const Managecity = () => {
         alert("Error making POST request: " + (error.response?.data?.message || error.message));
       }
     }
+    fetchCities();
+    setLoading(false);
   };
 
 
@@ -313,8 +316,9 @@ const Managecity = () => {
 
   return (
     <div className="Managecity-container">
+      {loading && <Loader />}
+      <Toaster position="top-center" reverseOrder={false} />
       <HeaderNavigation value={"Location > City"} />
-
       <div className="autocompleteform-Managecity">
         <Subheader heading={"Add City"} />
         <div className="textbox-main-Managecity">

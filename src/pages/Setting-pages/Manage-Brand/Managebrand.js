@@ -108,8 +108,9 @@ const Managebrand = () => {
       getBrandList();
     } catch (error) {
       console.log(`Error saving Brand ${error}`);
-    } finally {
       setLoading(false);
+    } finally {
+      
     }
   };
 
