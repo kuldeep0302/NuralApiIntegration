@@ -1,0 +1,58 @@
+.firstbox-Amccn {
+  border-bottom: 1px solid #ccc;
+  padding-top: 20px;
+  padding-left: 25px;
+  height: 60px;
+  font-size: x-large;
+  position: relative;
+  bottom: 20px;
+}
+
+.Amccn-container {
+  background-color: #eff3fe;
+  margin: 10px;
+  border-radius: 10px;
+  padding: 5px;
+  padding-bottom: 30px;
+}
+
+.line-Amccn {
+  display: flex;
+  justify-content: space-between;
+}
+
+.textinput-Amccn {
+  width: 20%;
+}
+
+.buttons-Amccn {
+  display: flex;
+  margin-top: 20px;
+  /* flex-direction: row-reverse; */
+}
+
+.buttons-Amccn-span {
+  margin: 5px;
+}
+
+.date-Amccn {
+  width: 72%;
+}
+
+@media screen and (max-width: 600px) {
+  .line-Amccn {
+    flex-direction: column;
+    display: flex;
+  }
+
+  .textinput-Amccn {
+    width: 80%;
+    align-self: center;
+    margin-top: 10px;
+  }
+
+  .buttons-Amccn {
+    display: flex;
+    margin-top: 20px;
+  }
+}

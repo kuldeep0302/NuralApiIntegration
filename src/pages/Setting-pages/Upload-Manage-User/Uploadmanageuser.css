@@ -1,0 +1,46 @@
+.container-Uploadmanageuser {
+    display: flex;
+    position: relative;
+    width: 100%;
+    background-color: #EFF3FE;
+    left: 5px;
+    top: 5px;
+    gap: 6rem;
+    flex-wrap: wrap;
+}
+
+.upload-excel-Uploadmanageuser {
+    position: relative;
+    top: 1rem;
+    left: 1rem;
+}
+
+.upload-text-Uploadmanageuser {
+    display: flex;
+    /* flex-wrap: wrap; */
+}
+
+.upload-Uploadmanageuser {
+    position: relative;
+    left: 5rem;
+    height: 5vh;
+    top: 5px;
+}
+
+@media only screen and (max-width: 666px) {
+    .container-Uploadmanageuser {
+        overflow: hidden;
+        position: relative;
+        left: 0;
+    }
+
+    .upload-text-Uploadmanageuser {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .upload-text-Uploadmanageuser {
+        position: relative;
+        bottom: 1rem;
+    }
+}

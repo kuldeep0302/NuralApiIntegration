@@ -1,0 +1,36 @@
+
+
+@media (max-width: 768px) {
+  .firstbox-Reappointment {
+    overflow: hidden;
+  }
+
+  .box-Reappointment {
+    flex-wrap: wrap;
+  }
+
+  .textinput-one-Reappointment {
+    width: 52%;
+    position: relative;
+    left: 3rem;
+    bottom: 1rem;
+  }
+
+  .First-box-Reappointment {
+    height: 18vh;
+    width: 85%;
+  }
+
+  .text-serchline-Reappointment {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .textinput-two-Reappointment {
+    width: 90%;
+  }
+
+  .my-table {
+    overflow-x: auto;
+  }
+}

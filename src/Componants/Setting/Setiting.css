@@ -1,0 +1,116 @@
+/* .setting-containermain {
+  width: 100%;
+  overflow-y: scroll;
+  height: 80vh;
+}
+
+.setting-containermain::-webkit-scrollbar {
+  display: none;
+}
+
+.Setting_div {
+  font-size: 23px;
+  cursor: pointer;
+  text-decoration: underline;
+  font-weight: 400;
+  margin-left: 26px;
+}
+
+.MASTERS {
+  font-size: 21px;
+  margin: 31px;
+  line-height: 1.5;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.Positions {
+  width: 300px;
+  background-color: #32499f;
+  color: white;
+  margin: 20px;
+  height: 50px;
+  margin-top: 0px;
+  border-radius: 10px;
+  border: none;
+  font-weight: bold;
+  font-size: 20px;
+  text-align: center;
+}
+
+.Positions:hover {
+  cursor: pointer;
+}
+
+@media (max-width: 767px) {
+  .setting-container {
+    width: 80%;
+    position: absolute;
+    left: 0rem;
+    top: 127px;
+    overflow-y: scroll;
+    height: 80vh;
+  }
+
+  .Positions {
+    width: 95%;
+  }
+
+  .MASTERS {
+    text-wrap: nowrap;
+  }
+
+  .settingpage-setting {
+    margin: 10px;
+  }
+} */
+
+
+.Positions {
+    /* width: 250px;  */
+    width:210px;
+    background-color: #32499f;
+    color: white;
+    margin: 15px; 
+    height: 40px; 
+    border-radius: 8px;
+    border: none;
+    font-weight: bold;
+    font-size: 18px; 
+    text-align: center;
+  }
+  
+  .MASTERS {
+    /* border:2px solid red; */
+    font-size: 20px;
+    margin: 31px;
+    margin-bottom: 0px;
+    /* line-height: 1.5; */
+    font-weight: 550;
+    font-size: 20px;
+  }
+
+  @media (max-width: 767px) {
+    .setting-containermain {
+      width: 90%; 
+      position: relative; 
+      margin: auto; 
+      height: auto; 
+    }
+  
+    .Positions {
+      width: 95%; 
+      height: 45px;
+      font-size: 16px;
+    }
+  
+    .MASTERS {
+      font-size: 18px;
+      margin: 20px; 
+    }
+  
+    .settingpage-setting {
+      margin: 10px; 
+    }
+  }
+  

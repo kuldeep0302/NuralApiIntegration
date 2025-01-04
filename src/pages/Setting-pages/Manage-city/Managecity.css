@@ -1,0 +1,75 @@
+.autocompleteform-Managecity {
+  background-color: #eff3fe;
+  margin: 10px;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.fistline-Managecity {
+  border-bottom: 1px solid #ccc;
+  height: 60px;
+  display: flex;
+  gap: 1rem;
+  padding: 10px;
+  margin: 10px;
+}
+
+.line-Managecity {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px;
+}
+
+
+
+.textinput-Managecity {
+  width: 20%;
+}
+
+.button-Managecity {
+  display: flex;
+  gap: 1rem;
+  margin: 30px 10px 6px 10px;
+  padding-bottom: 10px;
+}
+
+.excelexport-Managecity {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  /* padding: "10px", */
+}
+
+.table-Managecity {
+  margin: 10px;
+  overflow: auto;
+  /* margin-bottom: 20px; */
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+@media screen and (max-width: 600px) {
+  .line-Managecity {
+    flex-direction: column;
+    display: flex;
+  }
+
+  .textinput-Managecity {
+    width: 100%;
+  }
+  .button-Managecity {
+    display: flex;
+    margin-top: 20px;
+    flex-direction: row;
+    justify-content: space-around;
+  }
+
+  .table-Managecity {
+    width: 100%;
+    overflow: scroll;
+  }
+}

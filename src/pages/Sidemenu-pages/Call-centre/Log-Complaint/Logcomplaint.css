@@ -1,0 +1,165 @@
+.firstbox-Logcomplaint {
+    border-bottom: 1px solid #ccc;
+    padding-top: 20px;
+    padding-left: 25px;
+    height: 60px;
+    font-size: x-large;
+    position: relative;
+    bottom: 20px;
+}
+
+.secoundbox-Logcomplaint {
+    /* border: 1px solid black; */
+    height: 8vh;
+    position: relative;
+    top: 4px;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.container-Logcomplaint {
+    width: 100%;
+    background-color: #EFF3FE;
+    height: 24vh;
+    margin: 6px 1px 1px 6px;
+    border-radius: 15px;
+    position: relative;
+    top: 7px;
+}
+
+.first-text-Logcomplaint {
+    position: relative;
+    top: 18px;
+    left: 15px;
+}
+
+.secound-text-Logcomplaint {
+    position: relative;
+    top: 18px;
+    left: 15px;
+    text-decoration: none;
+}
+
+.line-Logcomplaint {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+}
+
+.textinput-Logcomplaint {
+    width: 20%;
+}
+
+
+.secound-text-Callhistory {
+    position: relative;
+    top: 18px;
+    left: 15px;
+}
+
+.secoundbox-Customerproduct {
+    display: flex;
+}
+
+.secound-text-Customerproduct {
+    cursor: pointer;
+}
+
+.secound-text-Customerproduct.active {
+    border-bottom: 2px solid red;
+}
+
+
+.secound-text-Customerproduct {
+    margin-top: 20px;
+    margin-left: 15px;
+}
+
+.secound-text-Callhistory {
+    margin-top: 20px;
+}
+
+.table-Customerproduct {
+    margin: 10px;
+}
+
+.table-Callhistory {
+    margin: 10px;
+    font-size: large;
+}
+
+
+table {
+    width: 100%;
+}
+
+th,
+td {
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #EFF3FE;
+}
+
+.cs-Callhistory {
+    border-bottom: 1px solid #ccc;
+}
+
+
+.container-form-Logcomplaint {
+    display: flex;
+    gap: 9rem;
+    position: relative;
+    top: 1rem;
+    left: 2rem;
+}
+
+.buttons-Logcomplaint {
+    display: flex;
+    margin-top: 30px;
+}
+
+.buttons-Logcomplaint-span {
+    margin: 5px;
+}
+
+@media (max-width: 600px) {
+    .line-Logcomplaint {
+        flex-direction: column;
+        display: flex;
+    }
+
+    .textinput-Logcomplaint {
+        width: 80%;
+        align-self: center;
+        margin-top: 10px;
+    }
+
+    .buttons-Logcomplaint {
+        display: flex;
+        margin-top: 20px;
+        flex-direction: row;
+        justify-content: space-around;
+    }
+
+    .container-Logcomplaint {
+        height: 50vh;
+    }
+
+    .first-text-Logcomplaint {
+        top: 8px;
+    }
+
+    .table-Customerproduct {
+        width: 100%;
+        overflow: scroll;
+    }
+
+    .table-Callhistory {
+        width: 100%;
+        overflow: scroll;
+    }
+}

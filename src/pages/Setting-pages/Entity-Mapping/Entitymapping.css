@@ -1,0 +1,59 @@
+.autocompleteform-Entitymapping {
+    background-color: #EFF3FE;
+    margin: 10px;
+    border-radius: 5px;
+}
+
+.fistline-Entitymapping {
+    border-bottom: 1px solid #ccc;
+    height: 60px;
+    display: flex;
+    gap: 1rem;
+    padding: 10px;
+    margin: 10px;
+}
+
+.name2-Entitymapping {
+    position: relative;
+    top: 10px;
+    left: 10px;
+}
+
+.line-Entitymapping {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+}
+
+.textinput-Entitymapping {
+    width: 20%;
+}
+
+.button-Entitymapping {
+    display: flex;
+    gap: 1rem;
+    margin: 30px 10px 6px 10px;
+    padding-bottom: 10px;
+}
+
+.table-Entitymapping {
+    margin: 10px;
+    overflow: auto;
+}
+
+@media screen and (max-width: 600px) {
+
+    .line-Entitymapping {
+        flex-direction: column;
+        display: flex;
+    }
+
+    .textinput-Entitymapping {
+        width: 100%;
+    }
+
+    .table-Entitymapping {
+        width: 100%;
+        overflow: scroll;
+    }
+}

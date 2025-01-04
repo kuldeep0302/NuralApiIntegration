@@ -1,0 +1,36 @@
+.firstname-Opencalldetail {
+    border-bottom: 1px solid #ccc;
+    padding-top: 20px;
+    padding-left: 25px;
+    height: 60px;
+    font-size: x-large;
+    position: relative;
+    bottom: 20px;
+}
+
+.line-Opencalldetail {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+    padding: 5px;
+}
+
+.textinput-Opencalldetail {
+    width: 20%;
+}
+
+.textfiled-Opencalldetail,
+.noecord {
+    background-color: #EFF3FE;
+    margin: 10px;
+    border-radius: 4px;
+}
+
+.date-Opencalldetail {
+    width: 100%;
+    border: none;
+}
+
+.excelbutton-Opencalldetail {
+    margin: 10px;
+}

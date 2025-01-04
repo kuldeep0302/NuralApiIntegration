@@ -1,0 +1,92 @@
+@import url("https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100;0,200;0,300;0,400;1,100;1,200&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Work Sans", sans-serif;
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+.container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.main-content {
+  flex-grow: 1;
+  overflow: hidden;
+  transition: margin-left 0.3s ease, width 0.3s ease; /* Smooth sliding effect */
+}
+
+.main-content.expanded {
+  margin-left: 240px;
+  width: calc(100vw - 240px);
+}
+
+.main-content.collapsed {
+  margin-left: 60px;
+  width: calc(100vw - 60px);
+}
+
+.routepath {
+  /* border: 2px solid red; */
+  padding-top: 120px;
+  padding-bottom: 20px;
+  height: 95vh;
+  overflow-y: auto;
+  transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+.routepath.expanded {
+  width: calc(100vw - 240px);
+}
+
+.routepath.collapsed {
+  width: calc(100vw - 60px);
+}
+
+.header {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  max-height: 260px;
+}
+
+@media only screen and (max-width: 600px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .main-content,
+  .main-content.expanded,
+  .main-content.collapsed {
+    margin-left: 0;
+    width: 100vw;
+  }
+}
+
+/* Scrollbar styling for specific elements if needed */
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 10px;
+  border: 1px solid transparent;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

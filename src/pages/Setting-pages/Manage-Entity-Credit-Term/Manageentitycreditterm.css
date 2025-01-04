@@ -1,0 +1,219 @@
+.Manageentitycreditterm-container {
+    font-family: 'Work Sans', sans-serif;
+    width: 100%;
+    height: 80vh;
+    margin: 0;
+    padding: 0;
+}
+
+.time-input{
+    width: 22%;
+}
+
+.fistline-Manageentitycreditterm {
+    border: ridge;
+    position: relative;
+    justify-content: center;
+    height: 57px;
+}
+
+.name-Manageentitycreditterm {
+    position: absolute;
+    top: 16px;
+    left: 11px;
+}
+
+.autocompleteform-Manageentitycreditterm {
+    position: relative;
+    width: 100%;
+    background-color: #EFF3FE;
+    height: 80vh;
+    left: 1vh;
+    top: 1vh;
+}
+
+.textbox-main-Manageentitycreditterm {
+    position: relative;
+    top: 3rem;
+    left: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 4rem;
+}
+
+.first-textbox-Manageentitycreditterm {
+    display: flex;
+    gap: 6rem;
+}
+
+.second-textbox-Manageentitycreditterm {
+    display: flex;
+    gap: 7rem;
+}
+
+.third-textbox-Manageentitycreditterm {
+    display: flex;
+}
+
+.autocomplete-Manageentitycreditterm {
+    width: 18rem;
+}
+
+.buttons-Manageentitycreditterm {
+    display: flex;
+    position: relative;
+    top: 6rem;
+}
+
+.CANCEL-Manageentitycreditterm {
+    width: 20rem;
+    text-align: center;
+    border-radius: 7px;
+    background-color: #32499F;
+    color: white;
+    height: 5vh;
+    position: relative;
+    left: 0vh;
+}
+
+.Save-Manageentitycreditterm {
+    width: 20rem;
+    text-align: center;
+    border-radius: 7px;
+    background-color: #32499F;
+    color: white;
+    height: 5vh;
+    margin-left: 3px;
+}
+
+@media only screen and (max-width: 666px) {
+    .autocompleteform-Manageentitycreditterm {
+        position: relative;
+        left: 0px;
+        width: 100%;
+        background-color: #EFF3FE;
+        height: 117vh;
+        overflow: scroll;
+    }
+
+    .first-textbox-Manageentitycreditterm {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .second-textbox-Manageentitycreditterm {
+        display: flex;
+        flex-direction: column;
+        gap: 3rem;
+    }
+
+    .buttons-Manageentitycreditterm {
+        position: relative;
+        right: 11px;
+        top: 3rem;
+    }
+
+    .textbox-main-Manageentitycreditterm {
+        gap: 2rem;
+    }
+
+}
+
+@media screen and (min-width: 820px) and (max-width: 1180px) {
+
+    .autocompleteform-Manageentitycreditterm {
+        position: relative;
+        left: 5px;
+        width: 100%;
+        background-color: #EFF3FE;
+        height: 85vh;
+        overflow: scroll;
+    }
+
+    .first-textbox-Manageentitycreditterm {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .second-textbox-Manageentitycreditterm {
+        display: flex;
+        flex-direction: column;
+        gap: 3rem;
+    }
+
+    .buttons-Manageentitycreditterm {
+        position: relative;
+        right: 11px;
+        top: 3rem;
+    }
+
+    .textbox-main-Manageentitycreditterm {
+        gap: 2rem;
+    }
+
+    .CANCEL-Manageentitycreditterm {
+        width: 17rem;
+    }
+
+    .Save-Manageentitycreditterm {
+        width: 17rem;
+    }
+
+}
+
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+
+    .autocompleteform-Manageentitycreditterm {
+        position: relative;
+        left: 5px;
+        width: 100%;
+        background-color: #EFF3FE;
+        height: 85vh;
+        overflow: scroll;
+    }
+
+    .first-textbox-Manageentitycreditterm {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .second-textbox-Manageentitycreditterm {
+        display: flex;
+        flex-direction: column;
+        gap: 3rem;
+    }
+
+    .buttons-Manageentitycreditterm {
+        position: relative;
+        right: 11px;
+        top: 3rem;
+    }
+
+    .textbox-main-Manageentitycreditterm {
+        gap: 2rem;
+    }
+
+    .CANCEL-Manageentitycreditterm {
+        width: 17rem;
+    }
+
+    .Save-Manageentitycreditterm {
+        width: 17rem;
+    }
+
+}
+
+@media screen and (min-width: 800px) and (max-width: 1280px) {
+
+    .first-textbox-Manageentitycreditterm {
+        gap: 2rem;
+    }
+
+    .second-textbox-Manageentitycreditterm {
+        gap: 3rem;
+    }
+
+}

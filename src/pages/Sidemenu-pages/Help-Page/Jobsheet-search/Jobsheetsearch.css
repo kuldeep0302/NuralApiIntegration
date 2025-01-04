@@ -1,0 +1,46 @@
+.firstname-Jobsheetsearch {
+    border-bottom: 1px solid #ccc;
+    padding-top: 20px;
+    padding-left: 25px;
+    height: 60px;
+    font-size: x-large;
+    position: relative;
+    bottom: 20px;
+}
+
+.line-Jobsheetsearch {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+    padding: 5px;
+}
+
+.textinput-Jobsheetsearch {
+    width: 20%;
+}
+
+.textfiled-Jobsheetsearch,
+.noecord {
+    background-color: #EFF3FE;
+    margin: 10px;
+    border-radius: 4px;
+}
+
+.date-Jobsheetsearch {
+    width: 100%;
+    border: none;
+}
+
+.button-Jobsheetsearch {
+    display: flex;
+}
+
+@media (max-width: 600px) {
+    .line-Jobsheetsearch {
+        flex-direction: column;
+    }
+
+    .textinput-Jobsheetsearch {
+        width: 100%;
+    }
+}

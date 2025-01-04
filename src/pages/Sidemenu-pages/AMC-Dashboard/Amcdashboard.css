@@ -1,0 +1,145 @@
+.setting-icones-Amcdashboard {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  bottom: 28px;
+}
+
+
+.fistline-Amcdashboard {
+  border-bottom: 1px solid #ccc;
+  padding-top: 20px;
+  padding-left: 25px;
+  height: 60px;
+  font-size: x-large;
+  position: relative;
+  bottom: 20px;
+}
+
+.firstdivicone-Amcdashboard {
+  display: flex;
+  align-items: center;
+}
+
+.setting-icones-Amcdashboard img {
+  width: 38px;
+  margin-right: 8px;
+}
+
+.value-container-Amcdashboard {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin: 10px;
+}
+
+.firstvaluebox-Amcdashboard {
+  border-radius: 10px;
+  width: 230px;
+  /* background-color: #33499F; */
+  background-color: #f5f8ff;
+  color: black;
+  min-height: 145px;
+  max-height: 230px;
+  padding: 20px 0px 20px 0px;
+  /* box-shadow: 1.5px 0.5px 1.5px rgb(110, 142, 237); */
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: x-large;
+}
+
+.firstvaluebox-Amcdashboard:hover {
+  background-color: #4566b8;
+  color: #fff;
+  cursor: pointer;
+}
+
+.textinput-Amcdashboard {
+  width: 20%;
+}
+.date-Amcdashboard {
+  width: 72%;
+  border:"2px solid red"
+}
+
+.First-Amcdashboard {
+  margin-top: 10px;
+  font-size: small;
+  font-weight: 500;
+}
+
+.Secound-Amcdashboard {
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.line-Amcdashboard {
+  display: flex;
+  justify-content: space-between;
+
+  background-color: #eff3fe;
+  margin: 20px;
+  border-radius: 10px;
+  padding: 10px;
+  /* padding-bottom: 30px; */
+}
+.excelexport-Amcdashboard {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  /* padding: "10px", */
+}
+
+.table-Amcdashboard {
+  margin: 10px;
+  font-size: large;
+}
+
+table {
+  width: 100%;
+}
+
+th,
+td {
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: #eff3fe;
+}
+
+.cs-Amcdashboard {
+  border-bottom: 1px solid #ccc;
+}
+
+@media screen and (max-width: 600px) {
+  .fistline-Amcdashboard {
+    position: relative;
+    right: 13px;
+  }
+  .line-Amcdashboard {
+    flex-direction: column;
+    display: flex;
+  }
+
+  .firstvaluebox-Amcdashboard {
+    height: 20vh;
+  }
+
+  .table-Amcdashboard {
+    width: 100%;
+    overflow: scroll;
+  }
+  .buttons-Amcdashboard {
+    display: flex;
+    margin-top: 20px;
+  }
+  .textinput-Amcdashboard {
+    width: 80%;
+    align-self: center;
+    margin-top: 10px;
+  }
+}

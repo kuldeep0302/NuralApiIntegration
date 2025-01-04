@@ -1,0 +1,60 @@
+.autocompleteform-TaxCategoryName {
+    background-color: #EFF3FE;
+    margin: 10px;
+    border-radius: 5px;
+}
+
+.fistline-TaxCategoryName {
+    border-bottom: 1px solid #ccc;
+    height: 60px;
+    display: flex;
+    gap: 1rem;
+    padding: 10px;
+    margin: 10px;
+}
+
+.name2-TaxCategoryName {
+    position: relative;
+    top: 10px;
+    left: 10px;
+}
+
+.line-TaxCategoryName {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+}
+
+.textinput-TaxCategoryName {
+    width: 20%;
+}
+
+.button-TaxCategoryName {
+    display: flex;
+    gap: 1rem;
+    margin: 30px 10px 6px 10px;
+    padding-bottom: 10px;
+}
+
+.table-TaxCategoryName {
+    margin: 10px;
+    overflow: auto;
+}
+
+
+@media screen and (max-width: 600px) {
+
+    .line-TaxCategoryName {
+        flex-direction: column;
+        display: flex;
+    }
+
+    .textinput-TaxCategoryName {
+        width: 100%;
+    }
+
+    .table-TaxCategoryName {
+        width: 100%;
+        overflow: scroll;
+    }
+}

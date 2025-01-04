@@ -1,0 +1,61 @@
+/* .managezone-container{
+  border:2px solid red;
+ 
+} */
+.autocompleteform-managezone {
+  background-color: #eff3fe;
+  margin: 10px;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.fistline-managezone {
+  border-bottom: 1px solid #ccc;
+  padding-top: 20px;
+  padding-left: 25px;
+}
+
+.name2-managezone {
+  position: relative;
+  top: 10px;
+  left: 10px;
+}
+
+.line-managezone {
+  display: flex;
+
+  /* justify-content: space-around; */
+  margin: 10px;
+}
+
+.textinput-managezone {
+  width: 20%;
+  margin-right: 10rem;
+}
+
+.button-managezone {
+  display: flex;
+  gap: 1rem;
+  margin: 30px 10px 6px 10px;
+  padding-bottom: 10px;
+}
+
+.table-Managezone {
+  margin: 10px;
+}
+
+@media screen and (max-width: 600px) {
+  .line-managezone {
+    flex-direction: column;
+    display: flex;
+  }
+
+  .table-Managezone {
+    width: 100%;
+    overflow: scroll;
+  }
+
+  .textinput-managezone {
+    width: 100%;
+  }
+}

@@ -1,0 +1,65 @@
+.Manageentitycredittermmain-container::-webkit-scrollbar {
+    display: none;
+}
+
+.namewithicone-Manageentitycredittermmain {
+    margin-left: 7px;
+    font-weight: bold;
+    border-bottom: 1px solid rgb(204, 204, 204);
+    padding: 7px 20px 10px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+}
+
+.setting-icones-Manageentitycredittermmain {
+    display: flex;
+    margin-left: auto;
+    margin-bottom: 13px;
+    height: 4px;
+    width: 409px;
+    justify-content: flex-end;
+}
+
+.fistline-Manageentitycredittermmain {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    height: 77px;
+    margin: 3px;
+    border: 1px solid black;
+    margin-top: 31px;
+}
+
+.firstdivicone-Manageentitycredittermmain {
+    display: flex;
+    align-items: center;
+}
+
+.iconefirst-Manageentitycredittermmain{
+    align-items: center;
+}
+
+.addwithicone-Manageentitycredittermmain {
+    display: flex;
+    align-items: center;
+}
+
+.setting-icones-Manageentitycredittermmain img {
+    width: 38px;
+    margin-right: 8px;
+}
+
+@media only screen and (max-width: 666px) {
+    .namewithicone-Manageentitycredittermmain {
+        position: relative;
+        top: 1vh;
+        left: 1vh;
+    }
+
+    .Manageentitycredittermmain-container {
+        overflow-y: scroll;
+        overflow-x: hidden;
+
+    }
+}

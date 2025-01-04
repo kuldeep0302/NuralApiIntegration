@@ -1,0 +1,195 @@
+.Jobsheet-container {
+    width: 100%;
+    background-color: #EFF3FE;
+    height: 76vh;
+    margin: 6px 1px 1px 6px;
+}
+
+.first-with-Jobsheet {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.first-heading-Jobsheet {
+    margin: 10px;
+    font-weight: bold;
+}
+
+.cross-Jobsheet {
+    margin: 10px;
+}
+
+.cross-Jobsheet img {
+    width: 50%;
+}
+
+.heading-Jobsheet {
+    position: relative;
+    top: 20px;
+    left: 20px;
+}
+
+.main-line-Jobsheet {
+    position: relative;
+    top: 2rem;
+    left: 2rem;
+}
+
+.main-line2-Jobsheet {
+    position: relative;
+    top: 3rem;
+    left: 0rem;
+}
+
+.first-line-Jobsheet {
+    display: flex;
+    gap: 17rem;
+}
+
+.Secound-line-Jobsheet {
+    display: flex;
+    gap: 17rem;
+}
+
+.third-line-Jobsheet {
+    display: flex;
+    gap: 17rem;
+}
+
+.switchline-main-Jobsheet {
+    display: flex;
+    gap: 3rem;
+}
+
+.switchline-Jobsheet {
+    display: flex;
+    position: relative;
+    top: 2rem;
+    gap: 1rem;
+}
+
+.switchline2-Jobsheet {
+    display: flex;
+    position: relative;
+    top: 2rem;
+    gap: 1rem;
+}
+
+.upload-Jobsheet {
+    position: relative;
+    top: 5rem;
+    display: flex;
+    gap: 6rem;
+}
+
+.sign-Jbsheet {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sign-Jobsheet {
+    width: 75%;
+    text-align: center;
+    border-radius: 7px;
+    background-color: #32499F;
+    color: white;
+    height: 5vh;
+}
+
+.input-Jobsheet {
+    width: 75%;
+}
+
+.warrent-Jobsheet {
+    position: relative;
+    top: 10px;
+}
+
+.MuiInputLabel-animated {
+    width: 137%;
+}
+
+.buttons-Jobsheet {
+    display: flex;
+    position: relative;
+    top: 8rem;
+    gap: 1rem;
+    left: 29rem;
+}
+
+.create-Jobsheet {
+    width: 12%;
+    text-align: center;
+    border-radius: 7px;
+    background-color: #32499F;
+    color: white;
+    height: 5vh;
+}
+
+.cancel-Jobsheet {
+    width: 12%;
+    text-align: center;
+    border-radius: 7px;
+    background-color: #32499F;
+    color: white;
+    height: 5vh;
+}
+
+@media (max-width: 600px) {
+
+    .Jobsheet-container {
+        height: 200vh;
+    }
+
+    .first-line-Jobsheet {
+        gap: 1rem;
+        flex-direction: column;
+    }
+
+    .Secound-line-Jobsheet {
+        gap: 1rem;
+        flex-direction: column;
+    }
+
+    .third-line-Jobsheet {
+        display: flex;
+        gap: 1rem;
+        flex-direction: column;
+    }
+
+    .switchline-main-Jobsheet {
+        display: flex;
+        gap: 1rem;
+        flex-direction: column;
+    }
+
+    .upload-Jobsheet {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .buttons-Jobsheet {
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        top: 7rem;
+        gap: 1rem;
+        left: 0rem;
+    }
+
+    .create-Jobsheet {
+        width: 80%;
+    }
+
+    .cancel-Jobsheet {
+        width: 80%;
+    }
+
+    .MuiFormControl-root MuiTextField-root {
+        width: 65%;
+    }
+
+}

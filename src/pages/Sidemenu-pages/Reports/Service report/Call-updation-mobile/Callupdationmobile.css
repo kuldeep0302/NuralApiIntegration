@@ -1,0 +1,31 @@
+.firstname-Callupdationmobile {
+    border-bottom: 1px solid #ccc;
+    padding-top: 20px;
+    padding-left: 25px;
+    height: 60px;
+    font-size: x-large;
+    position: relative;
+    bottom: 20px;
+}
+
+.line-Callupdationmobile {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+    padding: 5px;
+}
+
+.textinput-Callupdationmobile {
+    width: 20%;
+}
+
+.textfiled-Callupdationmobile {
+    background-color: #EFF3FE;
+    margin: 10px;
+    border-radius: 4px;
+}
+
+.date-Callupdationmobile {
+    width: 100%;
+    border: none;
+}

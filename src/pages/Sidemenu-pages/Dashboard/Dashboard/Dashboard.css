@@ -1,0 +1,80 @@
+.firstname-dashboard {
+    border-bottom: 1px solid #ccc;
+    padding-top: 20px;
+    padding-left: 25px;
+    height: 60px;
+    font-size: x-large;
+    position: relative;
+    bottom: 20px;
+}
+
+.table-dashboard {
+    position: relative;
+    top: 22px;
+    left: 6px;
+    width: 100%;
+    margin: 10px;
+    font-size: large;
+}
+
+.my-table {
+    text-align: center;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.one {
+    background-color: #32499F;
+    color: white;
+    border-radius: 5px;
+}
+
+th,
+td {
+    padding: 8px;
+    text-align: center;
+}
+
+th {
+    background-color: #32499F;
+    color: white;
+}
+
+.graph-dashboard {
+    display: flex;
+}
+
+.graph1-dashboard {
+    width: 50%;
+    position: relative;
+    top: 3rem;
+}
+
+.graph2-dashboard {
+    width: 50%;
+    position: relative;
+    top: 3rem;
+}
+
+@media (max-width: 600px) {
+    .table-dashboard {
+        width: 100%;
+        overflow: scroll;
+    }
+
+    .graph-dashboard {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .graph1-dashboard {
+        width: 100%;
+    }
+
+    .graph2-dashboard {
+        width: 100%;
+    }
+}

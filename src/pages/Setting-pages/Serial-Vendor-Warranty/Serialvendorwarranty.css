@@ -1,0 +1,122 @@
+.upload-excel-Serialvendorwarranty {
+    position: relative;
+    top: 1rem;
+    left: 1rem;
+}
+
+.upload-text-Serialvendorwarranty {
+    display: flex;
+    /* flex-wrap: wrap; */
+}
+
+.fistline-Serialvendorwarranty {
+    border-bottom: 1px solid #ccc;
+    height: 60px;
+    display: flex;
+    gap: 1rem;
+    padding: 10px;
+    margin: 10px;
+}
+
+.upload-Serialvendorwarranty {
+    position: relative;
+    left: 5rem;
+    height: 5vh;
+    top: 5px;
+    width: 10rem;
+    text-align: center;
+    border-radius: 7px;
+    background-color: #32499F;
+    color: white;
+    height: 5vh;
+}
+
+.input-Serialvendorwarranty {
+    width: 90%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    margin-bottom: 10px;
+    border-width: 0 0 2px 0;
+}
+
+.uploadcontainer-Serialvendorwarranty {
+    background-color: #EFF3FE;
+    margin: 30px 10px 10px 10px;
+    border-radius: 4px;
+    display: flex;
+    gap: 2rem;
+}
+
+.Uicontainer-Serialvendorwarranty {
+    background-color: #EFF3FE;
+    margin: 10px;
+    border-radius: 4px;
+}
+
+.name-Serialvendorwarranty {
+    position: relative;
+    top: 8px;
+    left: 10px;
+    font-weight: bold;
+}
+
+.line-Serialvendorwarranty {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+}
+
+.textinput-Serialvendorwarranty {
+    width: 20%;
+}
+
+.button-Serialvendorwarranty {
+    display: flex;
+    gap: 1rem;
+    margin: 30px 10px 6px 10px;
+    padding-bottom: 10px;
+}
+
+.table-Serialvendorwarranty {
+    margin: 10px;
+    overflow: auto;
+}
+
+@media only screen and (max-width: 666px) {
+    .container-Serialvendorwarranty {
+        overflow: hidden;
+        position: relative;
+        left: 0;
+    }
+
+    .upload-text-Serialvendorwarranty {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .upload-text-Serialvendorwarranty {
+        position: relative;
+        bottom: 1rem;
+    }
+
+    .line-Serialvendorwarranty {
+        flex-direction: column;
+        display: flex;
+    }
+
+    .textinput-Serialvendorwarranty {
+        width: 100%;
+    }
+
+    .table-Serialvendorwarranty {
+        width: 100%;
+        overflow: scroll;
+    }
+
+    .uploadcontainer-Serialvendorwarranty {
+        flex-direction: column;
+        gap: 2rem;
+    }
+}

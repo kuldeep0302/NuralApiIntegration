@@ -1,0 +1,67 @@
+.firstbox-Customerservice {
+  border-bottom: 1px solid #ccc;
+  padding-top: 20px;
+  padding-left: 25px;
+  height: 60px;
+  font-size: x-large;
+  position: relative;
+  bottom: 20px;
+}
+
+.Customerservice-container {
+  background-color: #eff3fe;
+  margin: 5px;
+  border-radius: 10px;
+  padding: 5px;
+  padding-bottom: 30px;
+}
+
+.heading-Customerservice {
+  margin-top: 10px;
+  margin-left: 20px;
+}
+
+.line-Customerservice {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px;
+}
+
+.textinput-Customerservice {
+  width: 20%;
+}
+
+.upload-button {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.buttons-Customerservice {
+  display: flex;
+  margin-top: 20px;
+  flex-direction: row-reverse;
+}
+
+.buttons-Customerservice-span {
+  margin: 5px;
+}
+
+@media screen and (max-width: 600px) {
+  .line-Customerservice {
+    flex-direction: column;
+    display: flex;
+  }
+
+  .textinput-Customerservice {
+    width: 80%;
+    align-self: center;
+    margin-top: 10px;
+  }
+
+  .buttons-Customerservice {
+    display: flex;
+    margin-top: 20px;
+    flex-direction: row;
+    justify-content: space-around;
+  }
+}

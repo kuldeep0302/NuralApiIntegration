@@ -1,0 +1,142 @@
+.Jobsheets-container {
+    width: 100%;
+    background-color: #EFF3FE;
+    height: 36vh;
+    margin: 6px 1px 1px 1px;
+    overflow: hidden;
+}
+
+.heading-Jobsheets {
+    position: relative;
+    top: 15px;
+    left: 20px;
+}
+
+.main-line2-Jobsheets {
+    position: relative;
+    top: 3rem;
+    left: 0rem;
+}
+
+.line-jobsheets {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+}
+
+.textinput-Jobsheets {
+    width: 20%;
+}
+
+.warrent-Jobsheets {
+    position: relative;
+    top: 10px;
+}
+
+.secoundbox-Jobsheets {
+    /* border: 1px solid black; */
+    height: 8vh;
+    position: relative;
+    top: 4px;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.secound-text-Jobsheets {
+    position: relative;
+    top: 18px;
+    left: 15px;
+}
+
+.table-Jobsheets {
+    width: 100%;
+    margin: 10px;
+}
+
+table {
+    width: 100%;
+}
+
+th,
+td {
+    padding: 8px;
+    text-align: left;
+    text-align: center;
+}
+
+th {
+    background-color: #EFF3FE;
+}
+
+.cs-Jobsheets {
+    border-bottom: 1px solid #ccc;
+}
+
+.popup-Jobsheets-main {
+    position: relative;
+    bottom: 40%;
+}
+
+.popup-Jobsheets {
+    margin: 15px;
+    padding: 15px;
+}
+
+.MuiInputLabel-animated {
+    width: 137%;
+}
+
+.upload-button {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.buttons-Jobsheets {
+    display: flex;
+    margin-top: 40px;
+    margin-left: 10px;
+}
+
+.buttons-Jobsheets-span {
+    margin: 5px;
+}
+
+@media (max-width: 600px) {
+
+    .line-jobsheets {
+        flex-direction: column;
+    }
+
+    .textinput-Jobsheets {
+        width: 80%;
+        align-self: center;
+        margin-top: 10px;
+    }
+
+    .buttons-Jobsheets {
+        display: flex;
+        margin-top: 20px;
+        flex-direction: row;
+        justify-content: space-around;
+    }
+
+    .table-Jobsheets {
+        overflow: scroll;
+        height: 60vh;
+    }
+
+    .underline-Jobsheets {
+        width: 25%;
+    }
+
+    .Jobsheets-container {
+        height: 62vh;
+    }
+
+    .secound-text-Jobsheets {
+        top: 0px;
+        left: 8px;
+    }
+
+}

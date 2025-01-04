@@ -1,0 +1,68 @@
+.container-bulkuploadlocality {
+  display: flex;
+  position: relative;
+  width: 100%;
+  background-color: #eff3fe;
+  /* left: 5px; */
+  top: 5px;
+  /* gap: 1rem; */
+  flex-wrap: wrap;
+}
+
+.upload-excel-bulkuploadlocality {
+  position: relative;
+  top: 1rem;
+  left: 1rem;
+}
+
+.upload-text-bulkuploadlocality {
+  display: flex;
+  /* flex-wrap: wrap; */
+}
+
+.upload-bulkuploadlocality {
+  position: relative;
+  left: 5rem;
+  height: 5vh;
+  top: 5px;
+  width: 10rem;
+  text-align: center;
+  border-radius: 7px;
+  background-color: #32499f;
+  color: white;
+  height: 5vh;
+}
+
+.input-bulkuploadlocality {
+  width: 90%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  margin-bottom: 10px;
+  border-width: 0 0 2px 0;
+}
+
+.download-text-bulkuploadlocality {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+@media only screen and (max-width: 666px) {
+  .container-bulkuploadlocality {
+    overflow: hidden;
+    position: relative;
+    left: 0;
+  }
+
+  .upload-text-bulkuploadlocality {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .upload-text-bulkuploadlocality {
+    position: relative;
+    bottom: 1rem;
+  }
+}

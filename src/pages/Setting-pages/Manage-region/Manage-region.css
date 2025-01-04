@@ -1,0 +1,71 @@
+.autocompleteform-manageregion {
+    background-color: #EFF3FE;
+    margin: 10px;
+    border-radius: 5px;
+}
+
+.fistline-manageregion {
+    border-bottom: 1px solid #ccc;
+    height: 60px;
+    display: flex;
+    gap: 1rem;
+    padding: 10px;
+    margin: 10px;
+}
+
+.name2-manageregion {
+    position: relative;
+    top: 10px;
+    left: 10px;
+}
+
+.line-Manageregion {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+    padding: 10px;
+}
+
+.textinput-manageregion {
+    width: 20%;
+}
+
+.button-manageregion {
+    display: flex;
+    gap: 1rem;
+    margin: 30px 10px 6px 10px;
+    padding-bottom: 10px;
+}
+
+.table-Manageregionmain {
+    margin: 10px;
+    overflow: auto;
+}
+
+@media screen and (max-width: 600px) {
+
+    .autocompleteform-Manageregion {
+        height: 65vh;
+    }
+
+    .line-Manageregion {
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .textinput-Manageregion {
+        width: 80%;
+        align-self: center;
+        margin-top: 10px;
+    }
+
+    .textinput-manageregion {
+        width: 100%;
+    }
+
+
+    .table-Manageregionmain {
+        width: 100%;
+        overflow: scroll;
+    }
+}

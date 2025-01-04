@@ -1,0 +1,65 @@
+.autocompleteform-Managedistrict {
+    background-color: #EFF3FE;
+    margin: 10px;
+    border-radius: 5px;
+}
+
+.fistline-Managedistrict {
+    border-bottom: 1px solid #ccc;
+    height: 60px;
+    display: flex;
+    gap: 1rem;
+    padding: 10px;
+    margin: 10px;
+}
+
+.name2-Managedistrict {
+    position: relative;
+    top: 10px;
+    left: 10px;
+}
+
+.line-Managedistrict {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+}
+
+.textinput-Managedistrict {
+    width: 20%;
+}
+
+.button-Managedistrict {
+    display: flex;
+    gap: 1rem;
+    margin: 30px 10px 6px 10px;
+    padding-bottom: 10px;
+}
+
+.table-Managedistrict {
+    margin: 10px;
+    overflow: auto;
+}
+
+@media screen and (max-width: 600px) {
+    .line-Managedistrict {
+        flex-direction: column;
+        display: flex;
+    }
+
+    .textinput-Managedistrict {
+        width: 100%;
+    }
+
+    .button-Managedistrict {
+        display: flex;
+        margin-top: 20px;
+        flex-direction: row;
+        justify-content: space-around;
+    }
+
+    .table-Managedistrict {
+        width: 100%;
+        overflow: scroll;
+    }
+}

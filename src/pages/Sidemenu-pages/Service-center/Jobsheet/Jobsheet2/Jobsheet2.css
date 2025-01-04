@@ -1,0 +1,218 @@
+
+.Jobsheet2-container {
+    width: 100%;
+    background-color: #EFF3FE;
+    height: 76vh;
+    margin: 6px 1px 1px 6px;
+}
+
+.heading-Jobsheet2 {
+    position: relative;
+    top: 20px;
+    left: 20px;
+}
+
+.container-Jobsheet2 {
+    position: relative;
+    left: 270px;
+    display: flex;
+}
+
+.main-line-Jobsheet2 {
+    position: relative;
+    top: 2rem;
+    left: 2rem;
+}
+
+.main-line3-Jobsheet2 {
+    display: flex;
+    gap: 17rem;
+    position: relative;
+    top: 4rem;
+}
+
+.main-line2-Jobsheet2 {
+    display: flex;
+    position: relative;
+    top: 3rem;
+}
+
+.first-line-Jobsheet2 {
+    display: flex;
+    gap: 17rem;
+}
+
+.Secound-line-Jobsheet2 {
+    display: flex;
+    gap: 17rem;
+}
+
+.third-line-Jobsheet2 {
+    display: flex;
+    gap: 17rem;
+}
+
+.switchline-main-Jobsheet2 {
+    display: flex;
+    gap: 3rem;
+}
+
+.switchline-Jobsheet2 {
+    display: flex;
+    position: relative;
+    top: 2rem;
+    gap: 1rem;
+}
+
+.switchline2-Jobsheet2 {
+    display: flex;
+    position: relative;
+    top: 2rem;
+    gap: 1rem;
+}
+
+.upload-Jobsheet2 {
+    position: relative;
+    top: 6rem;
+    display: flex;
+    gap: 6rem;
+}
+
+.sign-Jbsheet {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sign-Jobsheet2 {
+    width: 75%;
+    text-align: center;
+    border-radius: 7px;
+    background-color: #32499F;
+    color: white;
+    height: 5vh;
+}
+
+.input-Jobsheet2 {
+    width: 75%;
+}
+
+.warrent-Jobsheet2 {
+    position: relative;
+    top: 10px;
+}
+
+.buttons-Jobsheet2 {
+    display: flex;
+    position: relative;
+    top: 8rem;
+    gap: 1rem;
+    left: 29rem;
+}
+
+.create-Jobsheet2 {
+    width: 12%;
+    text-align: center;
+    border-radius: 7px;
+    background-color: #32499F;
+    color: white;
+    height: 5vh;
+}
+
+.cancel-Jobsheet2 {
+    width: 12%;
+    text-align: center;
+    border-radius: 7px;
+    background-color: #32499F;
+    color: white;
+    height: 5vh;
+}
+
+@media (max-width: 600px) {
+
+    .Jobsheet2-container {
+        height: 150vh;
+        overflow: scroll;
+        width: 100%;
+    }
+
+    .first-line-Jobsheet2 {
+        gap: 1rem;
+        flex-direction: column;
+    }
+
+    .Secound-line-Jobsheet2 {
+        gap: 1rem;
+        flex-direction: column;
+    }
+
+    .third-line-Jobsheet2 {
+        display: flex;
+        gap: 1rem;
+        flex-direction: column;
+    }
+
+    .switchline-main-Jobsheet2 {
+        display: flex;
+        gap: 1rem;
+        flex-direction: column;
+    }
+
+    .upload-Jobsheet2 {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .buttons-Jobsheet2 {
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        top: 7rem;
+        gap: 1rem;
+        left: 0rem;
+    }
+
+    .create-Jobsheet2 {
+        width: 80%;
+    }
+
+    .cancel-Jobsheet2 {
+        width: 80%;
+    }
+
+    .MuiFormControl-root MuiTextField-root {
+        width: 65%;
+    }
+
+    .textinput-Jobsheet2 {
+        width: 83%;
+    }
+
+    .main-line3-Jobsheet2 {
+        gap: 1rem;
+        flex-direction: column;
+    }
+
+    .main-line2-Jobsheet2 {
+        gap: 2rem;
+        flex-direction: column;
+    }
+
+    .heading-Jobsheet2 {
+        position: relative;
+        top: 14px;
+        left: 27px;
+    }
+
+    .container-Jobsheet2 {
+        position: relative;
+        left: 1px;
+        display: flex;
+    }
+
+    .sign-Jobsheet2 {
+        width: 79%;
+    }
+
+}

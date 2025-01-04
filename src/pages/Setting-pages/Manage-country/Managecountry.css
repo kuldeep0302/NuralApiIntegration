@@ -1,0 +1,77 @@
+.autocompleteform-managecountry {
+  background-color: #eff3fe;
+  margin: 10px;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.fistline-managecountry {
+  border-bottom: 1px solid #ccc;
+  height: 60px;
+  display: flex;
+  gap: 1rem;
+  padding: 10px;
+  margin: 10px;
+}
+
+.name2-managecountry {
+  position: relative;
+  top: 10px;
+  left: 10px;
+}
+
+.line-managecountry {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px;
+}
+
+.textinput-managecountry {
+  width: 20%;
+}
+
+.button-managecountry {
+  display: flex;
+  gap: 1rem;
+  margin: 30px 10px 6px 10px;
+  padding-bottom: 10px;
+}
+
+.table-managecountry {
+  margin: 10px;
+  overflow: auto;
+}
+
+@media screen and (max-width: 600px) {
+  .line-managecountry {
+    flex-direction: column;
+    display: flex;
+  }
+
+  .textinput-managecountry {
+    width: 100%;
+  }
+
+  .table-managecountry {
+    width: 100%;
+    overflow: scroll;
+  }
+}
+
+.managecountry-container {
+  width:100% !important;
+  /* border:2px solid green; */
+  /* height: 100vh; */
+  overflow-y: auto;
+  transition: width 0.3s ease;
+}
+
+.managecountry-container.expanded {
+  width: calc(100vw - 250px);
+  /* margin-left: 240px; */
+}
+
+.managecountry-container.collapsed {
+  width: calc(100vw - 60px);
+  /* margin-left: 60px; */
+}

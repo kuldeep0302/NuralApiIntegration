@@ -1,0 +1,65 @@
+.Uicontainer-Managesparepartmapping {
+    background-color: #EFF3FE;
+    margin: 10px;
+    border-radius: 4px;
+}
+
+
+.fistline-Managesparepartmapping {
+    border-bottom: 1px solid #ccc;
+    height: 60px;
+    display: flex;
+    gap: 1rem;
+    padding: 10px;
+    margin: 10px;
+}
+
+.name-Managesparepartmapping {
+    position: relative;
+    top: 8px;
+    left: 10px;
+    font-weight: bold;
+}
+
+.line-Managesparepartmapping {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+}
+
+.textinput-Managesparepartmapping {
+    width: 20%;
+}
+
+.button-Managesparepartmapping {
+    display: flex;
+    gap: 1rem;
+    margin: 30px 10px 6px 10px;
+    padding-bottom: 10px;
+}
+
+.table-Managesparepartmapping {
+    margin: 10px;
+    overflow: auto;
+}
+
+@media only screen and (max-width: 666px) {
+    .line-Managesparepartmapping {
+        flex-direction: column;
+        display: flex;
+    }
+
+    .textinput-Managesparepartmapping {
+        width: 100%;
+    }
+
+    .table-Managesparepartmapping {
+        width: 100%;
+        overflow: scroll;
+    }
+
+    .uploadcontainer-Managesparepartmapping {
+        flex-direction: column;
+        gap: 2rem;
+    }
+}

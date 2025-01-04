@@ -1,0 +1,59 @@
+.autocompleteform-Manageproductcatgeory {
+    background-color: #EFF3FE;
+    margin: 10px;
+    border-radius: 5px;
+}
+
+.fistline-Manageproductcatgeory {
+    border-bottom: 1px solid #ccc;
+    height: 60px;
+    display: flex;
+    gap: 1rem;
+    padding: 10px;
+    margin: 10px;
+}
+
+.name2-Manageproductcatgeory {
+    position: relative;
+    top: 10px;
+    left: 10px;
+}
+
+.line-Manageproductcatgeory {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+}
+
+.textinput-Manageproductcatgeory {
+    width: 20%;
+}
+
+
+.button-Manageproductcatgeory {
+    display: flex;
+    gap: 1rem;
+    margin: 30px 10px 6px 10px;
+    padding-bottom: 10px;
+}
+
+.table-Manageproductcatgeory {
+    margin: 10px;
+    overflow: auto;
+}
+
+@media screen and (max-width: 600px) {
+    .line-Manageproductcatgeory {
+        flex-direction: column;
+        display: flex;
+    }
+
+    .textinput-Manageproductcatgeory {
+        width: 100%;
+    }
+
+    .table-Manageproductcatgeory {
+        width: 100%;
+        overflow: scroll;
+    }
+}

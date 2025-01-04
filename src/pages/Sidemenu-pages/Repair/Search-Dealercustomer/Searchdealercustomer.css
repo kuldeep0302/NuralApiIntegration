@@ -1,0 +1,110 @@
+.firstname-Searchdealercustomer {
+  border-bottom: 1px solid #ccc;
+  padding-top: 20px;
+  padding-left: 25px;
+  height: 60px;
+  font-size: x-large;
+  position: relative;
+  bottom: 20px;
+}
+
+.textline-Searchdealercustomer {
+  background-color: #EFF3FE;
+  margin: 10px;
+}
+
+.line-Searchdealercustomer {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.textinput-Searchdealercustomer {
+  width: 20%;
+}
+
+.btn-Searchdealercustomer {
+  display: flex;
+  gap: 10px;
+  margin-left: 10px;
+  margin-top: 20px;
+}
+
+.underline-Searchdealercustomer {
+  width: 100%;
+  border: 0.5px solid;
+  margin-right: 15px;
+  margin-right: 15px;
+  margin-top: 10px;
+}
+
+.details-Searchdealercustomer {
+  margin: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.heading-Searchdealercustomer {
+  display: flex;
+  margin: 10px;
+  gap: 1rem;
+}
+
+#customerproduct,
+#callhistory {
+  display: inline-block;
+  padding: 10px;
+  cursor: pointer;
+}
+
+#customerproduct:hover,
+#callhistory:hover {
+  background-color: lightblue;
+}
+
+#customerproduct:active,
+#callhistory:active {
+  background-color: lightgreen;
+}
+
+
+.first-table-Jobsheetstatus {
+  position: relative;
+  top: 50px;
+  left: 6px;
+  width: 100%;
+  margin: 10px;
+  overflow-x: auto;
+}
+
+.my-table {
+  text-align: center;
+  font-size: large;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.one {
+  background-color: #32499F;
+  color: white;
+  border-radius: 5px;
+}
+
+th,
+td {
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background-color: #32499F;
+  color: white;
+}
+
+@media (max-width: 600px) {}

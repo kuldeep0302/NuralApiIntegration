@@ -1,0 +1,35 @@
+.firstname-Closecallreport {
+    border-bottom: 1px solid #ccc;
+    padding-top: 20px;
+    padding-left: 25px;
+    height: 60px;
+    font-size: x-large;
+    position: relative;
+    bottom: 20px;
+}
+
+.line-Closecallreport {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+    padding: 5px;
+}
+
+.textinput-Closecallreport {
+    width: 20%;
+}
+
+.textfiled-Closecallreport {
+    background-color: #EFF3FE;
+    margin: 10px;
+    border-radius: 4px;
+}
+
+.date-Closecallreport {
+    width: 100%;
+    border: none;
+}
+
+.excelbutton-Closecallreport {
+    margin: 10px;
+}

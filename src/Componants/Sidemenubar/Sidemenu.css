@@ -1,0 +1,51 @@
+.content {
+  position: fixed;
+  z-index: 100;
+  width: 18%;
+  height: 100vh;
+  background-color: #EFF3FE;
+  overflow: hidden;
+}
+
+.sidebar-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-bottom: 40px;
+}
+
+.sidebar-logo-text {
+  font-size: 22px;
+}
+
+.sidebar-logo img {
+  max-width: 50%;
+  margin-top: 51px;
+  margin-bottom: 20px;
+}
+
+.ant-menu .ant-menu-item a {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* Updated the selector to match the correct class */
+.ant-menu-light>.ant-menu.ant-menu-root.ant-menu-inline {
+  border-inline-end: none;
+}
+
+#menu {
+  border-inline-end: none !important;
+  background-color: #EFF3FE;
+  font-size: larger;
+  font-weight: bold;
+}
+
+/* @media screen and (max-width: 768px) {
+  .content {
+    width: 65%;
+    height: 80vh;
+    overflow: scroll;
+  }
+} */

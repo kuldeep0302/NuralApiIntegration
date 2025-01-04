@@ -1,0 +1,58 @@
+.autocompleteform-Managemodel {
+    background-color: #EFF3FE;
+    margin: 10px;
+    border-radius: 5px;
+}
+
+.fistline-Managemodel {
+    border-bottom: 1px solid #ccc;
+    height: 60px;
+    display: flex;
+    gap: 1rem;
+    padding: 10px;
+    margin: 10px;
+}
+
+.name2-Managemodel {
+    position: relative;
+    top: 10px;
+    left: 10px;
+}
+
+.line-Managemodel {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+}
+
+.textinput-Managemodel {
+    width: 20%;
+}
+
+.button-Managemodel {
+    display: flex;
+    gap: 1rem;
+    margin: 30px 10px 6px 10px;
+    padding-bottom: 10px;
+}
+
+.table-Managemodel {
+    margin: 10px;
+    overflow: auto;
+}
+
+@media screen and (max-width: 600px) {
+    .line-Managemodel {
+        flex-direction: column;
+        display: flex;
+    }
+
+    .textinput-Managemodel {
+        width: 100%;
+    }
+
+    .table-Managemodel {
+        width: 100%;
+        overflow: scroll;
+    }
+}
