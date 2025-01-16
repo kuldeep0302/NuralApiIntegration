@@ -48,6 +48,10 @@ const Managezone = () => {
   const [editIndex, setEditIndex] = useState(null);
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [searchZoneName, setSearchZoneName] = useState("");
+  const [stateName, setStateName] = useState("")
+  const [limit, setLimit] = useState(10);
+  const [countryId, setCountryId] = useState("")
+  const [zoneId, setZoneId] = useState("")
   const [postData, setPostData] = useState({
     countryId: "",
     zoneName: "",
@@ -72,12 +76,6 @@ const Managezone = () => {
   // const totalItems = filteredZones.length;
 
   const startIndex = (currentPage - 1) * itemsPerPage;
-
-  // const paginatedZones = filteredZones.slice(
-  //   startIndex,
-  //   startIndex + itemsPerPage
-  // );
-
   const [dataSize, setDataSize] = useState(pageSize);
 
   const [searchParams, setParams] = useState({
@@ -278,10 +276,6 @@ const Managezone = () => {
 
         }
       }
-
-
-
-
       // setFlag(!flag)
     } catch (error) {
       console.log(`Error updating status ${error}`);

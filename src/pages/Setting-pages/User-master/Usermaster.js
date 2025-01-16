@@ -1,20 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Usermaster.css";
 import TextField from "@material-ui/core/TextField";
 import Autocomplete from "@mui/lab/Autocomplete";
 import Radio from "@mui/material/Radio";
 import CommonButton from "../../../Componants/Common/Button";
 import HeaderNavigation from "../../../Componants/Common/header Navigation/HeaderNavigation";
+import { createUser, getCityList, getStateList } from "../../../API Service/apiService";
 
 const calltype = [];
 
 const Usermaster = () => {
-  const [entityType, setEntityType] = useState("Service Center");
+  const [entityType, setEntityType] = useState("serviceCenter");
   const [selectedValue, setSelectedValue] = useState("ui"); // Default is "UI"
 
-  const handleEntityChange = (event, val) => {
+  const handleEntityChange = (e, val) => {
     if (val) {
-      setEntityType(val.title);
+      setEntityType(val.title); // Set the entityType separately if needed
+      setValue({ ...value, entityType: val.title }); // Update the entityType in the value object
     }
   };
 
@@ -22,12 +24,12 @@ const Usermaster = () => {
     setSelectedValue(event.target.value); // Only one radio button can be selected
   };
 
-  const [value, setValue] = useState({
-    customerCompanyName: "",
-    contactPersonName: "",
-    email: "",
-    mobileNo: "",
-  });
+  // const [value, setValue] = useState({
+  //   customerCompanyName: "",
+  //   contactPersonName: "",
+  //   email: "",
+  //   mobileNo: "",
+  // });
 
   const calltypeDefaultProps = {
     options: calltype,
@@ -36,11 +38,12 @@ const Usermaster = () => {
 
   const EntityType = [
     { title: "Engineer", Value: 1 },
-    { title: "Service Center", Value: 2 },
+    { title: "serviceCenter", Value: 2 },
   ];
 
   const [isChecked1, setChecked1] = useState(false);
   const [isChecked2, setChecked2] = useState(false);
+
 
   const handleCheckboxChange1 = () => {
     setChecked1(!isChecked1);
@@ -51,7 +54,8 @@ const Usermaster = () => {
   };
 
   const [selectedFile, setSelectedFile] = useState(null);
-
+  const [loading, setLoading] = useState([]);
+  const [totalRecords, setTotalRecords] = useState([]);
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     setSelectedFile(file);
@@ -66,7 +70,7 @@ const Usermaster = () => {
   };
 
   const shouldHideField = (field) => {
-    if (entityType === "Service Center") {
+    if (entityType === "serviceCenter") {
       return (
         field === "loginName" ||
         field === "password" ||
@@ -86,6 +90,124 @@ const Usermaster = () => {
     }
     return false;
   };
+
+  const [value, setValue] = useState({
+    entityType: "",
+    firstName: "",
+    lastName: "",
+    mobile: "",
+    email: "",
+    landline: "",
+    addressLine1: "",
+    addressLine2: "",
+    state: "",
+    city: "",
+    landmark: "",
+    pincode: "",
+  });
+
+  const handleSave = async () => {
+    
+
+    const data = {
+      entityType: value.entityType,
+      firstName: value.firstName,
+      lastName: value.lastName,
+      mobile: value.mobile,
+      email: value.email,
+      landline: value.landline || "",
+      addressLine1: value.addressLine1,
+      addressLine2: value.addressLine2 || "",
+      state: value.state,
+      city: value.city,
+      landmark: value.landmark || "",
+      pincode: value.pincode,
+    };
+    const requiredFields = [
+      { field: "entityType", message: "Entity type is required." },
+      { field: "firstName", message: "First name is required." },
+      { field: "lastName", message: "Last name is required." },
+      { field: "mobile", message: "Mobile number is required." },
+      { field: "email", message: "Email is required." },
+      { field: "addressLine1", message: "Address Line 1 is required." },
+      { field: "state", message: "State is required." },
+      { field: "city", message: "City is required." },
+      { field: "pincode", message: "Pincode is required." },
+    ];
+
+    // Check for missing required fields
+    for (let { field, message } of requiredFields) {
+      if (!data[field] || data[field].trim() === "") {
+        alert(message);
+        return;
+      }
+    }
+
+    // Additional validations
+    if (!/^\d{10}$/.test(data.mobile)) {
+      alert("Mobile number must be 10 digits.");
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(data.email)) {
+      alert("Enter a valid email address.");
+      return;
+    }
+
+    if (!/^\d{6}$/.test(data.pincode)) {
+      alert("Pincode must be a valid 6-digit number.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await createUser(data);
+      console.log("Data saved successfully:", response);
+      setLoading(false);
+      alert("Data saved successfully!");
+    } catch (error) {
+      setLoading(false);
+      console.error("Error saving data:", error.response?.data || error.message);
+      alert("Failed to save data. Please try again.");
+    }
+  };
+
+const [states, setStates] = useState([]);
+const [cities, setCities] = useState([]);
+
+  const [selectedState, setSelectedState] = useState([]); // Track the selected state
+
+  const fetchState = async () => {
+        try {
+          const response = await getStateList();
+          setStates(response.data.states);
+          console.log("response.data", response.data);
+        } catch (error) {
+          console.error("Error fetching countries:", error);
+        }
+      };
+    const fetchCities= async () => {
+      try {
+        setLoading(true);
+        const response = await getCityList();
+        setCities(response.data.cities);
+        console.log("response.data", response.data);
+        setTotalRecords(response.data.totalCities);
+        setLoading(false);
+        // setFilteredZones(response.data.zones);
+        // setFilteredCountries(response.data.countries);
+      } catch (error) {
+        console.error("Error fetching countries:", error);
+      }
+    };
+    useEffect(() => {
+      
+      fetchState();
+      fetchCities();
+      }, []);
+  const filteredCities = selectedState
+    ? cities.filter((city) => city.stateName === selectedState.stateName)
+    : [];
 
   return (
     <>
@@ -152,7 +274,7 @@ const Usermaster = () => {
                 />
               </div>
 
-              {!shouldHideField("serviceCenter") && (
+              {/* {!shouldHideField("serviceCenter") && (
                 <div className="textinput-Usermaste">
                   <Autocomplete
                     onChange={(e, val) => {
@@ -170,20 +292,20 @@ const Usermaster = () => {
                     )}
                   />
                 </div>
-              )}
+              )} */}
 
-              {!shouldHideField("serviceCentertext") && (
+              {/* {!shouldHideField("serviceCentertext") && (
                 <div className="textinput-Usermaste">
                   <TextField
                     id="standard-basic"
                     label="Service Center"
                     variant="standard"
                     onChange={(e) => {
-                      setValue({ ...value, FirstName: e.target.value });
+                      setValue({ ...value, servicecenter: e.target.value });
                     }}
                   />
                 </div>
-              )}
+              )} */}
 
               <div className="textinput-Usermaste"></div>
               <div className="textinput-Usermaste"></div>
@@ -196,7 +318,7 @@ const Usermaster = () => {
                   label="First Name"
                   variant="standard"
                   onChange={(e) => {
-                    setValue({ ...value, FirstName: e.target.value });
+                    setValue({ ...value, firstName: e.target.value });
                   }}
                 />
               </div>
@@ -206,7 +328,7 @@ const Usermaster = () => {
                   label="Last Name"
                   variant="standard"
                   onChange={(e) => {
-                    setValue({ ...value, LastName: e.target.value });
+                    setValue({ ...value, lastName: e.target.value });
                   }}
                 />
               </div>
@@ -216,7 +338,7 @@ const Usermaster = () => {
                   label="Mobile"
                   variant="standard"
                   onChange={(e) => {
-                    setValue({ ...value, Mobile: e.target.value });
+                    setValue({ ...value, mobile: e.target.value });
                   }}
                 />
               </div>
@@ -226,7 +348,7 @@ const Usermaster = () => {
                   label="Email"
                   variant="standard"
                   onChange={(e) => {
-                    setValue({ ...value, Email: e.target.value });
+                    setValue({ ...value, email: e.target.value });
                   }}
                 />
               </div>
@@ -240,7 +362,7 @@ const Usermaster = () => {
                     label="Landline"
                     variant="standard"
                     onChange={(e) => {
-                      setValue({ ...value, Landline: e.target.value });
+                      setValue({ ...value, landline: e.target.value });
                     }}
                   />
                 </div>
@@ -252,7 +374,7 @@ const Usermaster = () => {
                     label="Address Line 1"
                     variant="standard"
                     onChange={(e) => {
-                      setValue({ ...value, AddressLine1: e.target.value });
+                      setValue({ ...value, addressLine1: e.target.value });
                     }}
                   />
                 </div>
@@ -264,7 +386,7 @@ const Usermaster = () => {
                     label="Address Line 2"
                     variant="standard"
                     onChange={(e) => {
-                      setValue({ ...value, AddressLine2: e.target.value });
+                      setValue({ ...value, addressLine2: e.target.value });
                     }}
                   />
                 </div>
@@ -272,12 +394,13 @@ const Usermaster = () => {
               {!shouldHideField("state") && (
                 <div className="textinput-Usermaste">
                   <Autocomplete
-                    onChange={(e, val) => {
-                      setValue({ ...value, role: val.title });
+                    options={states}
+                    getOptionLabel={(option) => option.stateName}
+                    onChange={(event, newValue) => {
+                      setSelectedState(newValue); // Update selected state
+                      setValue({ ...value, state: newValue ? newValue.stateName : "" }); // Update state name in form value
+                      
                     }}
-                    {...calltypeDefaultProps}
-                    id="disable-close-on-select"
-                    disableCloseOnSelect
                     renderInput={(params) => (
                       <TextField {...params} label="State" variant="standard" />
                     )}
@@ -290,12 +413,11 @@ const Usermaster = () => {
               {!shouldHideField("city") && (
                 <div className="textinput-Usermaste">
                   <Autocomplete
-                    onChange={(e, val) => {
-                      setValue({ ...value, role: val.title });
+                    options={filteredCities}
+                    getOptionLabel={(option) => option.cityName}
+                    onChange={(event, newValue) => {
+                      setValue({ ...value, city: newValue ? newValue.cityName : "" }); // Update city name in form value
                     }}
-                    {...calltypeDefaultProps}
-                    id="disable-close-on-select"
-                    disableCloseOnSelect
                     renderInput={(params) => (
                       <TextField {...params} label="City" variant="standard" />
                     )}
@@ -309,7 +431,7 @@ const Usermaster = () => {
                     label="Landmark"
                     variant="standard"
                     onChange={(e) => {
-                      setValue({ ...value, Landmark: e.target.value });
+                      setValue({ ...value, landmark: e.target.value });
                     }}
                   />
                 </div>
@@ -321,7 +443,7 @@ const Usermaster = () => {
                     label="Pincode"
                     variant="standard"
                     onChange={(e) => {
-                      setValue({ ...value, Pincode: e.target.value });
+                      setValue({ ...value, pincode: e.target.value });
                     }}
                   />
                 </div>
@@ -367,7 +489,7 @@ const Usermaster = () => {
             {/* Save and Cancel Buttons */}
             <div className="button-container-Usermaster">
               <div className="button-Usermaster">
-                <CommonButton name={"SAVE"} />
+                <CommonButton name={"SAVE"}  handleOnClick={handleSave}/>
                 <CommonButton name={"CANCEL"} />
               </div>
             </div>

@@ -29,12 +29,16 @@ import ExportToExcel from "../../../Componants/Common/ExportToExcel";
 import {
   createBrand,
   deleteBrand,
+  fetchAllBrandList,
   fetchBrandList,
+  fetchLimitedBrandList,
   updateBrand,
   updateBrandStatus,
 } from "../../../API Service/apiService";
 import toast, { Toaster } from "react-hot-toast";
 import Loader from "../../../Componants/Loader/Loader";
+import Paginate from "../../../Componants/Common/Paginate";
+import { width } from "@mui/system";
 // import { fetchBrandList } from "../../../API Service/apiService";
 
 const cells = ["S.No","Brand", "Description", "Action"];
@@ -43,45 +47,110 @@ const cells = ["S.No","Brand", "Description", "Action"];
 const Managebrand = () => {
   
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const pageSize = config.pageSize;
   const [dataSize, setDataSize] = useState(pageSize);
   const [brandName, setBrandName] = useState("");
   const [brandParams, setBrandParams] = useState("");
   const [brandlist, setBrandList] = useState([]);
+  const [allBrandList, setAllBrandList] = useState([]);
   const [description, setDescription] = useState("");
   const [tableData, setTableData] = useState([]);
   const [postData, setPostData] = useState({ brandName: "", description: "" });
   const [editIndex, setEditIndex] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [brands, setBrands] = useState([]);
+  const [params, setParams] = useState("");
+  const [totalRecords, setTotalRecords] = useState(null);
+  const [search, setSearch] = useState(""); // Search term
+  const [brandError, setBrandError] = useState(false);
+  const [descriptionError, setDescriptionError] = useState(false);
+
+  const [activeBrandList, setActiveBrandList] = useState([]);
+
   const brandheader = [    
     
     { label: "Brand", key: "brandName" },
     { label: "Description", key: "description" },
   ];
-  
+ 
   const handleCancel = () => {
     console.log(`this is cancel`);
     setBrandName("");
     setDescription("");
   };
   //API for search api list
+  
   const getBrandList = async () => {
     try {
       setLoading(true);
-      const response = await fetchBrandList();
-      setTableData(response.data.brandList);
+      const response = await fetchBrandList(page, limit, search); // Fetch data from API
       setBrandList(response.data.brandList);
+      setTableData(response.data.brandList); 
+      setTotalRecords(response.data.totalRecords); // Update total records
+      setBrandList(response.data.brandList);
+      const activeBrandList = response.data.brandList.filter((brand) => brand.isActive);
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching brand list:", error);
     } finally {
-      setLoading(false);
+      setLoading(false); // Stop loading
     }
   };
-  
 
 
+  const getAllBrandList = async () => {
+    try {
+      setLoading(true);
+      const response = await fetchAllBrandList(); // Fetch data from API
+      setAllBrandList(response.data.brandList);
+    } catch (error) {
+      console.error("Error fetching brand list:", error);
+    } finally {
+      setLoading(false); // Stop loading
+    }
+  };
+
+  // Trigger fetch when search, page, or limit changes
+  useEffect(() => {
+    getBrandList();
+  }, [page]); 
+
+  useEffect(() => {
+    getAllBrandList();
+  }, []); 
+
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    setParams((prevParams) => ({
+      ...prevParams,
+      pageIndex: newPage.toString()
+    }));
+  };
 
   const handlePostRequest = async () => {
+    let isValid = true;
+
+    if (!brandName.trim()) {
+      setBrandError(true);
+      isValid = false;
+    } else {
+      setBrandError(false);
+    }
+
+    if (!description.trim()) {
+      setDescriptionError(true);
+      isValid = false;
+    } else {
+      setDescriptionError(false);
+    }
+
+    if (!isValid) {
+      toast.error("Please fill all the fields");
+      return;
+    }
+
+    else{
     try {
       setLoading(true);
       postData.brandName = brandName;
@@ -105,13 +174,13 @@ const Managebrand = () => {
       }
       setBrandName("");
       setDescription("");
-      getBrandList();
     } catch (error) {
       console.log(`Error saving Brand ${error}`);
+    } finally { 
       setLoading(false);
-    } finally {
-      
     }
+      getBrandList()
+  }
   };
 
   const handleEdit = (brandId, brandName, description) => {
@@ -120,10 +189,27 @@ const Managebrand = () => {
     setDescription(description);
   };
 
+  
+    // useEffect(() => {   
+    //   const fetchBrands = async () => {
+    //     try {
+    //       const response = await fetchLimitedBrandList(page, limit, ""); // Pass page, limit, search
+    //       setBrands(response.data.brandList); // Set the returned brands
+    //       setTotalRecords(response.data.totalRecords); // Set the total number of records
+    //       setTableData(response.data.brandList);
+    //     } catch (err) {
+    //       console.error("Failed to fetch brands:", err.message);
+    //     }
+    //   };
+
+    //   fetchBrands();
+    // }, [page, limit]); //
+
+
   // API call for toggle status
   const handleStatus = async (index, brandId) => {
     try {
-      setLoading();
+      setLoading(true);
       console.log(`brand id is ${brandId}, ${index}`);
       const response = await updateBrandStatus({ brandId: brandId });
       console.log(`status resposne : ${response.data.message}`);
@@ -131,14 +217,16 @@ const Managebrand = () => {
       if (response.status === "success") {
         toast.success("Status Updated Successfully");
       }
-      getBrandList();
+      // getBrandList();
     } catch (error) {
       console.log(`Error updating status ${error}`);
       toast.error(`Failed to update status`);
       throw error;
     } finally {
+      handleSearch();
       setLoading(false);
     }
+    
   };
   // API call for delete
   const handleDelete = async (index, brandId) => {
@@ -147,7 +235,7 @@ const Managebrand = () => {
       console.log("response is ", response.message);
 
       // Refresh the brand list directly from the backend after deletion
-      getBrandList();
+      // getBrandList();
     } catch (error) {
       console.log(`Error deleting Brand ${error}`);
     }
@@ -155,24 +243,21 @@ const Managebrand = () => {
 
   const handleSearch = async () => {
     try {
-      const filter = {
-        search: brandParams, // Ensure brandParams is correctly passed
-        page: 1,
-        limit: 10,
-      };
-      const response = await fetchBrandList(filter);
-
+    setLoading(true)
+      const response = await fetchBrandList(1,limit,brandParams);
       setTableData(response.data.brandList);
+      setTotalRecords(response.data.totalRecords);
       console.log(`response table  is `, response.data.brandList);
-      toast.success("List updated successfully.");
     } catch (error) {
       console.log(`Error in filter List`);
       toast.error("Failed to Update List");
     }
+    setLoading(false);
   };
   useEffect(() => {
-    getBrandList();
+    // getBrandList();
   }, []);
+
   return (
     <Grid container>
       {loading && <Loader />}
@@ -198,31 +283,40 @@ const Managebrand = () => {
         </Grid>
 
         <Grid container spacing={10}>
-          <Grid item>
+          <Grid item >
             <TextField
               style={{ width: "100%" }}
-              id="standard-basic"
+              id="brand-name"
               label="Brand Name"
               variant="standard"
               value={brandName}
-              onChange={(e, val) => {
+              onChange={(e) => {
                 setBrandName(e.target.value);
+                setBrandError(false); // Clear error when typing
               }}
+              required
+              error={brandError}
+              helperText={brandError ? "Brand Name is required." : ""}
             />
           </Grid>
 
           <Grid item>
             <TextField
               style={{ width: "100%" }}
-              id="standard-basic"
+              id="description"
               label="Description"
               variant="standard"
               value={description}
-              onChange={(e, val) => {
+              onChange={(e) => {
                 setDescription(e.target.value);
+                setDescriptionError(false); // Clear error when typing
               }}
+              required
+              error={descriptionError}
+              helperText={descriptionError ? "Description is required." : ""}
             />
           </Grid>
+
         </Grid>
         <Grid container gap={2} spacing={5} sx={{ marginTop: "1rem" }}>
           <Grid item>
@@ -296,7 +390,7 @@ const Managebrand = () => {
             <Autocomplete
               id="disable-close-on-select"
               disableCloseOnSelect
-              options={brandlist}
+              options={allBrandList}
               getOptionLabel={(option) => option.brandName}
               renderInput={(params) => (
                 <TextField
@@ -423,7 +517,34 @@ const Managebrand = () => {
             </Table>
           </TableContainer>
         </Grid>
+        {/* <div>
+          <h1>Brand List</h1>
+          <ul>
+            {brandlist.map((brand, index) => (
+              <li key={brand._id}>{brand.brandName}</li> // Use unique _id for the key
+            ))}
+          </ul>
+          <div>
+            <button onClick={() => setPage((prev) => Math.max(prev - 1, 1))} disabled={page === 1}>
+              Previous
+            </button>
+            <button onClick={() => setPage((prev) => (brands.length < limit ? prev : prev + 1))} disabled={brands.length < limit}>
+              Next
+            </button>
+          </div>
+          <p>Total Records: {totalRecords}</p>
+          <p>Current Page: {page}</p>
+        </div> */}
+        <div className="pagination-container">
+          <Paginate
+            page={page}
+            totalRecords={totalRecords}
+            onPageChange={handlePageChange}
+            dataSize={dataSize}
+          />
+        </div>
       </Grid>
+     
     </Grid>
   );
 };

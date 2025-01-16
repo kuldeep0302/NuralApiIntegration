@@ -10,6 +10,8 @@ import {
   getZoneList,
   getStateList,
   updateStateStatus,
+  getfilteredZoneList,
+  getCountryListActive,
 } from "../../../API Service/apiService";
 import {
   Autocomplete,
@@ -49,61 +51,56 @@ const stateHeaders = [
 const Managestate = () => {
   const [page, setPage] = useState(1);
   const pageSize = config.pageSize;
-  const dummyGetList = {
-    serialNo: "",
-    // countryName: "",
-    // zoneName: "",
-    countryId: "",
-    zoneId: "",
-    stateName: "",
-    page: page,
-    limit: pageSize,
-  };
-  
-  const [zoneList, setZoneList] = useState([]);
+ 
+
   const [countries, setCountries] = useState([]);
-  
   const [states, setStates] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [selectedZone, setSelectedZone] = useState(null);
   const [filteredStates, setFilteredStates] = useState([]);
-const [filteredCountries, setFilteredCountries] = useState([]);
-const [filteredZones, setFilteredZones] = useState([])
   const [editIndex, setEditIndex] = useState(false);
   const [searchActivated, setSearchActivated] = useState(false);
   const [searchStateName, setSearchStateName] = useState("");
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
-
+  const [tableData, setTableData] = useState([]);
+  const [stateName, setStateName] = useState(null);
+  const [limit, setLimit] = useState(10);
+  const [countryId, setCountryId] = useState(null);
+  const [zoneId, setZoneId] = useState(null);
+  const [zones, setZones] = useState([]);
+  const [zoneName, setZoneName] = useState(null);
+  const [flag, setFlag] = useState(false);
+  const [filteredzones, setfilteredzones] = useState([]);
   // const totalItems = filteredStates.length;
-
   const startIndex = (currentPage - 1) * itemsPerPage;
-
   const [dataSize, setDataSize] = useState(pageSize);
-  const [searchParams, setParams] = useState({
-    ...dummyGetList,
-  });
-  const [zoneAddDropdown, setZoneAddDropdown] = useState([]);
-  const [totalRecords, setTotalRecords] = useState(1);
+  const [selstateName, setselstateName] = useState(null);
+  const [filStates, setFilStates] = useState([]);
+  const [selZoneId, setselZoneId] = useState(null);
+  const [countryId2, setCountryId2] = useState(null);
+  const [filteredzones2, setfilteredzones2] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [selCountry2, setselCountry2] = useState(null); // Selected country object for the second API
+  const [selZoneId2, setselZoneId2] = useState(null); // Selected zone ID for the second API
+  const [selZoneName2, setselZoneName2] = useState(null); // Selected zone object for the second API
+  const [stateId2, setstateId2] = useState(null); // Selected state ID for the second API
+  const [selstateName2, setselstateName2] = useState(null); // Selected state object for the second API
+  const [filStates2, setFilStates2] = useState([]); // Filtered states for the second API
 
-  const handlePageChange = (newPage) => {
-    setPage(newPage);
+  const [countryError, setCountryError] = useState(false);
+  const [zoneError, setZoneError] = useState(false);
+  const [stateError, setStateError] = useState(false);
+  const [status, setStatus] = useState(true);
+  const [countriesActive, setCountriesActive] = useState([]);
 
-    setParams((prevParams) => ({
-      ...prevParams,
-      pageIndex: newPage.toString(),
-    }));
-  };
 
-  // Fetching data
-  useEffect(() => {
-    fetchCountries();
-    fetchState();
-  }, []);
+  //---------------------common------------------------------------------//
 
-  const fetchCountries = async () => {
+  
+
+  const fetchCountries2 = async () => {
     try {
       const response = await getCountryList();
       setCountries(response.data.countries);
@@ -114,172 +111,285 @@ const [filteredZones, setFilteredZones] = useState([])
     }
   };
 
-  const fetchState = async () => {
+  useEffect(() => {
+    fetchCountries2();
+  }, []);
+
+  const fetchCountries = async () => {
     try {
-      setLoading(true);
-      const response = await getStateList(searchParams);
-      setStates(response.data.states);
+      const response = await getCountryListActive("", page, limit, status);
+      setCountriesActive(response.data.countries);
       console.log("response.data", response.data);
-      setTotalRecords(response.data.totalStates);
-      setFilteredZones(response.data.zones);
-      setFilteredCountries(response.data.countries);
+      // setFilteredCountries(response.data.countries);
     } catch (error) {
+      console.error("Error fetching countries:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCountries();
+  }, []);
+    
+    const fetchState = async () => {
+      try {
+        setLoading(true);
+        const response = await getStateList("", page, limit, "", "");
+        setStates(response.data.states);
+        console.log("response.data", response.data);
+        setTotalRecords(response.data.totalStates);
+        setTableData(response.data.states);
+        // setFilteredZones(response.data.zones);
+        // setFilteredCountries(response.data.countries);
+      } catch (error) {
+        console.error("Error fetching countries:", error);
+      }
+      setLoading(false);
+    };
+  
+    useEffect(() => {
+      fetchState();
+    }, [page]);
+
+
+    //------------------------------------------filter states-------------------------------------------------------------------//
+
+  const fetchFilState = async () => {
+    try {
+      if(selZoneId){
+      setLoading(true);
+      const response = await getStateList("", page, limit, countryId, selZoneId);
+      setFilStates(response.data.states || []);
+      console.log("response.data", response.data);
+      // setTotalRecords(response.data.totalStates);
+      // setTableData(response.data.states);
+      // setFilteredZones(response.data.zones);
+      // setFilteredCountries(response.data.countries);
+    }} catch (error) {
       console.error("Error fetching countries:", error);
     }
     setLoading(false);
   };
 
-  const [postData, setPostData] = useState({
-    countryId: "",
-    zoneId: "",
+  useEffect(() => {
+    fetchFilState();
+  }, [selZoneId]);
+
+
+  const fetchFilState2 = async () => {
+    try {
+      if (selZoneId2) {
+        setLoading(true);
+        const response = await getStateList("", page, limit, countryId2, selZoneId2);
+        setFilStates2(response.data.states || []);
+        console.log("Response for Zone ID 2:", response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching states for Zone ID 2:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFilState2();
+  }, [selZoneId2]);
+  
+    const fetchZones = async () => {
+      try {
+        if (countryId && !isEditing) { 
+        setLoading(true);
+        const response = await getfilteredZoneList(1,
+          limit,
+          countryId,
+        status);
+        setfilteredzones(response.data.zones);
+        console.log("filtered zones", response.data.zones);
+      }} catch (error) {
+        console.error("Error fetching zones:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    useEffect(() => {
+      fetchZones();
+    }, [countryId]);
+
+  const fetchZones2 = async () => {
+    try {
+      if (countryId2) {
+        setLoading(true);
+        const response = await getfilteredZoneList(1,
+          limit,
+          countryId2);
+        setfilteredzones2(response.data.zones);
+        console.log("filtered zones", response.data.zones);
+      }
+    } catch (error) {
+      console.error("Error fetching zones:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchZones2();
+  }, [countryId2]);
+
+    
+  
+  const dummyGetList = {
     stateName: "",
-    // displayOrder: "",
-    // remarks: ""
+    page: page,
+    limit: pageSize,
+    countryId: countryId,
+    zoneId: zoneId,
+  };
+  // const dummyGetList2 = {
+  //   serialNo: "",
+  //   countryName: "",
+  //   zoneName: "",
+  //   countryId: null, // Initialize as null
+  //   page: 1,
+  //   limit: 10,
+  // };
+  const [searchParams, setParams] = useState({
+    ...dummyGetList,
   });
+  // const [searchParams2, setParams2] = useState({
+  //   ...dummyGetList2,
+  // });
+  // const [zoneAddDropdown, setZoneAddDropdown] = useState([]);
+  const [totalRecords, setTotalRecords] = useState("");
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+
+    setParams((prevParams) => ({
+      ...prevParams,
+      pageIndex: newPage.toString(),
+    }));
+  };
+  const cells = ["S.No", "Country", "Zone", "State", "Action"];
 
   const handleStatus = async (_id) => {
     try {
       setLoading(true);
       const response = await updateStateStatus({ id: _id });
       console.log(`status resposne : ${response.data.message}`);
-
       if (response.status === "success") {
         toast.success("Status Updated Successfully");
       }
-      fetchState();
+
     } catch (error) {
       console.log(`Error updating status ${error}`);
       toast.error(`Failed to update status`);
       throw error;
     } finally {
+      handleSearch();
       setLoading(false);
     }
+
   };
 
   const handlePostRequest = async () => {
-    try {
-      setLoading(true);
-      let response;
-      if (editIndex) {
-        // Include `_id` in the `postData` for update
-        const updateData = { ...postData, _id: editIndex };
-        response = await updateState(updateData); // Call update API
-        console.log("Update response:", response);
-        alert("State updated successfully!");
-        setEditIndex(false); // Reset the `editIndex` after update
-        fetchState();
-      } else {
-        response = await createState(postData); // Call create API
-        console.log("Create response:", response);
-        alert("State created successfully!");
+    
+    let isValid = true;
+    if (!countryId) {
+      setCountryError(true);
+      isValid = false;
+    } else {
+      setCountryError(false);
+    }
+
+    if (!zoneId) {
+      setZoneError(true);
+      isValid = false;
+    } else {
+      setZoneError(false);
+    }
+
+    if (!stateName) {
+      setStateError(true);
+      isValid = false;
+    } else {
+      setStateError(false);
+    }
+
+    if (!isValid) {
+      toast.error("Please fill all the fields");
+      return;
+    }
+
+    else {
+      try {
+        setLoading(true);
+        let response;
+        if (editIndex) {
+          const postData = {
+            _id: editIndex,
+            countryId: countryId,
+            zoneId: zoneId,
+            stateName: stateName,
+          }
+          response = await updateState(postData); // Call update API
+          console.log("Update response:", postData);
+          alert("State updated successfully!");
+          setEditIndex(false); // Reset the `editIndex` after update
+        } else {
+          const postData = {
+            countryId: countryId,
+            zoneId: zoneId,
+            stateName: stateName,
+          }
+          response = await createState(postData); // Call create API
+          console.log("Create response:", postData);
+          alert("State created successfully!");
+        }
+      } catch (error) {
+        console.error("Error making POST request:", error);
+        alert("Error making POST request. Please try again.");
       }
-
-      // Alert the response message
-      alert(response.data.message);
-
-      // Reset the form
-      setPostData({
-        countryId: "",
-        zoneId: "",
-        stateName: "",
-        displayOrder: "",
-        remarks: "",
-      });
-
-      // Refresh states after a successful post
-      setFilteredStates((prev) => [...prev, response.data]); // Update the states list
-    } catch (error) {
-      console.error("Error making POST request:", error);
-      alert("Error making POST request. Please try again.");
     }
     fetchState();
+    setIsEditing(false);
     setLoading(false);
-    
   };
 
+  const startingSerialNumber = (page - 1) * pageSize + 1;
 
-  const handleEdit = (_id, countryId, zoneId, zoneName, stateName) => {
+  const handleEdit = (_id, stateName, countryId, countryName, zoneId, zoneName) => {
+    setIsEditing(true);
     setEditIndex(_id); // Set the `editIndex` to determine it's an update
-    setZoneAddDropdown([{ _id: zoneId, zoneName }]); // Set the zone dropdown with the selected zone
-    setPostData({
-      _id,
-      countryId,  // Assign the `countryId`
-      zoneId,     // Assign the `zoneId`
-      stateName,  // Assign the `stateName`
-    });
+    setStateName(stateName);
+    setCountryId(countryId);
+    setSelectedCountry(countryName);
+    setZoneId(zoneId);
+    setZoneName(zoneName);
   };
 
-  const handleCancel =async()=>{
-    setPostData({
-      countryId: "",
-      zoneId: "",
-      stateName: "",
-    });
+  const handleCancel = async () => {
+    setSelectedCountry(null);
+    setSelectedZone(null);
+    setselstateName(null);
     setEditIndex(false);
+    setZoneId(null);
+    setCountryId(null);
+    setZoneName(null);
   }
-  
+
    const handleSearch = async () => {
-      setSearchActivated(true);
-  };
-
-
-  const handleAddState = async (fieldName, value) => {
-    console.log("running value", value);
-    if (fieldName === "countryId" && !value) {
-      setZoneAddDropdown([]);
-      setPostData((prev) => ({
-        ...prev,
-        countryId: "",
-        zoneId: "",
-        stateName: "",
-      }));
-      return;
-    }
-
-    if (fieldName === "zoneId" && !value) {
-      setPostData((prev) => ({
-        ...prev,
-        zoneId: "",
-        stateName: "",
-      }));
-      return;
-    }
-
-    if (fieldName === "countryId" && value) {
-      console.log("countryIdvalue", value);
-      setPostData((p) => ({
-        ...p,
-        countryId: value,
-        zoneId: "",
-        stateName: "",
-      }));
-      // setLoading(true);
       try {
-        const body = {
-          countryId: value,
-          search: "",
-        };
-        let res = await getZoneList(body);
-        console.log("res.data.zones", res.data.zones);
-        setZoneAddDropdown(res.data.zones);
+        setLoading(true);
+        const response = await getStateList(selstateName2, page, limit, countryId2, selZoneId2);
+        console.log("response.data", response.data);
+        setTotalRecords(response.data.totalStates);
+        setTableData(response.data.states);
       } catch (error) {
-        console.log("Error fetching", error);
-        // toast.error(MenuConstants.errorwhilegettinglist, "model list");
+        console.error("Error fetching cities:", error);
       } finally {
-        // setLoading(false);
+        setLoading(false);
       }
-    }
+    };
 
-    if (fieldName === "zoneId" && value) {
-      console.log("zoneId",value)
-      setPostData((prev) => ({
-        ...prev,
-        zoneId: value,
-        stateName: "",
-      }));
-      return;
-    }
-  };
   return (
     <div className="Managestate-container">
       {loading && <Loader />}
@@ -289,70 +399,96 @@ const [filteredZones, setFilteredZones] = useState([])
         <Subheader heading={"Add State"} />
         <div className="textbox-main-Managestate">
           <div className="line-Managestate">
+          
             <div className="textinput-Managestate">
-              <Autocomplete
-                id="country-autocomplete"
-                clearOnEscape
-                options={countries}
-                getOptionLabel={(option) => option.countryName}
-                onChange={(event, value) => {
-                  handleAddState("countryId", value ? value._id : 0);
-
-                  // Update the subcategory value when selected
-                }}
-                value={
-                  countries.find(
-                    (option) => option._id === postData.countryId
-                  ) || null
-                }
-                isOptionEqualToValue={(option, value) =>
-                  option._id === value?._id
-                }
-                renderInput={(params) => (
-                  <TextField {...params} label="Country" variant="standard" />
-                )}
-              />
-            </div>
-
-            <div className="textinput-Managestate">
-            
-              
+              {!editIndex && (
                 <Autocomplete
-                  id="zone-Autocomplete"
-                  options={zoneAddDropdown}
-                  getOptionLabel={(option) => option.zoneName}
+                  id="country-autocomplete"
+                  clearOnEscape
+                  options={countriesActive}
+                  getOptionLabel={(option) => option.countryName}
+                  value={selectedCountry || null} // Controlled value
                   onChange={(event, value) => {
-                    handleAddState("zoneId", value ? value._id : null); // Use null when no selection
+                    setCountryId(value?._id || null);
+                    setSelectedCountry(value || null);
+                    if (!value) {
+                      setZoneId(null);
+                      setZoneName(null);
+                    }
+                    setCountryError(false); // Clear error on valid selection
                   }}
-                  value={
-                    zoneAddDropdown.find((option) => option._id === postData.zoneId) || null
-                  }
-                  isOptionEqualToValue={(option, value) => option._id === value?._id}
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="zone"
+                      label="Country"
                       variant="standard"
-                      className="mt-1 app-input-width"
-                      InputLabelProps={{
-                        style: { fontSize: "14px" }, // Optional styling
-                      }}
+                      required
+                      error={countryError}
+                      helperText={countryError ? "Country is required." : null}
                     />
                   )}
                 />
-              
+              )}
+              {editIndex && (
+                <TextField
+                  disabled
+                  id="outlined-basic"
+                  label="Country"
+                  variant="standard"
+                  value={selectedCountry} // Display countryName if available
+                />
+              )}
+            </div>
+
+            <div className="textinput-Managestate">
+              {!editIndex && (
+                <Autocomplete
+                  id="zone-autocomplete"
+                  clearOnEscape
+                  options={filteredzones}
+                  getOptionLabel={(option) => option.zoneName || ""}
+                  value={zoneName || null} // Controlled value
+                  onChange={(event, value) => {
+                    setZoneId(value?._id || null);
+                    setZoneName(value || null);
+                    setZoneError(false); // Clear error on valid selection
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Zone"
+                      variant="standard"
+                      required
+                      error={zoneError}
+                      helperText={zoneError ? "Zone is required." : null}
+                    />
+                  )}
+                />
+              )}
+              {editIndex && (
+                <TextField
+                  disabled
+                  id="outlined-basic"
+                  label="Zone"
+                  variant="standard"
+                  value={zoneName } // Display zoneName if available
+                />
+              )}
             </div>
 
             <div className="textinput-Managestate">
               <TextField
-                style={{ width: "100%" }}
-                id="standard-basic"
-                label="State"
-                value={postData.stateName}
+                id="state-name"
+                label="State Name"
                 variant="standard"
+                value={stateName}
                 onChange={(e) => {
-                  setPostData({ ...postData, stateName: e.target.value });
+                  setStateName(e.target.value);
+                  setStateError(false); // Clear error on input
                 }}
+                required
+                error={stateError}
+                helperText={stateError ? "State Name is required." : null}
               />
             </div>
           </div>
@@ -374,21 +510,28 @@ const [filteredZones, setFilteredZones] = useState([])
         {/* <h3>List View</h3> */}
         <Subheader heading={"List View"} />
         <div className="line-Managestate">
-          
+
           <div className="textinput-Managestate">
             <Autocomplete
               id="country-autocomplete"
-              options={countries
-                .filter((country) =>
-                  states.some((state) => state.countryName === country.countryName)
-                )
-                .map((country) => ({
-                  value: country.id,
-                  label: country.countryName,
-                }))}
-              onChange={(e, newValue) => {
-                setSelectedCountry(newValue);
-                setSelectedZone(null); // Reset the selected zone
+              clearOnEscape
+              options={countries}
+              getOptionLabel={(option) => option.countryName}
+              value={selCountry2 || null} // Controlled value
+              onChange={(event, value) => {
+                // Update country-related states
+                setCountryId2(value?._id || null);
+                setselCountry2(value || null);
+
+                // Reset dependent fields if Country is cleared
+                if (!value) {
+                  setselZoneId2(null);
+                  setselZoneName2(null);
+                  setstateId2(null);
+                  setselstateName2(null);
+                  setfilteredzones2([]); // Clear zones
+                  setFilStates2([]); // Clear states
+                }
               }}
               renderInput={(params) => (
                 <TextField {...params} label="Country" variant="standard" />
@@ -398,61 +541,60 @@ const [filteredZones, setFilteredZones] = useState([])
 
           <div className="textinput-Managestate">
             <Autocomplete
-              id="zone-autocomplete"
-              options={
-                selectedCountry
-                  ? states
-                    .filter(
-                      (state) => state.countryName === selectedCountry.label
-                    )
-                    .map((state) => ({
-                      value: state.zoneName,
-                      label: state.zoneName,
-                    }))
-                    .filter(
-                      (zone, index, self) =>
-                        index ===
-                        self.findIndex((z) => z.label === (zone.label||"")) // Remove duplicates
-                    )
-                  : []
-              }
-              onChange={(e, newValue) => setSelectedZone(newValue)}
+              id="zone2-Autocomplete"
+              clearOnEscape
+              options={filteredzones2} // Updated for second API
+              getOptionLabel={(option) => option.zoneName || ""}
+              value={selZoneName2 || null} // Controlled value for second API
+              onChange={(event, value) => {
+                // Update zone-related states for second API
+                setselZoneId2(value?._id || null);
+                setselZoneName2(value || null);
+
+                // Reset dependent fields if Zone is cleared
+                if (!value) {
+                  setstateId2(null);
+                  setselstateName2(null);
+                  setFilStates2([]); // Clear states
+                }
+              }}
               renderInput={(params) => (
-                <TextField {...params} label="Zone" variant="standard" />
+                <TextField
+                  {...params}
+                  label="Zone"
+                  variant="standard"
+                  className="mt-1 app-input-width"
+                />
               )}
             />
           </div>
 
           <div className="textinput-Managestate">
             <Autocomplete
-              id="state-autocomplete"
-              options={
-                selectedCountry && selectedZone
-                  ? states
-                    .filter(
-                      (state) =>
-                        state.countryName === selectedCountry.label && // Filter by selected country
-                        state.zoneName === selectedZone.label // Filter by selected zone
-                    )
-                    .map((state) => ({
-                      value: state.id, // Unique state ID
-                      label: state.stateName, // State name to display
-                    }))
-                  : [] // No options if country or zone is not selected
-              }
-              value={
-                searchStateName
-                  ? { label: searchStateName, value: searchStateName } // Show selected state
-                  : null // Default to null if no state is selected
-              }
-              onChange={(e, newValue) =>
-                setSearchStateName(newValue ? newValue.label : "") // Update state selection
-              }
+              id="state2-autocomplete"
+              clearOnEscape
+              options={filStates2} // Using the states list from the second API
+              getOptionLabel={(option) => option.stateName || ""} // Display the state name
+              value={filStates2.find((state) => state.stateName === selstateName2) || null} // Ensure the value matches an option
+              onChange={(event, value) => {
+                // Update state-related states for the second API
+                setstateId2(value?._id || null); // Set the selected state ID
+                setselstateName2(value ? value.stateName : null); // Set the selected state name
+              }}
               renderInput={(params) => (
-                <TextField {...params} label="State" variant="standard" />
+                <TextField
+                  {...params}
+                  label="State Name"
+                  variant="standard"
+                  className="mt-1 app-input-width"
+                />
               )}
             />
+
           </div>
+
+
+          {/* {selstateName?.stateName} {page} {limit} {countryId} {selZoneId} */}
           <span className="buttons-Managestate-span">
             <CommonButton name="Search" handleOnClick={handleSearch} />
           </span>
@@ -470,95 +612,86 @@ const [filteredZones, setFilteredZones] = useState([])
             </span>
           </div>
           <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 650 }} aria-label="simple table">
+            <Table
+              sx={{ minWidth: 650 }}
+              size="small"
+              aria-label="simple table"
+            >
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ color: "#fff" }} align="left">
-                    S. No.
-                  </TableCell>
-                  <TableCell sx={{ color: "#fff" }} align="center">
-                    Country
-                  </TableCell>
-                  <TableCell sx={{ color: "#fff" }} align="center">
-                    Zone
-                  </TableCell>
-                  <TableCell sx={{ color: "#fff" }} align="center">
-                    State
-                  </TableCell>
-                  <TableCell sx={{ color: "#fff" }} align="right">
-                    Action
-                  </TableCell>
+                  {cells.map((cell, index) => (
+                    <TableCell
+                      key={index}
+                      sx={{
+                        color: "white",
+                        textAlign:
+                          index === cells.length - 1 ? "right" : "center",
+                        paddingRight: index === cells.length - 1 ? "4rem" : "",
+                      }}
+                    >
+                      {cell}
+                    </TableCell>
+                  ))}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {states.length > 0 ? (
-                  states
-                    .filter((state) => {
-                      if (!searchActivated) {
-                        return true; // Show all rows if search is not activated
-                      }
-                      return (
-                        (!searchStateName || state.stateName === searchStateName) && // Match stateName if provided
-                        (!selectedCountry || state.countryName === selectedCountry.label) && // Match countryName if provided
-                        (!selectedZone || state.zoneName === selectedZone.label) // Match zoneName if provided
-                      );
-                    })
-                    .slice((page - 1) * dataSize, page * dataSize) // Slicing the states array for pagination
-                    .map((state, index) => (
-                      <TableRow key={state._id}>
-                        <TableCell align="left">
-                          {(page - 1) * dataSize + index +1} {/* Adjust index for pagination */}
-                        </TableCell>
-                        <TableCell align="center">{state.countryName}</TableCell>
-                        <TableCell align="center">{state.zoneName}</TableCell>
-                        <TableCell align="center">{state.stateName}</TableCell>
-                        <TableCell
-                          align="right"
-                          sx={{
-                            display: "flex",
-                            flexDirection: "row",
-                            justifyContent: "flex-end",
-                          }}
-                        >
-                          <IconButton
-                            onClick={() => handleStatus(state._id)}
-                            sx={{
-                              outline: "none",
-                              "&:focus": { outline: "none" },
-                            }}
-                          >
-                            <img
-                              src={state.active === false ? inactiveIcon : activeIcon}
-                              alt="active"
-                              height="20px"
-                              width="20px"
-                            />
-                          </IconButton>
+                {tableData.map((row, index) => (
+                  <TableRow key={index}>
+                    <TableCell align="center">
+                      {(page - 1) * dataSize + index + 1} {/* Index adjusted for pagination */}
+                    </TableCell>
+                    <TableCell align="center">{row.countryName}</TableCell>
+                    <TableCell align="center">{row.zoneName}</TableCell>
+                    <TableCell align="center">{row.stateName}</TableCell>
+                    <TableCell
+                      align="right"
+                      sx={{
+                        display: "flex",
+                        flexDirection: "row",
+                        justifyContent: "flex-end",
+                      }}
+                    >
+                      <IconButton
+                        onClick={() => handleStatus(row._id)}
+                        sx={{
+                          outline: "none",
+                          "&:focus": { outline: "none" },
+                        }}
+                      >
+                        <img
+                          src={row.active === false ? inactiveIcon : activeIcon}
+                          alt="active"
+                          height="20px"
+                          width="20px"
+                        />
+                      </IconButton>
 
-                          <IconButton
-                            onClick={() => handleEdit(state._id, state.countryId, state.zoneId, state.zoneName, state.stateName)}
-                            sx={{
-                              outline: "none",
-                              "&:focus": { outline: "none" },
-                            }}
-                          >
-                            <img
-                              src={editIcon}
-                              alt="Edit"
-                              height={"20px"}
-                              width={"20px"}
-                            />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                ) : (
-                  <TableRow>
-                    <TableCell align="center" colSpan={5}>
-                      No data available
+                      <IconButton
+                        onClick={() =>
+                          handleEdit(
+                            row._id,
+                            row.stateName,
+                            row.countryId,
+                            row.countryName,
+                            row.zoneId,
+                            row.zoneName
+                          )
+                        }
+                        sx={{
+                          outline: "none",
+                          "&:focus": { outline: "none" },
+                        }}
+                      >
+                        <img
+                          src={editIcon}
+                          alt="Edit"
+                          height={"20px"}
+                          width={"20px"}
+                        />
+                      </IconButton>
                     </TableCell>
                   </TableRow>
-                )}
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
@@ -571,6 +704,34 @@ const [filteredZones, setFilteredZones] = useState([])
             dataSize={dataSize}
           />
         </div>
+        {/* <div>
+          <h2>State List</h2>
+          {loading ? (
+            <p>Loading...</p> // Show loading message or spinner
+          ) : states.length > 0 ? (
+            <table border="1">
+              <thead>
+                <tr>
+                  <th>State Name</th>
+                  <th>Zone Name</th>
+                  <th>Country Name</th>
+                </tr>
+              </thead>
+              <tbody>
+                {states.map((state) => (
+                  <tr key={state._id}>
+                    <td>{state.stateName}</td>
+                    <td>{state.zoneName || "N/A"}</td>
+                    <td>{state.countryName || "N/A"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>No states found.</p>
+          )}
+          <p>Total Records: {totalRecords}</p> {/* Show total records */}
+        {/* </div> */} 
       </div>
     </div>
   );

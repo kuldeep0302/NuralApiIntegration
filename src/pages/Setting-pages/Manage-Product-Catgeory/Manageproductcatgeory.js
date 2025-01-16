@@ -1,12 +1,8 @@
 import React from "react";
-
-import { Link } from "react-router-dom";
 import TextField from "@material-ui/core/TextField";
-import Button from "@mui/material/Button";
 import { useState, useEffect } from "react";
-import { createCategory, deleteCategory, fetchBrandList, fetchCategoryList, updateCategory, updateCategoryStatus } from "../../../API Service/apiService";
+import { createCategory, deleteCategory, fetchAllCategoryList, fetchBrandList, fetchCategoryList, updateCategory, updateCategoryStatus } from "../../../API Service/apiService";
 import ProductTabs from "../../../Componants/Common/product tabs/ProductTabs";
-
 import config from "../../../Componants/Common/config";
 import {
   Autocomplete,
@@ -31,33 +27,39 @@ import deleteIcon from "../../../Assests/deleteIcon.svg";
 import HeaderNavigation from "../../../Componants/Common/header Navigation/HeaderNavigation";
 import toast, { Toaster } from "react-hot-toast";
 import Loader from "../../../Componants/Loader/Loader";
+import Paginate from "../../../Componants/Common/Paginate";
 
-
-const callsource = [];
-
-
-const cells = ["S.No","Brand", "Category", "Description", "Action"];
-
+const cells = ["S.No", "Brand", "Category", "Description", "Action"];
 
 
 const Manageproductcatgeory = () => {
-  
+
   const [brandName, setBrandName] = useState("");
   const [brandParams, setBrandParams] = useState("");
   const [brandlist, setBrandList] = useState([]);
   const [categoryList, setCategoryList] = useState([]);
   const [description, setDescription] = useState("");
   const [categorydescription, setCategoryDescription] = useState("");
-  
   const [loading, setLoading] = useState(false);
-  
   const [editIndex, setEditIndex] = useState(false);
   const pageSize = config.pageSize;
-  const [page, setPage] = useState(1);
-  const [dataSize, setDataSize] = useState(100);
-  const [searchActivated, setSearchActivated] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedBrand, setSelectedBrand] = useState("");
+  const [totalRecords, setTotalRecords] = useState(null);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [dataSize, setDataSize] = useState(pageSize);
+  const [tableData, setTableData] = useState([]);
+  const [filteredCat, setfilteredCat] = useState([]);
+  const [searchBrand, setSearchBrand] = useState("");
+  const [categoryList2, setCategoryList2] = useState([]);
+  const [BrandName2, setBrandName2] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [searchBrand2, setSearchBrand2] = useState(null);
+  const [activeBrandList, setActiveBrandList] = useState([]);
+  const [brandError, setBrandError] = useState(false);
+  const [categoryError, setCategoryError] = useState(false);
+  const [descriptionError, setDescriptionError] = useState(false);
   const dummyGetList = {
     serialNo: "",
     brandName: "",
@@ -73,20 +75,31 @@ const Manageproductcatgeory = () => {
       const response = await fetchBrandList();
       //  setTableData(response.data.brandList);
       setBrandList(response.data.brandList);
+      setBrandList(response.data.brandList);
+      const filteredActiveBrands = response.data.brandList.filter(
+        (brand) => brand.active === true
+      );
+
+      // Set the active brands
+      setActiveBrandList(filteredActiveBrands);
     } catch (error) {
       console.error(error);
     } finally {
       setLoading(false);
     }
   };
+    useEffect(() => {
+    getBrandList();
+  }, []);
+
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const response = await fetchCategoryList(); // API call
+      const response = await fetchAllCategoryList(page, limit); // API call
       console.log("Fetched Categories:", response);
-
-      // Set categories from API response
+      setTableData(response.data.categories);
       setCategoryList(response.data.categories || []);
+      setTotalRecords(response.data.totalCategories);
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
@@ -94,121 +107,169 @@ const Manageproductcatgeory = () => {
       setLoading(false);
     }
   };
-
-  // Fetch categories when the component loads
-
-
-
-
   useEffect(() => {
     fetchCategories();
-    getBrandList();
-  }, []);
-  const handleEdit = (brandId, brandName, _id, categoryName, description) => {
+  }, [page]);
+
+
+
+
+  const fetchCategories2 = async () => {
+    try {
+      if (searchBrand2){
+      setLoading(true);
+      const response = await fetchCategoryList(searchBrand2,"", page, limit ); // API call
+      console.log("Fetched Categories:", response);
+      // setTableData(response.data.categories);
+      setCategoryList2(response.data.categories || []);
+      // setTotalRecords(response.data.totalCategories);
+    } }catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+    finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchCategories2();
+  }, [searchBrand2]);
+  // Fetch categories when the component loads
+
+  
+
+
+
+  const handleEdit = (brandId,brandName, _id, categoryName, description) => {
     setEditIndex(_id);
-    setSelectedBrand({ _id: brandId, brandName }); // Fallback for custom values
+    setBrandName(brandName)
     setBrandParams(brandId); // Set brand ID
     setCategoryDescription(categoryName); // Set category description
     setDescription(description); // Set description
   };
-
   const handlecancel = () => {
     setBrandName("");
     setBrandParams("");
     setDescription("");
+    setBrandName("")
     setCategoryDescription("");
     setEditIndex(false);
     setSelectedBrand(null);
   };
 
-  const handleSave = async () => {
-    const requestData = {
-      brandId: brandParams, // Assuming this is the selected brand's ID
-      categoryName: categorydescription, // Use category description as category name
-      description: description, // Category description
-    };
-    try {
-      setLoading(true);
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    setParams((prevParams) => ({
+      ...prevParams,
+      pageIndex: newPage.toString()
+    }));
+  };
 
-      if (!editIndex) {
-        const response = await createCategory(requestData);
-        toast.success(response.message);
-        console.log("response is ", response.message);
-      } else {
-        const dataToUpdate = {
-          _id: editIndex,
-          brandId: brandParams,
-          categoryName: categorydescription,
-          description: description,
-        };
-        console.log("data to update is ", dataToUpdate);
-        const response = await updateCategory(dataToUpdate);
-        toast.success(response.message);
-        console.log("response is ", response.message);
-        setEditIndex(false);
-        fetchCategories();
+
+  const handleSave = async () => {
+    let isValid = true;
+
+    if (!brandParams) {
+      setBrandError(true);
+      isValid = false;
+    } else {
+      setBrandError(false);
+    }
+
+    if (!categorydescription.trim()) {
+      setCategoryError(true);
+      isValid = false;
+    } else {
+      setCategoryError(false);
+    }
+
+    if (!description.trim()) {
+      setDescriptionError(true);
+      isValid = false;
+    } else {
+      setDescriptionError(false);
+    }
+
+    if (!isValid) {
+      toast.error("Please fill all the fields");
+      return;
+    }
+    else {
+      const requestData = {
+        brandId: brandParams, // Assuming this is the selected brand's ID
+        categoryName: categorydescription, // Use category description as category name
+        description: description, // Category description
+      };
+      try {
+        setLoading(true);
+
+        if (!editIndex) {
+          const response = await createCategory(requestData);
+          toast.success(response.message);
+          console.log("response is ", response.message);
+        } else {
+          const dataToUpdate = {
+            _id: editIndex,
+            brandId: brandParams,
+            categoryName: categorydescription,
+            description: description,
+          };
+          console.log("data to update is ", dataToUpdate);
+          const response = await updateCategory(dataToUpdate);
+          toast.success(response.message);
+          console.log("response is ", response.message);
+          setEditIndex(false);
+        }
+
+      } catch (error) {
+        console.log(`Error saving Brand ${error}`);
+      } finally {
+
       }
-     
+      setLoading(false);
+      setBrandName("");
+      setBrandParams("");
+      setDescription("");
+      setCategoryDescription("");
+      fetchCategories();
+    }
+  };
+
+
+  const handleSearch = async () => {
+    try {
+      setLoading(true)
+      const response = await fetchCategoryList(searchBrand2, selectedCategory, 1, limit);
+      setTableData(response.data.categories);
+      setTotalRecords(response.data.totalCategories);
+      // console.log(`response table  is `, response.data.brandList);
+
     } catch (error) {
-      console.log(`Error saving Brand ${error}`);
-    } finally {
-      
+      console.log(`Error in filter List`);
     }
     setLoading(false);
-    setBrandName("");
-    setBrandParams("");
-    setDescription("");
-    setCategoryDescription("");
-    getBrandList();
-    fetchCategories();
   };
 
-  function handleClick() {
-    const saveButton = document.getElementById("save-button");
-    saveButton.textContent = "Saved";
-    saveButton.classList.add("saved");
-    alert("Data saved successfully!");
-  }
-  const handleSearch = () => {
-    setSearchActivated(true);
-  };
-  
-  const handleStatus = async (index,categoryId) => {
-    
+
+
+
+  const handleStatus = async (index, categoryId) => {
     try {
-      setLoading();
+      setLoading(true);
       console.log(`category id is ${categoryId}`);
       const response = await updateCategoryStatus({ _id: categoryId });
       console.log(`status resposne : ${response.data.message}`);
       if (response.status === "success") {
         toast.success("Status Updated Successfully");
-        fetchCategories();
       }
-      fetchCategories();
     } catch (error) {
       console.log(`Error updating status ${error}`);
       toast.error(`Failed to update status`);
       throw error;
-    } finally {
-      setLoading(false);
     }
-  };
-  const handleDelete = async ( categoryId) => {
-    try {
-      const response = await deleteCategory(categoryId);
-      console.log("response is ", response.message);
-      alert("Category deleted successfully!");
-      // Refresh the brand list directly from the backend after deletion
-      getBrandList();
-    } catch (error) {
-      console.log(`Error deleting category ${error}`);
-    }
+    handleSearch();
+    setLoading(false);
   };
 
-  document.addEventListener("DOMContentLoaded", function () {
-    const saveButton = document.getElementById("save-button");
-    saveButton.addEventListener("click", handleClick);
-  });
 
   return (
 
@@ -234,55 +295,77 @@ const Manageproductcatgeory = () => {
         <Grid item container>
           <ProductTabs selectedTab="two" />
         </Grid>
-
         <Grid container spacing={10}>
           <Grid item>
-            
-            <Autocomplete
-              id="disable-close-on-select"
-              disableCloseOnSelect
-              options={brandlist}
-              getOptionLabel={(option) => option.brandName}
-              value={brandlist.find((option) => option._id === selectedBrand?._id) || null} // Dynamically set value
-              onChange={(event, value) => {
-                setBrandParams(value ? value._id : ""); // Update brand ID
-                setBrandName(value ? value.brandName : ""); // Update brand name
-                setSelectedBrand(value); // Update the selected brand object
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Brand"
-                  variant="standard"
-                  style={{ width: "10rem" }}
-                />
-              )}
-            />
-
+            {!editIndex && (
+              <Autocomplete
+                id="disable-close-on-select"
+                options={activeBrandList}
+                getOptionLabel={(option) => option.brandName}
+                value={
+                  activeBrandList.find((option) => option._id === selectedBrand?._id) ||
+                  null
+                } // Dynamically set value
+                onChange={(event, value) => {
+                  setBrandParams(value ? value._id : ""); // Update brand ID
+                  setBrandName(value ? value.brandName : ""); // Update brand name
+                  setSelectedBrand(value); // Update the selected brand object
+                  setBrandError(false); // Clear error on selection
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Brand"
+                    variant="standard"
+                    style={{ width: "10rem" }}
+                    error={brandError}
+                    helperText={brandError ? "Brand is required." : ""}
+                  />
+                )}
+              />
+            )}
+            {editIndex && (
+              <TextField
+                disabled
+                value={brandName}
+                label="Brand"
+                variant="standard"
+                style={{ width: "10rem" }}
+              />
+            )}
           </Grid>
-          <Grid item>
+
+          <Grid item >
             <TextField
               style={{ width: "100%" }}
-              id="standard-basic"
+              id="category"
               label="Category"
               variant="standard"
               value={categorydescription}
-              onChange={(e, val) => {
+              onChange={(e) => {
                 setCategoryDescription(e.target.value);
+                setCategoryError(false); // Clear error on typing
               }}
+              required
+              error={categoryError}
+              helperText={categoryError ? "Category is required." : ""}
             />
           </Grid>
 
-          <Grid item>
+          <Grid item >
             <TextField
               style={{ width: "100%" }}
-              id="standard-basic"
+              id="description"
               label="Description"
               variant="standard"
               value={description}
-              onChange={(e, val) => {
+              onChange={(e) => {
                 setDescription(e.target.value);
+                setDescriptionError(false); // Clear error on typing
               }}
+              required
+              error={descriptionError}
+              helperText={descriptionError ? "Description is required." : ""}
             />
           </Grid>
         </Grid>
@@ -354,15 +437,20 @@ const Manageproductcatgeory = () => {
         <Grid container gap={5}>
           <Grid item>
             <Autocomplete
-              id="disable-close-on-select"
+              id="disable-close-on-select-brand"
               disableCloseOnSelect
-              options={brandlist}
-              getOptionLabel={(option) => option.brandName}
+              options={brandlist} // Array of brands
+              getOptionLabel={(option) => option.brandName || ""}
               onChange={(event, newValue) => {
                 // Update the selected brand name
-                setBrandName(newValue ? newValue.brandName : "");
+                setBrandName2(newValue ? newValue.brandName : "");
                 // Update the selected brand's ID to filter categories
-                setSelectedBrand(newValue ? newValue._id : null);
+                setSearchBrand2(newValue ? newValue._id : null);
+                // Clear the category selection and reset filteredCat when brand is cleared
+                if (!newValue) {
+                  setSelectedCategory(null); // Clear selected category
+                  setCategoryList2([]); // Reset the filtered category list
+                }
               }}
               renderInput={(params) => (
                 <TextField
@@ -374,18 +462,15 @@ const Manageproductcatgeory = () => {
               )}
             />
           </Grid>
+
           <Grid item>
             <Autocomplete
-              id="category-autocomplete"
+              id="disable-close-on-select-category"
               disableCloseOnSelect
-              options={
-                selectedBrand
-                  ? categoryList.filter((category) => category.brandId === selectedBrand)
-                  : [] // Filter categories based on the selected brand's ID
-              }
-              getOptionLabel={(option) => option.categoryName || ""} // Display categoryName
-              isOptionEqualToValue={(option, value) => option._id === value._id} // Match by unique _id
+              options={categoryList2 || []} // Handle null/empty filteredCat gracefully
+              getOptionLabel={(option) => option.categoryName || ""}
               onChange={(event, newValue) => {
+                // Update the selected category's name
                 setSelectedCategory(newValue ? newValue.categoryName : "");
               }}
               renderInput={(params) => (
@@ -398,48 +483,43 @@ const Manageproductcatgeory = () => {
               )}
             />
           </Grid>
-
           <Grid item>
-            <CommonButton name={"Search"} handleOnClick={handleSearch}/>
+            <CommonButton name={"Search"} handleOnClick={handleSearch} />
           </Grid>
         </Grid>
-
         <Grid container>
           <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 650 }} size="small" aria-label="simple table">
+            <Table
+              sx={{ minWidth: 650 }}
+              size="small"
+              aria-label="simple table"
+            >
               <TableHead>
                 <TableRow>
                   {cells.map((cell, index) => (
                     <TableCell
                       key={index}
-                      sx={{ color: "white", textAlign: "center" }}
+                      sx={{
+                        color: "white",
+                        textAlign:
+                          index === cells.length - 1 ? "right" : "center",
+                        paddingRight: index === cells.length - 1 ? "4rem" : "",
+                      }}
                     >
                       {cell}
-                    </TableCell> // Adding a key prop
+                    </TableCell>
                   ))}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {categoryList.length > 0 ? (
-                  categoryList
-                    .filter((category) => {
-                      if (!searchActivated) {
-                        return true; // Show all rows if search is not activated
-                      }
-                      return (
-                        (!selectedCategory || category.categoryName === selectedCategory) && // Match categoryName if provided
-                        (!brandName || category.brandName === brandName)  // Match stateName if provided
-                      );
-                    })
-                    .slice((page - 1) * dataSize, page * dataSize)
-                    .map((category, index) => (
-                      <TableRow key={category._id}>
-                        <TableCell align="center">
-                          {(page - 1) * dataSize + index + 1} {/* Index adjusted for pagination */}
-                        </TableCell>
-                    <TableCell align="center">{category.brandName}</TableCell>
-                    <TableCell align="center">{category.categoryName}</TableCell>
-                    <TableCell align="center">{category.description}</TableCell>
+                {tableData.map((row, index) => (
+                  <TableRow key={index}>
+                    <TableCell align="center">
+                      {(page - 1) * dataSize + index + 1}
+                    </TableCell>
+                    <TableCell align="center">{row.brandName}</TableCell>
+                    <TableCell align="center">{row.categoryName}</TableCell>
+                    <TableCell align="center">{row.description}</TableCell>
                     <TableCell
                       align="right"
                       sx={{
@@ -449,14 +529,14 @@ const Manageproductcatgeory = () => {
                       }}
                     >
                       <IconButton
-                        onClick={() => handleStatus(index,category._id)}
+                        onClick={() => handleStatus(index, row._id)}
                         sx={{
                           outline: "none",
                           "&:focus": { outline: "none" },
                         }}
                       >
                         <img
-                          src={category.active === false ? inactiveIcon : activeIcon}
+                          src={row.active === false ? inactiveIcon : activeIcon}
                           alt="active"
                           height="20px"
                           width="20px"
@@ -464,7 +544,15 @@ const Manageproductcatgeory = () => {
                       </IconButton>
 
                       <IconButton
-                        onClick={() => handleEdit( category.brandId,category.brandName, category._id, category.categoryName, category.description)}
+                        onClick={() =>
+                          handleEdit(
+                            row.brandId,
+                            row.brandName,
+                            row._id,
+                            row.categoryName,
+                            row.description,
+                          )
+                        }
                         sx={{
                           outline: "none",
                           "&:focus": { outline: "none" },
@@ -477,29 +565,33 @@ const Manageproductcatgeory = () => {
                           width={"20px"}
                         />
                       </IconButton>
-                      <IconButton
-                        onClick={() => handleDelete( category._id)}
+                      {/* <IconButton
+                        // onClick={() => handleDelete(index, row._id)}
                         sx={{
                           outline: "none",
                           "&:focus": { outline: "none" },
                         }}
                       >
-                        <img src={deleteIcon} alt="active" height={"20px"} width={"20px"} />
-                      </IconButton>
+                        <img
+                          src={}
+                          alt="active"
+                          height={"20px"}
+                          width={"20px"}
+                        />
+                      </IconButton> */}
                     </TableCell>
                   </TableRow>
-                    ))
-                ) : (
-                  <TableRow>
-                    <TableCell align="center" colSpan={6}>
-                      No data available
-                    </TableCell>
-                  </TableRow>
-                )}
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
         </Grid>
+        <Paginate
+          page={page}
+          totalRecords={totalRecords}
+          onPageChange={handlePageChange}
+          dataSize={dataSize}
+        />
       </Grid>
     </Grid>
 

@@ -1,10 +1,5 @@
-import React from "react";
-
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import TextField from "@material-ui/core/TextField";
-import Button from "@mui/material/Button";
-
-import ProductTabs from "../../../Componants/Common/product tabs/ProductTabs";
 import {
   Autocomplete,
   Grid,
@@ -26,18 +21,24 @@ import inactiveIcon from "../../../Assests/inactiveIcon.svg";
 import editIcon from "../../../Assests/editIcon.svg";
 import deleteIcon from "../../../Assests/deleteIcon.svg";
 import HeaderNavigation from "../../../Componants/Common/header Navigation/HeaderNavigation";
+import { createSparePart, fetchSparePartList, fetchSparePartList2, filterHsnCode, updateSparePart, updateSparePartStatus } from "../../../API Service/apiService";
+import Loader from "../../../Componants/Loader/Loader";
+import toast, { Toaster } from "react-hot-toast";
+import Paginate from "../../../Componants/Common/Paginate";
+import config from "../../../Componants/Common/config";
 
-const callsource = [];
 
-const cells = ["Spare Part Name", "Spare Part Code","HSN ", "Action"];
+
+const cells = ["S.No","Spare Part Name", "Spare Part Code","HSN ", "Action"];
+
 const options = [
   { label: "Option 1" },
   { label: "Option 2" },
   { label: "Option 3" },
 ];
 const serials = [
-  { label: "Yes" },
-  { label: "No" },
+  { key:true , label: "Yes" },
+  { key:false , label: "No" },
 ];
 const rows = [
     {
@@ -78,26 +79,245 @@ const rows = [
   ];
   
 const SparePartCreation = () => {
-  function handleClick() {
-    const saveButton = document.getElementById("save-button");
-    saveButton.textContent = "Saved";
-    saveButton.classList.add("saved");
-    alert("Data saved successfully!");
-  }
-  const handleSearch = () => {
-    // logic of search
+  const [sparePartList, setSparePartList] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [hsnCodes, setHsnCodes] = useState([]);
+  const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [search, setSearch] = useState(""); // For HSN code input search
+  const [selectedHsn, setSelectedHsn] = useState("");
+  const [isSerialized,setIsSerialized] = useState(null);
+  const [editIndex, setEditIndex] = useState(null);
+  const pageSize = config.pageSize;
+  const [tableDate, setTableDate] = useState([])
+  const [sparePartList2, setSparePartList2] = useState([]);
+  const dummyGetList = {
+    serialNo: "",
+    countryName: "",
+    zoneName: "",
+    stateName: "",
+    cityName: "",
+    pageSize: pageSize
+  };
+  const [searchParams, setParams] = useState({
+    ...dummyGetList
+  });
+  const [dataSize, setDataSize] = useState(pageSize);
+  const [totalRecords, setTotalRecords] = useState(1);
+  const [selectedSparePartName2, setSelectedSparePartName2] = useState([]);
+  const [selectedCode2, setSelectedCode2] = useState([]);
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    setParams((prevParams) => ({
+      ...prevParams,
+      pageIndex: newPage.toString()
+    }));
   };
 
-  document.addEventListener("DOMContentLoaded", function () {
-    const saveButton = document.getElementById("save-button");
-    saveButton.addEventListener("click", handleClick);
-  });
+ const fetchSpareParts = async() => {
+    // API call to fetch spare part list
+    try {
+      setLoading(true);
+      const response = await fetchSparePartList("", "", page, limit);
+      setSparePartList(response.data.spareParts);
+      setTableDate(response.data.spareParts);
+      setTotalRecords(response.data.totalRecords)
+      setLoading(false);
+    }
+    catch (error) {
+      console.log("Error in fetching spare part list", error);
+    }
+  };
+  useEffect(() => {
+    fetchSpareParts();
+  }, [page]);
 
-  const [value, setValue] = React.useState({});
+  const fetchSpareParts2 = async () => {
+    // API call to fetch spare part list
+    try {
+      setLoading(true);
+      const response = await fetchSparePartList2();
+      setSparePartList2(response.data.spareParts);
+      // setTableDate(response.data.spareParts);
+      // setTotalRecords(response.data.totalRecords)
+      setLoading(false);
+    }
+    catch (error) {
+      console.log("Error in fetching spare part list", error);
+    }
+  };
+  useEffect(() => {
+    fetchSpareParts2();
+  }, []);
+ 
+
+  
+
+
+  const fetchHsnCodes = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await filterHsnCode(); // Call the API
+      setHsnCodes(data.taxes); // Use `data.taxes` from API response
+      console.log(data.taxes);
+    } catch (err) {
+      setError("Failed to fetch HSN codes");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchHsnCodes();
+  }, []);
+
+  const handleStatus = async (_id) => {
+    try {
+      setLoading(true);
+      const response = await updateSparePartStatus({ sparePartId: _id });
+      console.log(`status resposne : ${response.data.message}`);
+
+      if (response.status === "success") {
+        toast.success("Status Updated Successfully");
+      }
+    } catch (error) {
+      console.log(`Error updating status ${error}`);
+      toast.error(`Failed to update status`);
+      throw error;
+    } finally {
+      handleSearch();
+      setLoading(false);
+    }
+  };
+
+  
+  const [value, setValue] = useState({});
+  const [sparePartName, setSparePartName] = useState("");
+  const [sparePartCode, setSparePartCode] = useState("");
+  const [selectedSparePartName, setSelectedSparePartName] = useState(null);
+  const [selectedSparePartId, setSelectedSparePartId] = useState(null);
+  const [relatedCodes, setRelatedCodes] = useState([]);
+  const [selectedCode, setSelectedCode] = useState(null);
+  const [filteredData, setFilteredData] = useState(sparePartList);
+  const [filteredSpareParts, setFilteredSpareParts] = useState(sparePartList); 
+
+
+  const handleEdit = (_id, sparePartName, sparePartCode, hsnCode, isSerialized) => {
+    setEditIndex(_id);
+    setSparePartName(sparePartName);
+    setSparePartCode(sparePartCode);
+
+    // Find the object from `hsnCodes` that matches the provided `hsnCode`
+    const selectedHsnObject = hsnCodes.find((code) => code.hsnCode === hsnCode);
+    setSelectedHsn(selectedHsnObject || null); // Set the entire object or null if not found
+
+    setIsSerialized(isSerialized);
+  };
+
+  const handleSearch = async () => {
+    try {
+      setLoading(true);
+
+      const response = await fetchSparePartList(
+        selectedSparePartName2,
+        selectedCode2,
+        page,
+        limit
+      );
+
+      setTableDate(response.data.spareParts); // Assuming `response.spareParts` exists
+      setTotalRecords(response.data.totalRecords); // Assuming `response.totalRecords` exists
+      setLoading(false);
+    } catch (error) {
+      console.log("Error in fetching spare part list", error);
+    }
+  };
+
+
+ 
+
+    // Prepare the data object
+    const handleSubmit = async () => {
+      // Validation
+      if (!sparePartName || !sparePartCode || !selectedHsn || isSerialized === null) {
+        alert("All fields are required!");
+        return;
+      }
+
+      // Prepare the data object
+      const data = {
+        sparePartName,
+        sparePartCode,
+        hsnCode: selectedHsn?._id, // Pass `_id` of the HSN Code object
+        isSerialized: isSerialized !== null ? isSerialized : false,
+      };
+
+      try {
+        setLoading(true);
+
+        if (editIndex === null) {
+          // Create Spare Part
+          const response = await createSparePart(data);
+          console.log("Data to post:", data);
+          console.log("Spare Part Created Successfully:", response);
+          alert("Spare Part Created Successfully!");
+        } else {
+          // Update Spare Part
+          const updateData = { sparePartId: editIndex , ...data}; // Flatten the structure
+          const response = await updateSparePart(updateData); // Call update API
+          console.log("Data to update:", updateData);
+          console.log("Spare Part Updated Successfully:", response);
+          alert("Spare Part Updated Successfully!");
+        }
+
+        // Reset the form and refresh the list
+        setSparePartName("");
+        setSparePartCode("");
+        setSelectedHsn(null);
+        setIsSerialized(null);
+        setEditIndex(null); // Reset edit index to null
+        fetchSpareParts(); // Refresh the list
+      } catch (error) {
+        console.error(editIndex === null ? "Error creating spare part:" : "Error updating spare part:", error);
+        alert(editIndex === null ? "Failed to create spare part!" : "Failed to update spare part!");
+      } finally {
+        setLoading(false); // Stop the loading indicator
+      }
+    };
+
+    const handleCancel = () => {
+      setSparePartName("");
+      setSparePartCode("");
+      setSelectedHsn(null);
+      setIsSerialized(null);
+      setEditIndex(null);
+    }
+
+
+  // const handleSparePartNameChange = (event, newValue) => {
+  //   setSelectedSparePartName(newValue);
+
+  //   // Update related codes dynamically
+  //   if (newValue) {
+  //     const codes = sparePartList2
+  //       .filter((item) => item.sparePartName === newValue.label)
+  //       .map((item) => ({ label: item.sparePartCode, id: item._id }));
+  //     setRelatedCodes(codes);
+  //   } else {
+  //     setRelatedCodes([]);
+  //   }
+  //   setSelectedCode(null); // Reset the selected code
+  // };
+
 
   return (
     <Grid container>
-      {/* <HeaderNavigation value={"Spare Part Creation"} /> */}
+      {loading && <Loader />}
+      <Toaster position="top-center" reverseOrder={false} />
       <HeaderNavigation value={"Spare Part Creation"}/>
       {/* create Category */}
       <Grid
@@ -117,58 +337,54 @@ const SparePartCreation = () => {
         
 
         <Grid container spacing={10}>
-        <Grid item>
+          <Grid item>
+            
             <TextField
-              style={{ width: "100%" }}
-              id="standard-basic"
+              fullWidth
               label="Spare Part Name"
               variant="standard"
-              onChange={(e, val) => {
-                setValue({ ...value, workflowName: e.target.value });
-              }}
+              value={sparePartName}
+              onChange={(e) => setSparePartName(e.target.value)}
             />
           </Grid>
-
           <Grid item>
             <TextField
-              style={{ width: "100%" }}
-              id="standard-basic"
+              fullWidth
               label="Spare Part Code"
               variant="standard"
-              onChange={(e, val) => {
-                setValue({ ...value, workflowName: e.target.value });
-              }}
+              value={sparePartCode}
+              onChange={(e) => setSparePartCode(e.target.value)}
             />
           </Grid>
           <Grid item>
             <Autocomplete
-              id="disable-close-on-select"
-              disableCloseOnSelect
-              options={options}
-              getOptionLabel={(option) => option.label}
+              options={hsnCodes}
+              getOptionLabel={(option) => option.hsnCode || ""}
+              value={hsnCodes.find((code) => code._id === selectedHsn?._id) || null}
+              onChange={(event, value) => setSelectedHsn(value || null)} // Store the entire object in state
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="HSN"
-                  variant="standard"
                   style={{ width: "11rem" }}
+                  label="HSN Code"
+                  variant="standard"
                 />
               )}
             />
           </Grid>
+
           <Grid item>
             <Autocomplete
-              id="disable-close-on-select"
+              id="is-serialized"
               disableCloseOnSelect
               options={serials}
-              getOptionLabel={(option) => option.label}
+              getOptionLabel={(option) => option.label} // Display "Yes" or "No"
+              value={serials.find((serial) => serial.key === isSerialized) || null} // Preselect value if set
+              onChange={(event, value) => {
+                setIsSerialized(value ? value.key : false); // Set true/false based on selection
+              }}
               renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Is Serialezed"
-                  variant="standard"
-                  style={{ width: "11rem" }}
-                />
+                <TextField {...params} style={{ width: "11rem" }} label="Is Serialized" variant="standard" />
               )}
             />
           </Grid>
@@ -176,10 +392,13 @@ const SparePartCreation = () => {
         </Grid>
         <Grid container gap={2} spacing={5} sx={{ marginTop: "1rem" }}>
           <Grid item>
-            <CommonButton name={"Cancel"} />
+            <CommonButton handleOnClick={handleCancel} name={"Cancel"} />
           </Grid>
           <Grid item>
-            <CommonButton name={"Save"} />
+            <CommonButton
+              name={editIndex !== null ? "UPDATE" : "Save"}
+              handleOnClick={handleSubmit}
+            />
           </Grid>
 
           <Grid container></Grid>
@@ -242,9 +461,22 @@ const SparePartCreation = () => {
           <Grid item>
             <Autocomplete
               id="disable-close-on-select"
-              disableCloseOnSelect
-              options={options}
-              getOptionLabel={(option) => option.label}
+              CloseOnSelect
+              options={sparePartList2}
+              getOptionLabel={(option) => option.sparePartName}
+              onChange={(event, newValue) => {
+                setSelectedSparePartName2(newValue ? newValue.sparePartName : "");
+                const filteredCodes = newValue
+                  ? sparePartList2
+                    .filter((item) => item.sparePartName === newValue.sparePartName)
+                    .map((item) => ({
+                      label: item.sparePartCode,
+                      id: item._id,
+                    }))
+                  : [];
+                setRelatedCodes(filteredCodes);
+                setSelectedCode2(null); // Reset the code selection
+              }}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -255,12 +487,14 @@ const SparePartCreation = () => {
               )}
             />
           </Grid>
+
           <Grid item>
             <Autocomplete
-              id="disable-close-on-select"
-              disableCloseOnSelect
-              options={options}
+              id="spare-part-code"
+              options={relatedCodes} // Dynamically filtered codes
               getOptionLabel={(option) => option.label}
+              value={selectedCode}
+              onChange={(event, newValue) => setSelectedCode2(newValue)}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -271,34 +505,44 @@ const SparePartCreation = () => {
               )}
             />
           </Grid>
-          
           <Grid item>
-            <CommonButton name={"Search"} />
+            <CommonButton name={"Search"} handleOnClick={handleSearch} />
           </Grid>
         </Grid>
 
         <Grid container>
           <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 650 }} size="small" aria-label="simple table">
+            <Table
+              sx={{ minWidth: 650 }}
+              size="small"
+              aria-label="simple table"
+            >
               <TableHead>
                 <TableRow>
                   {cells.map((cell, index) => (
                     <TableCell
                       key={index}
-                      sx={{ color: "white", textAlign: "center" }}
+                      sx={{
+                        color: "white",
+                        textAlign:
+                          index === cells.length - 1 ? "right" : "center",
+                        paddingRight: index === cells.length - 1 ? "4rem" : "",
+                      }}
                     >
                       {cell}
-                    </TableCell> // Adding a key prop
+                    </TableCell>
                   ))}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows.map((row, index) => (
+                {tableDate.map((row, index) => (
                   <TableRow key={index}>
-                    <TableCell align="center">{row.brandName}</TableCell>
-                    <TableCell align="center">{row.category}</TableCell>
-                    <TableCell align="center">{row.subCategory}</TableCell>
-                    {/* <TableCell align="center">{row.description}</TableCell> */}
+                    <TableCell align="center">
+                      {(page - 1) * dataSize + index + 1} {/* Index adjusted for pagination */}
+                    </TableCell>
+                    <TableCell align="center">{row.sparePartName}</TableCell>
+                    <TableCell align="center">{row.sparePartCode}</TableCell>
+                    <TableCell align="center">{row.hsnCode}</TableCell>
                     <TableCell
                       align="right"
                       sx={{
@@ -308,22 +552,22 @@ const SparePartCreation = () => {
                       }}
                     >
                       <IconButton
-                        // onClick={() => handleStatus(index)}
+                        onClick={() => handleStatus(row._id)}
                         sx={{
                           outline: "none",
                           "&:focus": { outline: "none" },
                         }}
                       >
                         <img
-                          src={activeIcon}
+                          src={row.status === false ? inactiveIcon : activeIcon}
                           alt="active"
-                          height={"20px"}
-                          width={"20px"}
+                          height="20px"
+                          width="20px"
                         />
                       </IconButton>
 
                       <IconButton
-                        // onClick={() => handleEdit(index)}
+                        onClick={() => handleEdit(row._id, row.sparePartName, row.sparePartCode, row.hsnCode, row.isSerialized)}
                         sx={{
                           outline: "none",
                           "&:focus": { outline: "none" },
@@ -337,7 +581,7 @@ const SparePartCreation = () => {
                         />
                       </IconButton>
                       <IconButton
-                        // onClick={() => handleStatus(index)}
+                        // onClick={() => handleDelete(index, row._id)}
                         sx={{
                           outline: "none",
                           "&:focus": { outline: "none" },
@@ -355,7 +599,14 @@ const SparePartCreation = () => {
                 ))}
               </TableBody>
             </Table>
-          </TableContainer>
+          </TableContainer>        </Grid>
+        <Grid className="pagination-container">
+          <Paginate
+            page={page}
+            totalRecords={totalRecords}
+            onPageChange={handlePageChange}
+            dataSize={dataSize}
+          />
         </Grid>
       </Grid>
     </Grid>

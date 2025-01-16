@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Set base URL for API requests
-const API_BASE_URL = "http://NuralLiteAPI.nuralservice.com/api/v1";
+const API_BASE_URL = "http://localhost:8090/api/v1";
 
 
 const api = axios.create({
@@ -59,6 +59,18 @@ export const createCountry = async (data) => {
     return response.data;
   } catch (error) {
     console.error("Error creating country API:", error);
+    throw error;
+  }
+};
+export const getCountryListActive = async (search, page, limit, status) => {
+  try {
+    const queryParams = { search, page, limit,  status };
+    const response = await api.get("/countries", {
+      params: queryParams,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching countries API:", error);
     throw error;
   }
 };
@@ -135,6 +147,19 @@ export const getZoneList = async (body = {}) => {
   }
 };
 
+ export const getfilteredZoneList = async (page, limit, countryId, status) => {
+  try {
+    const queryParams = {page, limit, countryId, status}
+    const response = await api.get("/zones", {
+      params: queryParams,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching zones API:", error);
+    throw error;
+  }
+}
+
 export const updateZoneStatus = async (body) => {
   try {
     // const jsonBody = JSON.stringify(hsnCode, status);
@@ -160,9 +185,12 @@ export const updateZone = async (data) => {
 
 // --------------------------------Manage State API ----------------------------------------------------------
 
-export const getStateList = async () => {
+export const getStateList = async (stateName, page, limit, countryId, zoneId, status) => {
   try {
-    const response = await api.get("/states");
+    const queryParams = {stateName, page, limit,countryId, zoneId, status};
+    const response = await api.get("/states", {
+      params: queryParams,
+    });
     return response.data;
   } catch (error) {
     console.error("Error fetching states API:", error);
@@ -253,13 +281,10 @@ export const createDistrict = async (data) => {
 
 // --------------------------------Manage City API ----------------------------------------------------------
 
-export const getCityList = async () => {
+export const getCityList = async (countryId, zoneId, stateId, page, limit, cityName) => {
   try {
-    const response = await api.get("/cities", {
-      params: {
-        limit: 10, // Set this to a value high enough to fetch all cities
-      },
-    });
+    const queryParams = { countryId, zoneId, stateId, page, limit, cityName };
+    const response = await api.get("/cities", {params: queryParams});
     return response.data;
   } catch (error) {
     console.error("Error fetching cities API:", error);
@@ -318,11 +343,11 @@ export const updateCityStatus = async (city) => {
 
 
 // --------------------------------Manage Brand API ----------------------------------------------------------
-export const fetchBrandList = async (searchFilter) => {
+export const fetchBrandList = async (page, limit, search) => {
   try {
-    const queryParams = new URLSearchParams(searchFilter);
+    const queryParams = {page, limit, search};
     console.log(queryParams);
-    const response = await api.get("/brands/", {
+    const response = await api.get("/brands", {
       params: queryParams,
     });
     return response.data;
@@ -331,6 +356,17 @@ export const fetchBrandList = async (searchFilter) => {
     throw error;
   }
 };
+
+export const fetchAllBrandList = async () => {
+  try {
+    const response = await api.get("/brands");
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching brand list: ${error}`);
+    throw error;
+  }
+};
+
 export const createBrand = async (data) => {
   try {
     const jsonBody = JSON.stringify(data);
@@ -381,9 +417,24 @@ export const deleteBrand = async (brandId) => {
 //---------------------------------Manage Category API ----------------------------------------------------------
 
 
-export const fetchCategoryList = async () => {
+export const fetchCategoryList = async (brandId, categoryName, page, limit, status) => {
   try {
-    const response = await api.get("/categories");
+    const queryParams = { brandId, categoryName, page, limit, status };
+    const response = await api.get("/categories" , {
+      params: queryParams,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching category list:", error);
+    throw error;
+  }
+};
+export const fetchAllCategoryList = async (page, limit) => {
+  try {
+    const queryParams = {  page, limit };
+    const response = await api.get("/categories", {
+      params: queryParams,
+    });
     return response.data;
   } catch (error) {
     console.error("Error fetching category list:", error);
@@ -442,9 +493,24 @@ export const deleteCategory = async (categoryId) => {
 // --------------------------------Manage SubCategory API ----------------------------------------------------------
 
 
-export const fetchSubCategoryList = async () => {
+export const fetchSubCategoryList = async (subcategoryName,page, limit, brandId, categoryId ) => {
   try {
-    const response = await api.get("/subcategories");
+    const queryParams = { subcategoryName, page, limit, brandId, categoryId };
+    const response = await api.get("/subcategories", {
+      params: queryParams,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching subcategory list:", error);
+    throw error;
+  }
+}
+export const fetchSubCategoryListActive = async (subcategoryName, page, limit, brandId, categoryId, status) => {
+  try {
+    const queryParams = { subcategoryName, page, limit, brandId, categoryId, status };
+    const response = await api.get("/subcategories", {
+      params: queryParams,
+    });
     return response.data;
   } catch (error) {
     console.error("Error fetching subcategory list:", error);
@@ -475,9 +541,9 @@ export const updateSubCategory = async (data) => {
   }
 }
 
-export const updateSubCategoryStatus = async (subCategory) => {
+export const updateSubCategoryStatus = async (subcategoryId) => {
   try {
-    const jsonBody = JSON.stringify(subCategory);
+    const jsonBody = JSON.stringify(subcategoryId);
     const response = await api.post("/subcategory/toggle", jsonBody);
     return response.data;
   } catch (error) {
@@ -488,12 +554,11 @@ export const updateSubCategoryStatus = async (subCategory) => {
 
 // --------------------------------Manage Model API ----------------------------------------------------------
 
-export const fetchModelList = async () => {
+export const fetchModelList = async (modelName , page, limit, brandId, categoryId, subcategoryId) => {
   try {
+    const queryParams = { modelName, page, limit, brandId, categoryId, subcategoryId };
     const response = await api.get("/models", {
-      params: {
-        limit: 1000, // Set this to a value high enough to fetch all cities
-      },
+      params: queryParams,
     });
     return response.data;
   }
@@ -609,5 +674,147 @@ export const deleteTax = async (taxId) => {
   }
 };
 
+
+//----------------------------------Manage Spare Part -------------------------------------------------------//
+
+export const fetchSparePartList = async (sparePartName, sparePartCode, page, limit) => {
+  try {
+    const queryParams = {
+      sparePartName,
+      sparePartCode,
+      page,
+      limit,
+    };
+
+    const response = await api.get("/spare-parts/", {
+      params: queryParams,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.log(`Error fetching spare part list: ${error}`);
+    throw error;
+  }
+};
+
+export const fetchSparePartList2 = async () => {
+  try {
+    const response = await api.get("/spare-parts");
+    return response.data;
+  } catch (error) {
+    console.log(`Error fetching spare part list: ${error}`);
+    throw error;
+  }
+};
+
+
+export const createSparePart = async (data) => {
+  try {
+    const jsonBody = JSON.stringify(data);
+    const response = await api.post("/spare-part", jsonBody);
+    return response.data;
+  } catch (error) {
+    console.log("Error creating spare part error", error);
+    throw error;
+  }
+};
+
+export const updateSparePart = async (data) => {
+  try {
+    const jsonBody = JSON.stringify(data);
+    console.log(`jsonBody is ${jsonBody}`);
+    const response = await api.put("/spare-part", jsonBody);
+    return response.data;
+  } catch (error) {
+    console.log(`Error updating spare part ${error}`);
+    throw error;
+  }
+};
+
+export const updateSparePartStatus = async (sparePart) => {
+  try {
+    const jsonBody = JSON.stringify(sparePart);
+
+    const response = await api.post("/spare-part-status", jsonBody);
+    return response.data;
+  } catch (error) {
+    console.log(`Error updating spare part status ${error}`);
+    throw error;
+  }
+};
+
+
+// ----------------------------------------------------Manage Spare Part mapping --------------------------------------------//
+
+export const mapSparePartToModel = async (data) => {
+  try{
+    const jsonBody = JSON.stringify(data);
+    const response = await api.post("/spare-part/model", jsonBody);
+    return response.data;
+    } catch (error) {
+      console.log(`Error mapping spare part to model ${error}`);
+      throw error;
+  }
+}
+
+export const getSparePartByModel = async () => {
+      try{
+        const response = await api.get("/model/spare-parts");
+    return response.data;
+  } catch (error) {
+    console.log(`Error in gettin spare part by model ${error}`);
+    throw error;
+  }
+      
+}
+
+//---------------------------------------------------------user master--------------------------------------------------//
+
+export const createUser = async (data) => {
+  try {
+    // const jsonBody = JSON.stringify(data);
+    const response = await api.post("/user/create",data);
+    return response.data;
+    } catch (error) {
+      console.log(`Error creating user ${error}`);
+      throw error;
+      }
+  }
+
+
+  //---------------------------------------------------AMC Master -------------------------------------------------------//
+
+  export const fetchAmcMaster = async () => {
+    try {
+      
+      const response = await api.get("/amcs");
+      return response.data;
+      } catch (error) {
+        console.log(`Error in fetching amc master ${error}`);
+        throw error;
+        }
+  }
+
+  export const createAmcMaster = async (data) => {
+    try{
+      const jsonBody = JSON.stringify(data);
+      const response = await api.post("/amc", jsonBody);
+      return response.data;
+      } catch (error) {
+        console.log(`Error in creating amc master ${error}`);
+        throw error;
+        }
+  }
+
+//--------------------------------------------Customers-------------------------------------------------------------------//
+
+export const createCustomers = async (data) => {
+  try {
+    const response = await api.post("/customer", data);
+    return response.data;
+    } catch (error) {
+      console.log(`Error creating customer ${error}`);
+    }
+}
 
 export default api;

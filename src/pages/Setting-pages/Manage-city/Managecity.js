@@ -3,14 +3,16 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
- getCountryList,
+  getCountryList,
   getZoneList,
   getStateList,
   createCity,
   getCityList,
   updateCityStatus,
   updateCity,
-  
+  getfilteredZoneList,
+  getCountryListActive,
+
 } from "../../../API Service/apiService";
 import CommonButton from "../../../Componants/Common/Button";
 import {
@@ -50,11 +52,11 @@ const Managecity = () => {
     serialNo: "",
     countryName: "",
     zoneName: "",
-    stateName:"",
-    cityName:"",
+    stateName: "",
+    cityName: "",
     pageSize: pageSize
   };
- 
+
 
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
@@ -70,6 +72,7 @@ const Managecity = () => {
   const [searchActivated, setSearchActivated] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  
   const itemsPerPage = 10;
 
   // const totalItems = filteredCities.length;
@@ -84,16 +87,45 @@ const Managecity = () => {
 
   const [dataSize, setDataSize] = useState(pageSize);
   const [zoneAddDropdown, setZoneAddDropdown] = useState([]);
+  const [zoneId, setZoneId] = useState(null);
   const [searchParams, setParams] = useState({
     ...dummyGetList
   });
 
   const [page, setPage] = useState(1);
   const [totalRecords, setTotalRecords] = useState(1);
+  const [tableData, setTableData] = useState([]);
+  const cells = ["S.No", "Country", "Zone", "State", "city", "Action"];
+  const [limit, setLimit] = useState(10);
+  const [countryId, setCountryId] = useState(null);
+  const [cityName, setcityName] = useState(null);
+  const [stateName, setstateName] = useState(null);
+  const [zoneName, setZoneName] = useState(null);
+  const [stateId, setstateId] = useState(null);
+  const [filteredzones, setfilteredzones] = useState([]);
+  const [selstateName, setselstateName] = useState(null);
+  const [selZoneName, setselZoneName] = useState(null);
+  const [selCountry, setselCountry] = useState(null);
+  const [countryId2, setCountryId2] = useState(null);
+  const [filteredzones2, setfilteredzones2] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [selCountry2, setselCountry2] = useState(null); // Selected country object for the second API
+  // Zone-related states
+  const [selZoneId2, setselZoneId2] = useState(null); // Selected zone ID for the second API
+  const [selZoneName2, setselZoneName2] = useState(null); // Selected zone object for the second API
+  const [stateId2, setstateId2] = useState(null); // Selected state ID for the second API
+  const [selstateName2, setselstateName2] = useState(null); // Selected state object for the second API
+  const [filStates2, setFilStates2] = useState([]); // Filtered states for the second API
+  const [FilteredCityList, setFilteredCityList] = useState([]);
+  const [countryError, setCountryError] = useState(false);
+  const [zoneError, setZoneError] = useState(false);
+  const [stateError, setStateError] = useState(false);
+  const [cityError, setCityError] = useState(false);
+  const [status, setStatus] = useState(true);
+  const [countriesActive, setCountriesActive] = useState([]);
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
-
     setParams((prevParams) => ({
       ...prevParams,
       pageIndex: newPage.toString()
@@ -109,25 +141,97 @@ const Managecity = () => {
       console.error("Error fetching countries:", error);
     }
   };
-   const fetchState = async () => {
-      try {
-        const response = await getStateList(searchParams);
-        setStates(response.data.states);
-        console.log("response.data", response.data);
-        // setTotalRecords(response.data.totalStates);
-        // setFilteredZones(response.data.zones);
-        // setFilteredCountries(response.data.countries);
-      } catch (error) {
-        console.error("Error fetching countries:", error);
+  
+
+  useEffect(() => {
+    fetchCountries();
+  }, []);
+
+  const fetchCountries2 = async () => {
+    try {
+      const response = await getCountryListActive("", page, limit, status);
+      setCountriesActive(response.data.countries);
+      console.log("response.data", response.data);
+      // setFilteredCountries(response.data.countries);
+    } catch (error) {
+      console.error("Error fetching countries:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCountries2();
+  }, []);
+  
+  const fetchState = async () => {
+    try {
+      if (zoneId && !isEditing){
+      setLoading(true);
+      const response = await getStateList(stateName, 1, limit, countryId, zoneId, status);
+      setStates(response.data.states);
+      console.log("response.data", response.data);
+      setTotalRecords(response.data.totalStates);
+      // setTableData(response.data.totalStates);
+      // setFilteredZones(response.data.zones);
+      // setFilteredCountries(response.data.countries);
+    } }catch (error) {
+      console.error("Error fetching countries:", error);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchState();
+  }, [zoneId]);
+
+  const fetchZones2 = async () => {
+    try {
+      if (countryId2) {
+        setLoading(true);
+        const response = await getfilteredZoneList(1,
+          limit,
+          countryId2);
+        setfilteredzones2(response.data.zones);
+        console.log("filtered zones", response.data.zones);
       }
-    };
-  const fetchCities= async () => {
+    } catch (error) {
+      console.error("Error fetching zones:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchZones2();
+  }, [countryId2]);
+
+  const fetchFilState2 = async () => {
+    try {
+      if (selZoneId2) {
+        setLoading(true);
+        const response = await getStateList("", page, limit, countryId2, selZoneId2);
+        setFilStates2(response.data.states || []);
+        console.log("Response for Zone ID 2:", response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching states for Zone ID 2:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFilState2();
+  }, [selZoneId2]);
+
+
+
+  const fetchCities = async () => {
     try {
       setLoading(true);
-      const response = await getCityList(searchParams);
+      const response = await getCityList("", "", "", page, limit, "");
       setCities(response.data.cities);
       console.log("response.data", response.data);
       setTotalRecords(response.data.totalCities);
+      setTableData(response.data.cities);
       setLoading(false);
       // setFilteredZones(response.data.zones);
       // setFilteredCountries(response.data.countries);
@@ -135,12 +239,76 @@ const Managecity = () => {
       console.error("Error fetching countries:", error);
     }
   };
+
   useEffect(() => {
-    fetchCountries();
-    fetchState();
     fetchCities();
-   
-  }, []);
+  }, [page]);
+
+  const fetchFiltereCities = async () => {
+    try {
+      if (stateId && !isEditing){
+      setLoading(true);
+      const response = await getCityList( countryId, zoneId, stateId,  1, limit);
+      setFilteredCities(response.data.cities);
+      console.log("response.data", response.data);
+      // setTotalRecords(response.data.totalCities);
+      // setTableData(response.data.cities);
+      setLoading(false);
+      // setFilteredZones(response.data.zones);
+      // setFilteredCountries(response.data.countries);
+    }} catch (error) {
+      console.error("Error fetching countries:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchFiltereCities();
+  }, [stateId]);
+  
+
+  const fetchFilteredCitiesByState = async () => {
+    try {
+      if (stateId2 ) {
+        setLoading(true);
+        const response = await getCityList(countryId2, selZoneId2, stateId2, 1, limit);
+        setFilteredCityList(response.data.cities);
+        console.log("Fetched cities data:", response.data);
+        // Additional updates can go here
+        // setTotalRecords(response.data.totalCities);
+        // setTableData(response.data.cities);
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error("Error fetching cities:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchFilteredCitiesByState();
+  }, [stateId2]);
+
+ 
+  const fetchZones = async () => {
+    try {
+      if (countryId && !isEditing) {
+        setLoading(true);
+        const response = await getfilteredZoneList(1,
+          limit,
+          countryId,
+          status);
+        setfilteredzones(response.data.zones);
+        console.log("filtered zones", response.data.zones);
+      }
+    } catch (error) {
+      console.error("Error fetching zones:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchZones();
+  }, [countryId]);
+
   const [postData, setPostData] = useState({
     countryId: "",
     zoneId: "",
@@ -159,160 +327,149 @@ const Managecity = () => {
       if (response.status === "success") {
         toast.success("Status Updated Successfully");
       }
-      fetchCities();
     } catch (error) {
       console.log(`Error updating status ${error}`);
       toast.error(`Failed to update status`);
       throw error;
     } finally {
+      handleSearch();
       setLoading(false);
     }
   };
 
   const handleCancel = () => {
-    setPostData({
-      countryId: "",
-      zoneId: "",
-      stateId: "",
-      cityName: "",
-      displayOrder: "",
-      remarks: ""
-    });
+    setCountryId(null);
+    setZoneId(null);
+    setSelectedCountry(null);
+    setZoneName(null);
+    setstateName(null);
+    setstateId(null);
+    setcityName(null);
     setEditIndex(null);
-  }
+  };
 
   const handlePostRequest = async () => {
-    console.log("Post Data is:", postData);
-    try {
-      setLoading(true);
-      const isStateExists = states.some((state) => {
-        return (
-          state.stateName === postData.stateName &&
-          state.zoneId === postData.zoneId
-        );
-      });
+    let isValid = true;
 
-      if (isStateExists) {
-        alert("This state name is already taken for the selected zone.");
-        return;
-      }
+    if (!countryId) {
+      setCountryError(true);
+      isValid = false;
+    } else {
+      setCountryError(false);
+    }
 
-      let response;
+    if (!zoneId) {
+      setZoneError(true);
+      isValid = false;
+    } else {
+      setZoneError(false);
+    }
 
-      if (editIndex) {
-        // Update city using PUT
-        const updateData = { ...postData, _id: editIndex };
-        response = await updateCity(updateData); // Call update API
-        console.log("Update response:", response);
-        alert("City updated successfully!");
-        setEditIndex(false); // Reset the `editIndex` after update
-      } else {
-        response = await createCity(postData);
-      }
-      // Reset the postData
-      setPostData({
-        countryId: "",
-        zoneId: "",
-        stateId: "",
-        cityName: "",
-        displayOrder: "",
-        remarks: "",
-      });
+    if (!stateId) {
+      setStateError(true);
+      isValid = false;
+    } else {
+      setStateError(false);
+    }
 
-      // Refresh cities list
-      setFilteredCities((prev) => [...prev, response.data]);
-    } catch (error) {
-      // Handle 409 Conflict error
-      if (error.response?.status === 409) {
-        alert("City is already present for the same zone.");
-      } else {
-        console.error("Error making POST request:", error);
-        alert("Error making POST request: " + (error.response?.data?.message || error.message));
+    if (!cityName) {
+      setCityError(true);
+      isValid = false;
+    } else {
+      setCityError(false);
+    }
+
+    if (!isValid) {
+      toast.error("Please fill all the fields");
+      return;
+    }
+
+    else {
+      console.log("Post Data is:", postData);
+      try {
+        setLoading(true);
+        let response;
+        const postData = {
+          countryId: countryId,
+          zoneId: zoneId,
+          stateId: stateId,
+          cityName: cityName,
+        }
+        if (editIndex) {
+          const postData = {
+            _id: editIndex,
+            countryId: countryId,
+            zoneId: zoneId,
+            stateId: stateId,
+            cityName: cityName,
+          }
+          // Update city using PUT
+          response = await updateCity(postData); // Call update API
+          console.log("data is", postData);
+          console.log(postData)
+          alert("City updated successfully!");
+          setEditIndex(false); // Reset the `editIndex` after update
+        } else {
+          response = await createCity(postData);
+          console.log("data is",postData);
+          alert("City Added Successfully");
+        }
+        // Reset the postData
+        setCountryId(null);
+        setZoneId(null);
+        setSelectedCountry(null);
+        setZoneName(null);
+        setstateName(null);
+        setstateId(null);
+        setcityName(null);
+        setEditIndex(null);        
+      } catch (error) {
+        // Handle 409 Conflict error
+        if (error.response?.status === 409) {
+          alert("City is already present for the same zone.");
+        } else {
+          console.error("Error making POST request:", error);
+          alert("Error making POST request: " + (error.response?.data?.message || error.message));
+        }
       }
     }
+    setIsEditing(false);
     fetchCities();
     setLoading(false);
   };
 
-
-  const handleEdit = (_id, countryId, zoneId, zoneName, stateId, cityName) => {
-    setZoneAddDropdown([{ _id: zoneId, zoneName }]); 
+ 
+  const handleEdit = (_id, countryId, zoneId, countryName, zoneName, stateName, stateId, cityName) => {
+    setIsEditing(true);
     setEditIndex(_id);
-    setPostData({
-      _id,
-      countryId,
-      zoneId,
-      stateId,
-      cityName,
-    });
-    };
-
-  const handleSearch = () => { 
-      setSearchActivated(true);
-    
+    setCountryId(countryId);
+    setZoneId(zoneId);
+    setSelectedCountry(countryName);
+    setZoneName(zoneName);
+    setstateName(stateName);
+    setstateId(stateId);
+    setcityName(cityName);
   };
-  const handleAddState = async (fieldName, value) => {
-    console.log("running value", value);
-    if (fieldName === "countryId" && !value) {
-      setZoneAddDropdown([]);
-      setPostData((prev) => ({
-        ...prev,
-        countryId: "",
-        zoneId: "",
-        stateName: "",
-      }));
-      return;
+
+  const handleSearch = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch data based on the selected values
+      const response = await getCityList(countryId2, selZoneId2, stateId2, 1, limit, selectedCity);
+      setFilteredCities(response.data.cities);
+      console.log("response.data", response.data);
+      setTotalRecords(response.data.totalCities);
+      setTableData(response.data.cities);
+    } catch (error) {
+      console.error("Error fetching cities:", error);
+    } finally {
+      setLoading(false);
     }
-     if (fieldName === "zoneId" && !value) {
-          setPostData((prev) => ({
-            ...prev,
-            zoneId: "",
-            stateName: "",
-          }));
-          return;
-        }
-    if (fieldName === "stateId" && value) {
-      setPostData((prev) => ({
-        ...prev,
-        stateId: value,
-      }));
-    }
-    
-        if (fieldName === "countryId" && value) {
-          console.log("countryIdvalue", value);
-          setPostData((p) => ({
-            ...p,
-            countryId: value,
-            zoneId: "",
-            stateName: "",
-          }));
-          // setLoading(true);
-          try {
-            const body = {
-              countryId: value,
-              search: "",
-            };
-            let res = await getZoneList(body);
-            console.log("res.data.zones", res.data.zones);
-            setZoneAddDropdown(res.data.zones);
-          } catch (error) {
-            console.log("Error fetching", error);
-            // toast.error(MenuConstants.errorwhilegettinglist, "model list");
-          } finally {
-            // setLoading(false);
-          }
-        }
-    
-        if (fieldName === "zoneId" && value) {
-          console.log("zoneId",value)
-          setPostData((prev) => ({
-            ...prev,
-            zoneId: value,
-            stateName: "",
-          }));
-          return;
-        }
-      };
+  };
+ 
+
+
 
   return (
     <div className="Managecity-container">
@@ -320,100 +477,142 @@ const Managecity = () => {
       <Toaster position="top-center" reverseOrder={false} />
       <HeaderNavigation value={"Location > City"} />
       <div className="autocompleteform-Managecity">
+        {/* {countryId} {zoneId} {stateId} {page} {limit}{selectedCity} */}
         <Subheader heading={"Add City"} />
         <div className="textbox-main-Managecity">
           <div className="line-Managecity">
             <div className="textinput-Managecity">
-              <Autocomplete
-                id="country-autocomplete"
-                clearOnEscape
-                options={countries}
-                getOptionLabel={(option) => option.countryName}
-                onChange={(event, value) => {
-                  handleAddState("countryId", value ? value._id : 0);
-
-                  // Update the subcategory value when selected
-                }}
-                value={
-                  countries.find(
-                    (option) => option._id === postData.countryId
-                  ) || null
-                }
-                isOptionEqualToValue={(option, value) =>
-                  option._id === value?._id
-                }
-                renderInput={(params) => (
-                  <TextField {...params} label="Country" variant="standard" />
-                )}
+        {!editIndex && (
+          <Autocomplete
+            id="country-autocomplete"
+            clearOnEscape
+            options={countriesActive}
+            getOptionLabel={(option) => option.countryName}
+            value={selectedCountry || null} // Controlled value
+            onChange={(event, value) => {
+              setCountryId(value?._id || null);
+              setSelectedCountry(value || null);
+              if (!value) {
+                setZoneId(null);
+                setZoneName(null);
+                setstateId(null);
+                setstateName(null);
+              }
+              setCountryError(false); // Clear error on valid selection
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Country"
+                variant="standard"
+                required
+                error={countryError}
+                helperText={countryError ? "Country is required." : null}
               />
-            </div>
-            <div className="textinput-Managecity">
-              <Autocomplete
-                id="zone-Autocomplete"
-                // sx={{mt:2}}
-                options={zoneAddDropdown}
-                getOptionLabel={(option) => option.zoneName}
-                onChange={(event, value) => {
-                  handleAddState("zoneId", value ? value._id : 0);
-                  // Update the subcategory value when selected
-                }}
-                value={
-                  zoneAddDropdown.find(
-                    (option) => option._id === postData.zoneId
-                  ) || null
-                }
-                isOptionEqualToValue={(option, value) =>
-                  option._id === value?._id
-                }
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="zone"
-                    variant="standard"
-                    className="mt-1 app-input-width"
-                  />
-                )}
-              />
-            </div>
-            <div className="textinput-Managecity">
-              <Autocomplete
-                id="state-autocomplete"
-                options={
-                  postData.zoneId
-                    ? states.filter((state) => state.zoneId === postData.zoneId) // Filter states based on selected zoneId
-                    : [] // No options if no zone is selected
-                }
-                getOptionLabel={(option) => option.stateName}
-                onChange={(event, value) => {
-                  handleAddState("stateId", value ? value._id : 0); // Update postData with stateId
-                }}
-                value={
-                  states.find((option) => option._id === postData.stateId) || null
-                } // Preselect the correct state based on postData.stateId
-                isOptionEqualToValue={(option, value) =>
-                  option._id === value?._id
-                } // Ensure selected state matches the option
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="State Name"
-                    variant="standard"
-                    className="mt-1 app-input-width"
-                  />
-                )}
-              />
-            </div>
+            )}
+          />
+        )}
+        {editIndex && (
+          <TextField
+            disabled
+            id="outlined-basic"
+            label="Country"
+            variant="standard"
+            value={selectedCountry?.countryName || ""}
+          />
+        )}
+      </div>
 
+      <div className="textinput-Managecity">
+        {!editIndex && (
+          <Autocomplete
+            id="zone-autocomplete"
+            clearOnEscape
+            options={filteredzones}
+            value={zoneName || null} // Controlled value
+            getOptionLabel={(option) => option.zoneName || ""}
+            onChange={(event, value) => {
+              setZoneId(value?._id || null);
+              setZoneName(value || null);
+              if (!value) {
+                setstateId(null);
+                setstateName(null);
+              }
+              setZoneError(false); // Clear error on valid selection
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Zone"
+                variant="standard"
+                required
+                error={zoneError}
+                helperText={zoneError ? "Zone is required." : null}
+              />
+            )}
+          />
+        )}
+        {editIndex && (
+          <TextField
+            disabled
+            id="outlined-basic"
+            label="Zone"
+            variant="standard"
+            value={zoneName?.zoneName || ""}
+          />
+        )}
+      </div>
 
-            <TextField
-              id="standard-basic"
-              label="City"
-              variant="standard"
-              value={postData.cityName} // Bind the input value to postData.cityName
-              onChange={(e) => {
-                setPostData({ ...postData, cityName: e.target.value });
-              }}
-            />
+      <div className="textinput-Managecity">
+        {!editIndex && (
+          <Autocomplete
+            clearOnEscape
+            id="state-autocomplete"
+            options={states}
+            value={stateName || null} // Controlled value
+            getOptionLabel={(option) => option.stateName || ""}
+            onChange={(event, value) => {
+              setstateId(value?._id || null);
+              setstateName(value || null);
+              setStateError(false); // Clear error on valid selection
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="State Name"
+                variant="standard"
+                required
+                error={stateError}
+                helperText={stateError ? "State is required." : null}
+              />
+            )}
+          />
+        )}
+        {editIndex && (
+          <TextField
+            disabled
+            id="outlined-basic"
+            label="State Name"
+            variant="standard"
+            value={stateName?.stateName || ""}
+          />
+        )}
+      </div>
+
+      <TextField
+        id="standard-basic"
+        label="City"
+        variant="standard"
+        focused={!!cityName}
+        value={cityName}
+        onChange={(e) => {
+          setcityName(e.target.value);
+          setCityError(false); // Clear error on input
+        }}
+        required
+        error={cityError}
+        helperText={cityError ? "City is required." : null}
+      />
           </div>
 
           <div className="button-Managecity">
@@ -436,21 +635,26 @@ const Managecity = () => {
           <div className="textinput-Managecity">
             <Autocomplete
               id="country-autocomplete"
-              options={cities
-                .filter((city) => countries.some((country) => country.countryName === city.countryName))
-                .map((city) => ({
-                  value: city.countryName,
-                  label: city.countryName,
-                }))
-                .filter(
-                  (country, index, self) =>
-                    index === self.findIndex((c) => c.label === country.label) // Remove duplicates
-                )}
-              onChange={(e, newValue) => {
-                setSelectedCountry(newValue);
-                setSelectedZone(null); // Reset zone when country changes
-                setSelectedState(null); // Reset state when country changes
-                setSelectedCity(null); // Reset city when country changes
+              clearOnEscape
+              options={countries}
+              getOptionLabel={(option) => option.countryName}
+              value={selCountry2 || null} // Controlled value
+              onChange={(event, value) => {
+                // Update country-related states
+                setCountryId2(value?._id || null);
+                setselCountry2(value || null);
+
+                // Reset dependent fields if Country is cleared
+                if (!value) {
+                  setselZoneId2(null);
+                  setselZoneName2(null);
+                  setstateId2(null);
+                  setselstateName2(null);
+                  setfilteredzones2([]); // Clear zones
+                  setFilStates2([]); // Clear states
+                  setSelectedCity(null);
+                  setFilteredCityList([]);
+                }
               }}
               renderInput={(params) => (
                 <TextField {...params} label="Country" variant="standard" />
@@ -460,88 +664,82 @@ const Managecity = () => {
 
           <div className="textinput-Managecity">
             <Autocomplete
-              id="zone-autocomplete"
-              options={
-                selectedCountry
-                  ? cities
-                    .filter((city) => city.countryName === selectedCountry.label)
-                    .map((city) => ({
-                      value: city.zoneName,
-                      label: city.zoneName,
-                    }))
-                    .filter(
-                      (zone, index, self) =>
-                        index === self.findIndex((z) => z.label === zone.label) // Remove duplicates
-                    )
-                  : []
-              }
-              onChange={(e, newValue) => {
-                setSelectedZone(newValue);
-                setSelectedState(null); // Reset state when zone changes
-                setSelectedCity(null); // Reset city when zone changes
+              id="zone2-Autocomplete"
+              clearOnEscape
+              options={filteredzones2} // Updated for second API
+              getOptionLabel={(option) => option.zoneName || ""}
+              value={selZoneName2 || null} // Controlled value for second API
+              onChange={(event, value) => {
+                // Update zone-related states for second API
+                setselZoneId2(value?._id || null);
+                setselZoneName2(value || null);
+
+                // Reset dependent fields if Zone is cleared
+                if (!value) {
+                  setstateId2(null);
+                  setselstateName2(null);
+                  setSelectedCity(null);
+                  setFilStates2([]); // Clear states
+                  setFilteredCityList([]);
+                  setSelectedCity(null);
+                }
               }}
               renderInput={(params) => (
-                <TextField {...params} label="Zone Name" variant="standard" />
+                <TextField
+                  {...params}
+                  label="Zone"
+                  variant="standard"
+                  className="mt-1 app-input-width"
+                />
               )}
             />
           </div>
 
           <div className="textinput-Managecity">
             <Autocomplete
-              id="state-autocomplete"
-              options={
-                selectedCountry && selectedZone
-                  ? cities
-                    .filter(
-                      (city) =>
-                        city.countryName === selectedCountry.label &&
-                        city.zoneName === selectedZone.label
-                    )
-                    .map((city) => ({
-                      value: city.stateName,
-                      label: city.stateName,
-                    }))
-                    .filter(
-                      (state, index, self) =>
-                        index === self.findIndex((s) => s.label === state.label) // Remove duplicates
-                    )
-                  : []
-              }
-              onChange={(e, newValue) => {
-                setSelectedState(newValue);
-                setSelectedCity(null); // Reset city when state changes
+              id="state2-autocomplete"
+              clearOnEscape
+              options={filStates2} // Using the states list from the second API
+              getOptionLabel={(option) => option.stateName || ""} // Display the state name
+              value={filStates2.find((state) => state.stateName === selstateName2) || null} // Ensure the value matches an option
+              onChange={(event, value) => {
+                // Update state-related states for the second API
+                setstateId2(value?._id || null); // Set the selected state ID
+                setselstateName2(value ? value.stateName : null); // Set the selected state name
+                if(!value){
+                  setSelectedCity(null);
+                  setFilteredCityList([]);
+                }
+
               }}
               renderInput={(params) => (
-                <TextField {...params} label="State" variant="standard" />
+                <TextField
+                  {...params}
+                  label="State Name"
+                  variant="standard"
+                  className="mt-1 app-input-width"
+                />
               )}
             />
+
           </div>
 
           <div className="textinput-Managecity">
             <Autocomplete
               id="city-autocomplete"
-              options={
-                selectedCountry && selectedZone && selectedState
-                  ? cities
-                    .filter(
-                      (city) =>
-                        city.countryName === selectedCountry.label &&
-                        city.zoneName === selectedZone.label &&
-                        city.stateName === selectedState.label
-                    )
-                    .map((city) => ({
-                      value: city.cityName,
-                      label: city.cityName,
-                    }))
-                  : []
-              }
-              value={selectedCity}
-              onChange={(e, newValue) => setSelectedCity(newValue)}
+              options={FilteredCityList}
+              getOptionLabel={(option) => option.cityName}
+              value={selectedCity ? { cityName: selectedCity } : null} // Controlled value for City
+              onChange={(event, newValue) => {
+                // Update city-related states
+                setSelectedCity(newValue ? newValue.cityName : null);
+              }}
               renderInput={(params) => (
                 <TextField {...params} label="City" variant="standard" />
               )}
             />
           </div>
+
 
           <span className="buttons-Managecity-span">
             <CommonButton name="Search" handleOnClick={handleSearch} />
@@ -560,100 +758,88 @@ const Managecity = () => {
             </span>
           </div>
           <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 650 }} aria-label="simple table">
+            <Table
+              sx={{ minWidth: 650 }}
+              size="small"
+              aria-label="simple table"
+            >
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ color: "#fff" }} align="left">
-                    S. No.
-                  </TableCell>
-                  <TableCell sx={{ color: "#fff" }} align="center">
-                    Country
-                  </TableCell>
-                  <TableCell sx={{ color: "#fff" }} align="center">
-                    Zone
-                  </TableCell>
-                  <TableCell sx={{ color: "#fff" }} align="center">
-                    State
-                  </TableCell>
-                  <TableCell sx={{ color: "#fff" }} align="center">
-                    City
-                  </TableCell>
-                  <TableCell sx={{ color: "#fff" }} align="right">
-                    Action
-                  </TableCell>
+                  {cells.map((cell, index) => (
+                    <TableCell
+                      key={index}
+                      sx={{
+                        color: "white",
+                        textAlign:
+                          index === cells.length - 1 ? "right" : "center",
+                        paddingRight: index === cells.length - 1 ? "4rem" : "",
+                      }}
+                    >
+                      {cell}
+                    </TableCell>
+                  ))}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {cities.length > 0 ? (
-                  cities
-                    .filter((city) => {
-                      if (!searchActivated) {
-                        return true; // Show all rows if search is not activated
-                      }
-                      return (
-                        (!selectedCity || city.cityName===selectedCity.label) && // Match cityName if provided
-                        (!selectedState || city.stateName === selectedState.label || "") && // Match stateName if provided
-                        (!selectedCountry || city.countryName === selectedCountry.label || "") && // Match countryName if provided
-                        (!selectedZone || city.zoneName === selectedZone.label || "") // Match zoneName if provided
-                      );
-                    })
-                  .slice((page - 1) * dataSize, page * dataSize) 
-                  .map((city, index) => (
-                    <TableRow key={city._id}>
-                      <TableCell align="left">
-                        {(page - 1) * dataSize + index + 1} {/* Index adjusted for pagination */}
-                      </TableCell>
-                      <TableCell align="center">{city.countryName}</TableCell>
-                      <TableCell align="center">{city.zoneName}</TableCell>
-                      <TableCell align="center">{city.stateName}</TableCell>
-                      <TableCell align="center">{city.cityName}</TableCell>
-                        <TableCell
-                          align="right"
-                          sx={{
-                            display: "flex",
-                            flexDirection: "row",
-                            justifyContent: "flex-end",
-                          }}
-                        >
-                        <IconButton
-                          onClick={() => handleStatus(city._id)}
-                          sx={{
-                            outline: "none",
-                            "&:focus": { outline: "none" },
-                          }}
-                        >
-                          <img
-                            src={city.active === false ? inactiveIcon : activeIcon}
-                            alt="active"
-                            height="20px"
-                            width="20px"
-                          />
-                        </IconButton>
+                {tableData.map((row, index) => (
+                  <TableRow key={index}>
+                    <TableCell align="center">
+                      {(page - 1) * dataSize + index + 1} {/* Index adjusted for pagination */}
+                    </TableCell>
+                    <TableCell align="center">{row.countryName}</TableCell>
+                    <TableCell align="center">{row.zoneName}</TableCell>
+                    <TableCell align="center">{row.stateName}</TableCell>
+                    <TableCell align="center">{row.cityName}</TableCell>
+                    <TableCell
+                      align="right"
+                      sx={{
+                        display: "flex",
+                        flexDirection: "row",
+                        justifyContent: "flex-end",
+                      }}
+                    >
+                      <IconButton
+                        onClick={() => handleStatus(row._id)}
+                        sx={{
+                          outline: "none",
+                          "&:focus": { outline: "none" },
+                        }}
+                      >
+                        <img
+                          src={row.active === false ? inactiveIcon : activeIcon}
+                          alt="active"
+                          height="20px"
+                          width="20px"
+                        />
+                      </IconButton>
 
-                        <IconButton
-                          onClick={() => handleEdit(city._id, city.countryId, city.zoneId, city.zoneName, city.stateId, city.cityName)}
-                          sx={{
-                            outline: "none",
-                            "&:focus": { outline: "none" },
-                          }}
-                        >
-                          <img
-                            src={editIcon}
-                            alt="Edit"
-                            height={"20px"}
-                            width={"20px"}
-                          />
-                        </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                ) : (
-                  <TableRow>
-                    <TableCell align="center" colSpan={6}>
-                      No data available
+                      <IconButton
+                        onClick={() =>
+                          handleEdit(
+                            row._id,
+                            row.countryId,
+                            row.zoneId,  // Corrected order
+                            row.countryName,
+                            row.zoneName,
+                            row.stateName,
+                            row.stateId,
+                            row.cityName
+                          )}
+                        sx={{
+                          outline: "none",
+                          "&:focus": { outline: "none" },
+                        }}
+                      >
+                        <img
+                          src={editIcon}
+                          alt="Edit"
+                          height={"20px"}
+                          width={"20px"}
+                        />
+                      </IconButton>
                     </TableCell>
                   </TableRow>
-                )}
+                ))}
               </TableBody>
             </Table>
           </TableContainer>
