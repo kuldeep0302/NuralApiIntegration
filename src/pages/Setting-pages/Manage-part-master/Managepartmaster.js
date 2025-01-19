@@ -188,10 +188,10 @@ const SparePartCreation = () => {
       console.log(`Error updating status ${error}`);
       toast.error(`Failed to update status`);
       throw error;
-    } finally {
+    }
+      // handleSearch();
       handleSearch();
       setLoading(false);
-    }
   };
 
   
@@ -227,10 +227,10 @@ const SparePartCreation = () => {
         selectedCode2,
         page,
         limit
-      );
-
-      setTableDate(response.data.spareParts); // Assuming `response.spareParts` exists
-      setTotalRecords(response.data.totalRecords); // Assuming `response.totalRecords` exists
+    );
+      setSparePartList(response.data.spareParts);
+      setTableDate(response.data.spareParts);
+      setTotalRecords(response.data.totalRecords)
       setLoading(false);
     } catch (error) {
       console.log("Error in fetching spare part list", error);
@@ -338,7 +338,6 @@ const SparePartCreation = () => {
 
         <Grid container spacing={10}>
           <Grid item>
-            
             <TextField
               fullWidth
               label="Spare Part Name"
@@ -493,7 +492,7 @@ const SparePartCreation = () => {
               id="spare-part-code"
               options={relatedCodes} // Dynamically filtered codes
               getOptionLabel={(option) => option.label}
-              value={selectedCode}
+              // value={selectedCode}
               onChange={(event, newValue) => setSelectedCode2(newValue)}
               renderInput={(params) => (
                 <TextField

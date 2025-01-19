@@ -65,19 +65,22 @@ const Managebrand = () => {
   const [search, setSearch] = useState(""); // Search term
   const [brandError, setBrandError] = useState(false);
   const [descriptionError, setDescriptionError] = useState(false);
-
+  const [searchCall, setSearchCall] = useState(false);
   const [activeBrandList, setActiveBrandList] = useState([]);
-
+  const [isSearching, setIsSearching] = useState(false);
+  const [flag, setFlag] = useState(false);
   const brandheader = [    
     
     { label: "Brand", key: "brandName" },
     { label: "Description", key: "description" },
+    { label: "Status", key: "active" },
   ];
  
   const handleCancel = () => {
     console.log(`this is cancel`);
     setBrandName("");
     setDescription("");
+    setEditIndex(false);
   };
   //API for search api list
   
@@ -97,13 +100,17 @@ const Managebrand = () => {
     }
   };
 
+  const truncateText = (text, maxLength) => {
+    return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+  };
 
   const getAllBrandList = async () => {
     try {
+      if (!isSearching || flag) {
       setLoading(true);
-      const response = await fetchAllBrandList(); // Fetch data from API
+        const response = await fetchAllBrandList(); // Fetch data from API
       setAllBrandList(response.data.brandList);
-    } catch (error) {
+    } }catch (error) {
       console.error("Error fetching brand list:", error);
     } finally {
       setLoading(false); // Stop loading
@@ -117,7 +124,7 @@ const Managebrand = () => {
 
   useEffect(() => {
     getAllBrandList();
-  }, []); 
+  }, [page]); 
 
 
   const handlePageChange = (newPage) => {
@@ -176,10 +183,17 @@ const Managebrand = () => {
       setDescription("");
     } catch (error) {
       console.log(`Error saving Brand ${error}`);
-    } finally { 
-      setLoading(false);
+    } finally {
+      if (!isSearching) {
+        getBrandList();
+      }
+      else {
+        // setselstateName2(stateName);
+        handleSearch();
+      }
     }
-      getBrandList()
+      handleCancel();
+      setLoading(false);  
   }
   };
 
@@ -223,7 +237,14 @@ const Managebrand = () => {
       toast.error(`Failed to update status`);
       throw error;
     } finally {
-      handleSearch();
+      if (!isSearching) {
+        getBrandList();
+      }
+      else {
+        // setselstateName2(stateName);
+        handleSearch();
+      }
+
       setLoading(false);
     }
     
@@ -243,10 +264,15 @@ const Managebrand = () => {
 
   const handleSearch = async () => {
     try {
-    setLoading(true)
+      setLoading(true);
+      setPage(1);
+      setIsSearching(true);
       const response = await fetchBrandList(1,limit,brandParams);
       setTableData(response.data.brandList);
       setTotalRecords(response.data.totalRecords);
+      if (totalRecords > 10) {
+        setFlag(true);
+      }
       console.log(`response table  is `, response.data.brandList);
     } catch (error) {
       console.log(`Error in filter List`);
@@ -291,6 +317,7 @@ const Managebrand = () => {
               variant="standard"
               value={brandName}
               onChange={(e) => {
+                setBrandParams(e.target.value);
                 setBrandName(e.target.value);
                 setBrandError(false); // Clear error when typing
               }}
@@ -415,7 +442,7 @@ const Managebrand = () => {
           <Grid container justifyContent="flex-end">
             <ExportToExcel
               name="Export to Excel"
-              data={brandlist}
+              data={tableData}
               // data={formattedData}
               fileName="Brand_Data"
               headers={brandheader}
@@ -451,8 +478,8 @@ const Managebrand = () => {
                     <TableCell align="center">
                       {(page - 1) * dataSize + index + 1} {/* Index adjusted for pagination */}
                     </TableCell>
-                    <TableCell align="center">{row.brandName}</TableCell>
-                    <TableCell align="center">{row.description}</TableCell>
+                    <TableCell align="center">{truncateText(row.brandName, 50)}</TableCell>
+                    <TableCell align="center">{truncateText(row.description,50)}</TableCell>
                     <TableCell
                       align="right"
                       sx={{
@@ -492,20 +519,6 @@ const Managebrand = () => {
                         <img
                           src={editIcon}
                           alt="Edit"
-                          height={"20px"}
-                          width={"20px"}
-                        />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => handleDelete(index, row._id)}
-                        sx={{
-                          outline: "none",
-                          "&:focus": { outline: "none" },
-                        }}
-                      >
-                        <img
-                          src={deleteIcon}
-                          alt="active"
                           height={"20px"}
                           width={"20px"}
                         />

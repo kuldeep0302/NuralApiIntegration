@@ -6,9 +6,18 @@ const ExportToExcel = ({ data, fileName, headers, name, onClick }) => {
     // Format the data to match the headers (keep columns empty if missing)
     const formattedData = data.map((item) => {
       let row = {};
-      headers.forEach((header) => {
-        row[header.label] = item[header.key] || ""; // Keep blank if no data for this column
-      });
+     headers.forEach((header) => {
+       if (header.key === "isSerialized") {
+         // Convert isSerialized to Yes/No
+         row[header.label] = item[header.key] ? "Yes" : "No";
+       }
+       else if (header.key === "active") {
+         row[header.label] = item[header.key] ? "Active" : "Inactive";
+       } else {
+         // Default behavior for other fields
+         row[header.label] = item[header.key] || ""; // Keep blank if no data for this column
+       }
+     });
       return row;
     });
 

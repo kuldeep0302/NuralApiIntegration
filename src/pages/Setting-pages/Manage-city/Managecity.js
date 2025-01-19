@@ -12,6 +12,7 @@ import {
   updateCity,
   getfilteredZoneList,
   getCountryListActive,
+  getStateListsearch,
 
 } from "../../../API Service/apiService";
 import CommonButton from "../../../Componants/Common/Button";
@@ -43,7 +44,8 @@ const cityHeaders = [
   { label: "Country", key: "countryName" },
   { label: "Zone", key: "zoneName" },
   { label: "State", key: "stateName" },
-  { label: "City", key: "cityName" }
+  { label: "City", key: "cityName" },
+  { label: "Status", key: "active" },
 ];
 
 const Managecity = () => {
@@ -61,7 +63,7 @@ const Managecity = () => {
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
-  const [selectedCity, setSelectedCity] = useState([]);
+  const [selectedCity, setSelectedCity] = useState(null);
 
   const [filteredCities, setFilteredCities] = useState([]);
 
@@ -123,7 +125,8 @@ const Managecity = () => {
   const [cityError, setCityError] = useState(false);
   const [status, setStatus] = useState(true);
   const [countriesActive, setCountriesActive] = useState([]);
-
+  const [isSearching, setIsSearching] = useState(false);
+const [flag, setFlag] = useState(false);
   const handlePageChange = (newPage) => {
     setPage(newPage);
     setParams((prevParams) => ({
@@ -207,7 +210,7 @@ const Managecity = () => {
     try {
       if (selZoneId2) {
         setLoading(true);
-        const response = await getStateList("", page, limit, countryId2, selZoneId2);
+        const response = await getStateListsearch( countryId2, selZoneId2);
         setFilStates2(response.data.states || []);
         console.log("Response for Zone ID 2:", response.data);
       }
@@ -226,6 +229,7 @@ const Managecity = () => {
 
   const fetchCities = async () => {
     try {
+      if (!isSearching || flag) {
       setLoading(true);
       const response = await getCityList("", "", "", page, limit, "");
       setCities(response.data.cities);
@@ -235,7 +239,7 @@ const Managecity = () => {
       setLoading(false);
       // setFilteredZones(response.data.zones);
       // setFilteredCountries(response.data.countries);
-    } catch (error) {
+    } }catch (error) {
       console.error("Error fetching countries:", error);
     }
   };
@@ -263,7 +267,7 @@ const Managecity = () => {
 
   useEffect(() => {
     fetchFiltereCities();
-  }, [stateId]);
+  }, []);
   
 
   const fetchFilteredCitiesByState = async () => {
@@ -332,7 +336,14 @@ const Managecity = () => {
       toast.error(`Failed to update status`);
       throw error;
     } finally {
-      handleSearch();
+      if (!isSearching) {
+        fetchCities();
+      }
+      else {
+        // setselstateName2(stateName);
+        handleSearch();
+      }
+
       setLoading(false);
     }
   };
@@ -407,35 +418,39 @@ const Managecity = () => {
           response = await updateCity(postData); // Call update API
           console.log("data is", postData);
           console.log(postData)
-          alert("City updated successfully!");
+          toast.success("City updated successfully!");
           setEditIndex(false); // Reset the `editIndex` after update
         } else {
           response = await createCity(postData);
           console.log("data is",postData);
-          alert("City Added Successfully");
+          toast.success("City Added Successfully");
         }
         // Reset the postData
-        setCountryId(null);
-        setZoneId(null);
-        setSelectedCountry(null);
-        setZoneName(null);
-        setstateName(null);
-        setstateId(null);
-        setcityName(null);
-        setEditIndex(null);        
+           
       } catch (error) {
-        // Handle 409 Conflict error
-        if (error.response?.status === 409) {
-          alert("City is already present for the same zone.");
-        } else {
-          console.error("Error making POST request:", error);
-          alert("Error making POST request: " + (error.response?.data?.message || error.message));
+        console.log(`Error updating status ${error}`);
+        toast.error(`Failed to update status`);
+        throw error;
+      } finally {
+        if (!isSearching) {
+          fetchCities();
+        }
+        else {
+          // setselstateName2(stateName);
+          handleSearch();
         }
       }
-    }
-    setIsEditing(false);
-    fetchCities();
+    setCountryId(null);
+    setZoneId(null);
+    setSelectedCountry(null);
+    setZoneName(null);
+    setstateName(null);
+    setstateId(null);
+    setcityName(null);
+    setEditIndex(null);     
+    setIsEditing(null);
     setLoading(false);
+    }
   };
 
  
@@ -454,13 +469,17 @@ const Managecity = () => {
   const handleSearch = async () => {
     try {
       setLoading(true);
-
+      setPage(1);
+      setIsSearching(true);
       // Fetch data based on the selected values
       const response = await getCityList(countryId2, selZoneId2, stateId2, 1, limit, selectedCity);
       setFilteredCities(response.data.cities);
       console.log("response.data", response.data);
       setTotalRecords(response.data.totalCities);
       setTableData(response.data.cities);
+      if (totalRecords > 10) {
+        setFlag(true);
+      }
     } catch (error) {
       console.error("Error fetching cities:", error);
     } finally {
@@ -518,7 +537,7 @@ const Managecity = () => {
             id="outlined-basic"
             label="Country"
             variant="standard"
-            value={selectedCountry?.countryName || ""}
+            value={selectedCountry}
           />
         )}
       </div>
@@ -558,7 +577,7 @@ const Managecity = () => {
             id="outlined-basic"
             label="Zone"
             variant="standard"
-            value={zoneName?.zoneName || ""}
+            value={zoneName}
           />
         )}
       </div>
@@ -594,25 +613,28 @@ const Managecity = () => {
             id="outlined-basic"
             label="State Name"
             variant="standard"
-            value={stateName?.stateName || ""}
+            value={stateName}
           />
         )}
       </div>
 
-      <TextField
-        id="standard-basic"
-        label="City"
-        variant="standard"
-        focused={!!cityName}
-        value={cityName}
-        onChange={(e) => {
-          setcityName(e.target.value);
-          setCityError(false); // Clear error on input
-        }}
-        required
-        error={cityError}
-        helperText={cityError ? "City is required." : null}
-      />
+            <TextField
+              id="standard-basic"
+              label="City"
+              variant="standard"
+              focused={!!cityName} // Focus only if cityName is not null or empty
+              value={cityName || ""} // Default to an empty string if cityName is null
+              onChange={(e) => {
+                if (selZoneId2 && stateId2){
+                setSelectedCity(e.target.value);
+                }
+                setcityName(e.target.value); // Update cityName state
+                setCityError(false); // Clear error on input
+              }}
+              required
+              error={cityError}
+              helperText={cityError ? "City is required." : null}
+            />
           </div>
 
           <div className="button-Managecity">
@@ -729,7 +751,8 @@ const Managecity = () => {
               id="city-autocomplete"
               options={FilteredCityList}
               getOptionLabel={(option) => option.cityName}
-              value={selectedCity ? { cityName: selectedCity } : null} // Controlled value for City
+              value={FilteredCityList.find((city)=> city.cityName ===selectedCity) || null }
+              // value={filStates2.find((state) => state.stateName === selstateName2) || null} // Ensure the value matches an option
               onChange={(event, newValue) => {
                 // Update city-related states
                 setSelectedCity(newValue ? newValue.cityName : null);
@@ -739,7 +762,6 @@ const Managecity = () => {
               )}
             />
           </div>
-
 
           <span className="buttons-Managecity-span">
             <CommonButton name="Search" handleOnClick={handleSearch} />
@@ -751,7 +773,7 @@ const Managecity = () => {
             <span className="buttons-Managecity-span">
               <ExportToExcel
                 name="Export to Excel"
-                data={cities}
+                data={tableData}
                 fileName="Cities_Data"
                 headers={cityHeaders}
               />

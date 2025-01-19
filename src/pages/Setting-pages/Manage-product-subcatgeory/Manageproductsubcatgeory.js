@@ -28,8 +28,15 @@ import toast, { Toaster } from "react-hot-toast";
 
 import Loader from "../../../Componants/Loader/Loader";
 import Paginate from "../../../Componants/Common/Paginate";
+import ExportToExcel from "../../../Componants/Common/ExportToExcel";
 const cells = ["S.No", "Brand", "Category", "Sub Category", "Description", "Action"];
-
+const subcategoryheader = [
+  { label: "Brand", key: "brandName" },
+  { label: "Category", key: "categoryName" },
+  { label: "Sub Category", key: "subcategoryName" },
+  { label: "Description", key: "description" },
+  { label: "Status", key: "active" },
+];
 
 const Manageproductsubcatgeory = () => {
   const [categoryList, setCategoryList] = useState([]);
@@ -67,6 +74,8 @@ const Manageproductsubcatgeory = () => {
   const [descriptionError, setDescriptionError] = useState(false);
   const [activeFilteredCat, setActiveFilteredCat] = useState([]);
   const [status, setStatus] = useState("true")
+  const [flag, setFlag] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const dummyGetList = {
     serialNo: "",
     brandName: "",
@@ -86,13 +95,20 @@ const Manageproductsubcatgeory = () => {
     }));
   };
   // When a brand is selected, filter categories
-
+  const truncateText = (text, maxLength) => {
+    return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+  };
   const handleSearch = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
+      setPage(1);
+      setIsSearching(true);
       const response = await fetchSubCategoryList(subcategoryName2, 1, limit, selectedBrandId2, categoryId2);
       setTableData(response.data.subcategory);
       setTotalRecords(response.data.totalSubcategories);
+      if (totalRecords > 10) {
+        setFlag(true);
+      }
       // console.log(`response table  is `, response.data.brandList);
 
     } catch (error) {
@@ -235,20 +251,29 @@ const Manageproductsubcatgeory = () => {
     } catch (error) {
       console.log(`Error updating status ${error}`)
       toast.error(`Failed to update status`);
+    } finally {
+      if (!isSearching) {
+        fetchSubCategories();
+      }
+      else {
+        // setselstateName2(stateName);
+        handleSearch();
+      }
+
+      setLoading(false);
     }
-    handleSearch();
-    setLoading(false);
   };
 
   const fetchSubCategories = async () => {
     try {
+      if (!isSearching || flag) {
       setLoading(true);
       const response = await fetchSubCategoryList(subcategoryName, page, limit); // API call to fetch subcategories
       console.log("Fetched SubCategories:", response);
       setSubCategoryList(response.data.subcategory || []);
       setTableData(response.data.subcategory);
       setTotalRecords(response.data.totalSubcategories);
-    } catch (error) {
+    } }catch (error) {
       console.error("Error fetching Subcategories:", error);
     }
     setLoading(false);
@@ -274,6 +299,7 @@ const Manageproductsubcatgeory = () => {
 
   const handleCancel = () => {
     setEditIndex(false)
+    setSelectedCategory("");
     setBrandName("")
     setcategoryName("")
     setSelectedBrandId("")
@@ -334,7 +360,7 @@ const Manageproductsubcatgeory = () => {
           const response = await createSubCategory(requestData);
           console.log("Server Response (Save):", response); // Log full server response
           console.log("Sub-Category saved successfully:", response.data);
-          alert("Sub-Category saved successfully!");
+          toast.success("Sub-Category saved successfully!");
         } else {
           // Update an existing subcategory
           const updateData = { ...requestData, _id: editIndex };
@@ -343,7 +369,7 @@ const Manageproductsubcatgeory = () => {
           const response = await updateSubCategory(updateData); // Call update API
           console.log("Server Response (Update):", response); // Log full server response
           console.log("Sub-Category updated successfully:", response.data);
-          alert("Sub-Category updated successfully!");
+          toast.success("Sub-Category updated successfully!");
           setEditIndex(false);
           fetchSubCategories(); // Fetch the updated subcategory list
         }
@@ -353,17 +379,22 @@ const Manageproductsubcatgeory = () => {
           // Print server response error if available
           console.error("Server Response (Error):", error.response);
           console.error("Server Response Data:", error.response.data);
-          alert(`Failed to save or update subcategory: ${error.response.data.message || "Unknown error"}`);
+          toast.error(`Failed to save or update subcategory: ${error.response.data.message || "Unknown error"}`);
         } else {
-          alert("Failed to save or update subcategory. Please try again.");
+          toast.error("Failed to save or update subcategory. Please try again.");
         }
       }
-      setLoading(false);
-      setBrandName("");
-      setDescription("");
-      setSubCategory("");
-      getBrandList();
-      fetchSubCategories(); // Fetch the updated subcategory list
+    if (!isSearching) {
+      fetchSubCategories();
+    }
+    else {
+      handleSearch();
+    }
+    handleCancel();
+    setBrandName("");
+    setDescription("");
+    setSubCategory("");
+    handleCancel("");
     }
     setIsEditing(false);
     setLoading(false);
@@ -407,7 +438,7 @@ const Manageproductsubcatgeory = () => {
                 onChange={(event, value) => {
                   const brandId = value?._id || null;
                   const brandName = value ? value.brandName : "";
-
+                  setIsEditing(false);
                   // Update brand-related states
                   setBrandName(brandName);
                   setSelectedBrandId(brandId);
@@ -451,8 +482,6 @@ const Manageproductsubcatgeory = () => {
                 onChange={(event, newValue) => {
                   const categoryName = newValue ? newValue.categoryName : "";
                   const categoryId = newValue ? newValue._id : "";
-
-                  // Update Category-related states
                   setSelectedCategory(categoryName);
                   setCategoryId(categoryId);
 
@@ -477,7 +506,7 @@ const Manageproductsubcatgeory = () => {
             {editIndex && (
               <TextField
                 disabled
-                value={selectedCategory}
+                value={categoryName}
                 label="Category"
                 variant="standard"
                 style={{ width: "10rem" }}
@@ -493,6 +522,9 @@ const Manageproductsubcatgeory = () => {
               variant="standard"
               value={subCategory}
               onChange={(e) => {
+                if(categoryId2){
+                setSubcategoryName2(e.target.value)
+                }
                 setSubCategory(e.target.value);
                 setSubCategoryError(false); // Clear error on typing
               }}
@@ -681,6 +713,15 @@ const Manageproductsubcatgeory = () => {
         </Grid>
 
         <Grid container>
+          <Grid container justifyContent="flex-end">
+            <ExportToExcel
+              name="Export to Excel"
+              data={tableData}
+              // data={formattedData}
+              fileName="Subcategory_Data"
+              headers={subcategoryheader}
+            />
+          </Grid>
           <TableContainer component={Paper}>
             <Table
               sx={{ minWidth: 650 }}
@@ -710,10 +751,10 @@ const Manageproductsubcatgeory = () => {
                     <TableCell align="center">
                       {(page - 1) * dataSize + index + 1} {/* Index adjusted for pagination */}
                     </TableCell>
-                    <TableCell align="center">{row.brandName}</TableCell>
-                    <TableCell align="center">{row.categoryName}</TableCell>
-                    <TableCell align="center">{row.subcategoryName}</TableCell>
-                    <TableCell align="center">{row.description}</TableCell>
+                    <TableCell align="center">{truncateText(row.brandName, 50)}</TableCell>
+                    <TableCell align="center">{truncateText(row.categoryName, 50)}</TableCell>
+                    <TableCell align="center">{truncateText(row.subcategoryName, 50)}</TableCell>
+                    <TableCell align="center">{truncateText(row.description, 50)}</TableCell>
                     <TableCell
                       align="right"
                       sx={{
@@ -747,20 +788,6 @@ const Manageproductsubcatgeory = () => {
                         <img
                           src={editIcon}
                           alt="Edit"
-                          height={"20px"}
-                          width={"20px"}
-                        />
-                      </IconButton>
-                      <IconButton
-                        // onClick={() => handleDelete(index, row._id)}
-                        sx={{
-                          outline: "none",
-                          "&:focus": { outline: "none" },
-                        }}
-                      >
-                        <img
-                          src={deleteIcon}
-                          alt="active"
                           height={"20px"}
                           width={"20px"}
                         />

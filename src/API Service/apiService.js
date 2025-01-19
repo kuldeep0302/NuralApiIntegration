@@ -197,6 +197,30 @@ export const getStateList = async (stateName, page, limit, countryId, zoneId, st
     throw error;
   }
 };
+export const getStateList2 = async (stateName, page, limit, countryId, zoneId) => {
+  try {
+    const queryParams = { stateName, page, limit, countryId, zoneId };
+    const response = await api.get("/states", {
+      params: queryParams,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching states API:", error);
+    throw error;
+  }
+};
+export const getStateListsearch = async (countryId, zoneId) => {
+  try {
+    const queryParams = { countryId, zoneId };
+    const response = await api.get("/states", {
+      params: queryParams,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching states API:", error);
+    throw error;
+  }
+};
 
 export const createState = async (data) => {
   try {
@@ -359,7 +383,10 @@ export const fetchBrandList = async (page, limit, search) => {
 
 export const fetchAllBrandList = async () => {
   try {
-    const response = await api.get("/brands");
+    const queryParams = {};
+    const response = await api.get("/brands",{
+      params: queryParams,
+    });
     return response.data;
   } catch (error) {
     console.error(`Error fetching brand list: ${error}`);
@@ -421,6 +448,18 @@ export const fetchCategoryList = async (brandId, categoryName, page, limit, stat
   try {
     const queryParams = { brandId, categoryName, page, limit, status };
     const response = await api.get("/categories" , {
+      params: queryParams,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching category list:", error);
+    throw error;
+  }
+};
+export const fetchCategoryList2 = async (brandId,categoryName,page,limit) => {
+  try {
+    const queryParams = { brandId, categoryName, page, limit };
+    const response = await api.get("/categories", {
       params: queryParams,
     });
     return response.data;
@@ -731,9 +770,9 @@ export const updateSparePart = async (data) => {
   }
 };
 
-export const updateSparePartStatus = async (sparePart) => {
+export const updateSparePartStatus = async (sparePartId) => {
   try {
-    const jsonBody = JSON.stringify(sparePart);
+    const jsonBody = JSON.stringify(sparePartId);
 
     const response = await api.post("/spare-part-status", jsonBody);
     return response.data;

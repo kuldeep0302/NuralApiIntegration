@@ -12,6 +12,8 @@ import {
   updateStateStatus,
   getfilteredZoneList,
   getCountryListActive,
+  getStateList2,
+  getStateListsearch,
 } from "../../../API Service/apiService";
 import {
   Autocomplete,
@@ -42,6 +44,7 @@ const stateHeaders = [
   { label: "Country", key: "countryName" },
   { label: "Zone", key: "zoneName" || "" },
   { label: "State", key: "stateName" },
+  { label: "Status", key: "active" },
 ];
 
 // const calltype = [];
@@ -94,6 +97,7 @@ const Managestate = () => {
   const [stateError, setStateError] = useState(false);
   const [status, setStatus] = useState(true);
   const [countriesActive, setCountriesActive] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
 
 
   //---------------------common------------------------------------------//
@@ -132,15 +136,17 @@ const Managestate = () => {
     
     const fetchState = async () => {
       try {
+        if(!isSearching || flag){
         setLoading(true);
         const response = await getStateList("", page, limit, "", "");
         setStates(response.data.states);
         console.log("response.data", response.data);
         setTotalRecords(response.data.totalStates);
         setTableData(response.data.states);
+     
         // setFilteredZones(response.data.zones);
         // setFilteredCountries(response.data.countries);
-      } catch (error) {
+      } }catch (error) {
         console.error("Error fetching countries:", error);
       }
       setLoading(false);
@@ -169,7 +175,6 @@ const Managestate = () => {
     }
     setLoading(false);
   };
-
   useEffect(() => {
     fetchFilState();
   }, [selZoneId]);
@@ -179,7 +184,7 @@ const Managestate = () => {
     try {
       if (selZoneId2) {
         setLoading(true);
-        const response = await getStateList("", page, limit, countryId2, selZoneId2);
+        const response = await getStateListsearch(countryId2, selZoneId2);
         setFilStates2(response.data.states || []);
         console.log("Response for Zone ID 2:", response.data);
       }
@@ -201,7 +206,7 @@ const Managestate = () => {
         const response = await getfilteredZoneList(1,
           limit,
           countryId,
-        status);
+          status);
         setfilteredzones(response.data.zones);
         console.log("filtered zones", response.data.zones);
       }} catch (error) {
@@ -284,7 +289,14 @@ const Managestate = () => {
       toast.error(`Failed to update status`);
       throw error;
     } finally {
-      handleSearch();
+      if(!isSearching){
+      fetchState();
+      }
+      else{
+        // setselstateName2(stateName);
+        handleSearch();
+      }
+      
       setLoading(false);
     }
 
@@ -332,7 +344,7 @@ const Managestate = () => {
           }
           response = await updateState(postData); // Call update API
           console.log("Update response:", postData);
-          alert("State updated successfully!");
+          toast.success("State updated successfully!");
           setEditIndex(false); // Reset the `editIndex` after update
         } else {
           const postData = {
@@ -342,19 +354,22 @@ const Managestate = () => {
           }
           response = await createState(postData); // Call create API
           console.log("Create response:", postData);
-          alert("State created successfully!");
+          toast.success("State created successfully!");
         }
       } catch (error) {
         console.error("Error making POST request:", error);
-        alert("Error making POST request. Please try again.");
+        toast.error("Error making POST request. Please try again.");
       }
     }
+    if(!isSearching){
     fetchState();
-    setIsEditing(false);
+    }
+    else{
+      handleSearch();
+    }
+    handleCancel();
     setLoading(false);
   };
-
-  const startingSerialNumber = (page - 1) * pageSize + 1;
 
   const handleEdit = (_id, stateName, countryId, countryName, zoneId, zoneName) => {
     setIsEditing(true);
@@ -374,20 +389,26 @@ const Managestate = () => {
     setZoneId(null);
     setCountryId(null);
     setZoneName(null);
+    setStateName("");
+    setEditIndex(false);
   }
 
    const handleSearch = async () => {
       try {
         setLoading(true);
-        const response = await getStateList(selstateName2, page, limit, countryId2, selZoneId2);
+        setPage(1);
+        setIsSearching(true);
+        const response = await getStateList(selstateName2, 1, limit, countryId2, selZoneId2);
         console.log("response.data", response.data);
         setTotalRecords(response.data.totalStates);
         setTableData(response.data.states);
+        if (totalRecords > 10) {
+          setFlag(true);
+        }
       } catch (error) {
         console.error("Error fetching cities:", error);
-      } finally {
+      } 
         setLoading(false);
-      }
     };
 
   return (
@@ -409,6 +430,7 @@ const Managestate = () => {
                   getOptionLabel={(option) => option.countryName}
                   value={selectedCountry || null} // Controlled value
                   onChange={(event, value) => {
+                    setIsEditing(false);
                     setCountryId(value?._id || null);
                     setSelectedCountry(value || null);
                     if (!value) {
@@ -481,8 +503,12 @@ const Managestate = () => {
                 id="state-name"
                 label="State Name"
                 variant="standard"
-                value={stateName}
+                focused={!!stateName} // Focus if editIndex is not false
+                value={stateName || ""}
                 onChange={(e) => {
+                  if (selZoneId2){
+                  setselstateName2(e.target.value);
+                  }
                   setStateName(e.target.value);
                   setStateError(false); // Clear error on input
                 }}
@@ -605,7 +631,7 @@ const Managestate = () => {
             <span className="buttons-Managestate-span">
               <ExportToExcel
                 name="Export to Excel"
-                data={states}
+                data={tableData}
                 fileName="States_Data"
                 headers={stateHeaders}
               />

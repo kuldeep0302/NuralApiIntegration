@@ -30,12 +30,22 @@ import HeaderNavigation from "../../../Componants/Common/header Navigation/Heade
 import toast, { Toaster } from "react-hot-toast";
 import Loader from "../../../Componants/Loader/Loader";
 import Paginate from "../../../Componants/Common/Paginate";
+import ExportToExcel from "../../../Componants/Common/ExportToExcel";
 
 const cells = ["S.No", "Brand", "Category", "Sub Category", "Model Name", "Serialized", "Action"];
 const serials = [
   { label: "Yes", value: true },
   { label: "No", value: false },
 ];
+const modelheader = [
+  { label: "Brand", key: "brandName" },
+  { label: "Category", key: "categoryName" },
+  { label: "Sub Category", key: "subcategoryName" },
+  { label: "Model Name", key: "modelName" },
+  { label: "Serialized", key: "isSerialized" },
+  { label: "Status", key: "active" },
+];
+
 
 
 const ManageModel = () => {
@@ -43,7 +53,7 @@ const ManageModel = () => {
   const [brandList, setBrandList] = useState([]);
   const [categoryList, setCategoryList] = useState([]);
   const [subCategoryList, setSubCategoryList] = useState([]);
-  const [modelName, setModelName] = useState(null);
+  const [modelName, setModelName] = useState("");
   const [modelCode, setModelCode] = useState("");
   const [hsnCode, setHsnCode] = useState("");
   const [isSerialized, setIsSerialized] = useState(true);
@@ -89,13 +99,18 @@ const ManageModel = () => {
   const [activeFilteredCat, setActiveFilteredCat] = useState([]);
   const [activeFilteredSubCat, setActiveFilteredSubCat] = useState([]);
   const [status, setStatus] = useState(true);
-
+  const [isSearching, setIsSearching] = useState(false);
+  const [flag, setFlag] = useState(false);
   
   const dummyGetList = {
     serialNo: "",
     brandName: "",
     categoryName: "",
     description: "",
+  };
+
+  const truncateText = (text, maxLength) => {
+    return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
   };
   const [searchParams, setParams] = useState({
     ...dummyGetList
@@ -159,7 +174,7 @@ const ManageModel = () => {
       try {
         console.log('Fetching categories with:', { selectedBrandId2, selectedCategory2 });
         setLoading(true);
-        const response = await fetchCategoryList(selectedBrandId2, selectedCategory2, 1, limit);
+        const response = await fetchCategoryList(selectedBrandId2, "", 1, limit);
         if (response.data && response.data.categories) {
           setfilteredCat2(response.data.categories);
         } else {
@@ -233,10 +248,15 @@ const ManageModel = () => {
 
   const handleSearch = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
+      setPage(1);
+      setIsSearching(true);
       const response = await fetchModelList(modelName2, 1, limit, selectedBrandId2, categoryId2, subcategoryId2);
       setTableData(response.data.models);
       setTotalRecords(response.data.totalModels);
+      if (totalRecords > 10) {
+        setFlag(true);
+      }
       // console.log(`response table  is `, response.data.brandList);
 
     } catch (error) {
@@ -260,20 +280,29 @@ const ManageModel = () => {
       console.log(`Error updating status ${error}`);
       toast.error(`Failed to update status`);
       throw error;
-    } 
-    handleSearch();
-    setLoading(false);
+    } finally {
+      if (!isSearching) {
+        getAllModelList();
+      }
+      else {
+        // setselstateName2(stateName);
+        handleSearch();
+      }
+
+      setLoading(false);
+    }
   };
 
   const getAllModelList = async () => {
     try {
+      if (!isSearching || flag) {
       setLoading(true);
       const response = await fetchModelList("", page, limit); // API call to fetch subcategories
       console.log("Fetched Modellist:", response);
       setModelList(response.data.models || []);
       setTotalRecords(response.data.totalModels);
       setTableData(response.data.models);
-    }
+    }}
     catch (error) {
       console.error("Error fetching Modellist:", error);
     }
@@ -314,10 +343,12 @@ const ManageModel = () => {
 
   const handleCancel = async () => {
     setBrandId(null);
-    setBrandName(null);
+    setBrandName("");
+    setSubcategoryName("")
+    setSelectedBrandId("")
     setSelectedCategory(null);
-    setSubcategoryName(null);
-    setCategoryId(null);
+    setCategoryId("");
+    setSelectedBrand(null);
     setSubCategoryId(null);
     setModelName("");
     setModelCode("");
@@ -377,7 +408,7 @@ const ManageModel = () => {
     }
     else {
       const requestData = {
-        brandId: brandId,
+        brandId: selectedBrandId,
         categoryId: categoryId,
         subcategoryId: subcategoryId,
         modelName: modelName,
@@ -393,7 +424,7 @@ const ManageModel = () => {
           // Save new model
           const response = await createModel(requestData); // API call to create new model
           console.log("Model saved successfully:", response.data);
-          alert("Model saved successfully!");
+          toast.success("Model saved successfully!");
         } else {
           // Update existing model
           const updateData = { _id: editIndex, active: true, ...requestData };
@@ -401,26 +432,26 @@ const ManageModel = () => {
 
           const response = await updateModel(updateData); // API call to update model
           console.log("Model updated successfully:", response.data);
-          alert("Model updated successfully!");
+          toast.success("Model saved successfully!");
           setEditIndex(false); // Reset edit index after updating
         }
       } catch (error) {
-        console.error("Error saving/updating model:", error);
-        alert("Failed to save or update the model. Please try again.");
+        console.log(`Error updating status ${error}`);
+        toast.error(`Failed to update status`);
+        throw error;
+      } finally {
+        if (!isSearching) {
+          getAllModelList();
+        }
+        else {
+          // setselstateName2(stateName);
+          handleSearch();
+        }
       }
-      setBrandId(null);
-      setCategoryId(null);
-      setSubCategoryId(null);
-      setSubcategoryName(null);
-      setModelName(null);
-      setModelCode(null);
-      setHsnCode(null);
-      setIsSerialized(true);
-      
-    }
+    handleCancel();
     setIsEditing(false);
-    getAllModelList();
     setLoading(false);
+    }
   };
 
   const handleEdit = (modelId, brandId, brandName, categoryId, categoryName, subcategoryId, subcategoryName, modelName, modelCode, hsnCode, isSerialized) => {
@@ -429,7 +460,7 @@ const ManageModel = () => {
     setSelectedCategoryName(categoryName);
     setSubcategoryName(subcategoryName);
     setEditIndex(modelId);
-    setBrandId(brandId);
+    setSelectedBrandId(brandId);
     setCategoryId(categoryId);
     setSubCategoryId(subcategoryId);
     setModelName(modelName);
@@ -469,13 +500,15 @@ const ManageModel = () => {
                 id="brand-autocomplete"
                 closeOnSelect
                 options={activeBrandList}
-                getOptionLabel={(option) => option.brandName}
+                value={selectedBrand} // Controlled value
+                getOptionLabel={(option) => option.brandName || ""}
                 onChange={(event, value) => {
                   const brandId = value?._id || null;
+                  setSelectedBrand(value); // Update selected brand state
                   setBrandName(value ? value.brandName : "");
                   setSelectedBrandId(brandId);
                   setBrandError(false); // Clear error on selection
-
+                  setIsEditing(false);
                   if (!value) {
                     setSelectedCategory("");
                     setCategoryId("");
@@ -493,7 +526,8 @@ const ManageModel = () => {
                     helperText={brandError ? "Brand is required." : ""}
                   />
                 )}
-              />            )}
+              />
+               )}
             {editIndex && (
               <TextField
                 disabled
@@ -510,9 +544,11 @@ const ManageModel = () => {
             {!editIndex && (
               <Autocomplete
                 options={filteredCat}
+                value={selectedCategory} // Controlled value
                 getOptionLabel={(option) => option.categoryName || ""}
                 onChange={(event, newValue) => {
-                  setSelectedCategory(newValue ? newValue.categoryName : "");
+                  setSelectedCategory(newValue); // Update selected category state
+                  setSelectedCategoryName(newValue ? newValue.categoryName: "")
                   setCategoryId(newValue ? newValue._id : "");
                   setCategoryError(false); // Clear error on selection
 
@@ -540,7 +576,7 @@ const ManageModel = () => {
                 id="standard-basic"
                 label="Category"
                 variant="standard"
-                value={selectedCategory} // Bind value
+                value={selectedCategoryName} // Bind value
               />
             )}
           </Grid>
@@ -549,9 +585,10 @@ const ManageModel = () => {
             {!editIndex && (
               <Autocomplete
                 options={filteredSubCat}
+                value={subcategoryName} // Controlled value
                 getOptionLabel={(option) => option.subcategoryName || ""}
                 onChange={(event, newValue) => {
-                  setSubcategoryName(newValue ? newValue.subcategoryName : "");
+                  setSubcategoryName(newValue );
                   setSubCategoryId(newValue ? newValue._id : "");
                   setSubCategoryError(false); // Clear error on selection
                 }}
@@ -588,6 +625,8 @@ const ManageModel = () => {
               value={modelName}
               focused={!!editIndex}
               onChange={(e) => {
+                if(categoryId2 && subcategoryId2){
+                setModelName2(e.target.value);}
                 setModelName(e.target.value);
                 setModelNameError(false); // Clear error on input
               }}
@@ -739,6 +778,7 @@ const ManageModel = () => {
                             setSubcategoryName2("");
                             setSubcategoryId2(null);
                             setSubcategoryName2(null);
+                            setModelName2(null);
                           }
                         }}
                         renderInput={(params) => (
@@ -770,6 +810,7 @@ const ManageModel = () => {
                             setSubcategoryName2("");
                             setSubcategoryId2(null);
                             setSubcategoryName2(null);
+                            setModelName2(null);
                           }
                         }}
                         renderInput={(params) => (
@@ -799,7 +840,7 @@ const ManageModel = () => {
 
                           if(!newValue)
                           {
-                            setModelName(null);
+                            setModelName2(null);
                           }
                         }}
                         renderInput={(params) => (
@@ -817,7 +858,7 @@ const ManageModel = () => {
             <Autocomplete
               options={filteredMod}
               getOptionLabel={(option) => option.modelName || ""}
-              value={modelName ? { modelName: modelName } : null}
+              value={filteredMod.find((mod) => mod.modelName === modelName2) || null} // Set the value correctly
               onChange={(event, newValue) => {
                 setModelName2(newValue ? newValue.modelName : "");
               }}
@@ -830,6 +871,7 @@ const ManageModel = () => {
                 />
               )}
             />
+
           </Grid>
           <Grid item>
             <CommonButton name={"Search"} handleOnClick={handleSearch} />
@@ -837,6 +879,15 @@ const ManageModel = () => {
         </Grid>
 
         <Grid container>
+          <Grid container justifyContent="flex-end">
+            <ExportToExcel
+              name="Export to Excel"
+              data={tableData}
+              // data={formattedData}
+              fileName="Model_Data"
+              headers={modelheader}
+            />
+          </Grid>
           <TableContainer component={Paper}>
             <Table
               sx={{ minWidth: 650 }}
@@ -866,13 +917,13 @@ const ManageModel = () => {
                     <TableCell align="center">
                       {(page - 1) * dataSize + index + 1} {/* Index adjusted for pagination */}
                     </TableCell>
-                    <TableCell align="center">{row.brandName}</TableCell>
-                    <TableCell align="center">{row.categoryName}</TableCell>
-                    <TableCell align="center">{row.subcategoryName}</TableCell>
-                    <TableCell align="center">{row.modelName}</TableCell>
+                    <TableCell align="center">{truncateText(row.brandName, 50)}</TableCell>
+                    <TableCell align="center">{truncateText(row.categoryName, 50)}</TableCell>
+                    <TableCell align="center">{truncateText(row.subcategoryName, 50)}</TableCell>
+                    <TableCell align="center">{truncateText(row.modelName, 50)}</TableCell>
                     <TableCell align="center">{row.isSerialized ? 'Yes' : 'No'}</TableCell>
                     <TableCell
-                      align="right"
+                      align=""
                       sx={{
                         display: "flex",
                         flexDirection: "row",
@@ -904,20 +955,6 @@ const ManageModel = () => {
                         <img
                           src={editIcon}
                           alt="Edit"
-                          height={"20px"}
-                          width={"20px"}
-                        />
-                      </IconButton>
-                      <IconButton
-                        // onClick={() => handleDelete(index, row._id)}
-                        sx={{
-                          outline: "none",
-                          "&:focus": { outline: "none" },
-                        }}
-                      >
-                        <img
-                          src={deleteIcon}
-                          alt="active"
                           height={"20px"}
                           width={"20px"}
                         />
