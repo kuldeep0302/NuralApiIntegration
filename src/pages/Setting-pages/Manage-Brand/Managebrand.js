@@ -116,7 +116,7 @@ const Managebrand = () => {
       setLoading(false); // Stop loading
     }
   };
-
+  const [isActiveFlag, setIsActiveFlag] = useState(false)
   // Trigger fetch when search, page, or limit changes
   useEffect(() => {
     getBrandList();
@@ -124,10 +124,11 @@ const Managebrand = () => {
 
   useEffect(() => {
     getAllBrandList();
-  }, [page]); 
+  }, [page, isActiveFlag]); 
 
 
   const handlePageChange = (newPage) => {
+    setIsSearching(false);
     setPage(newPage);
     setParams((prevParams) => ({
       ...prevParams,
@@ -192,10 +193,24 @@ const Managebrand = () => {
         handleSearch();
       }
     }
+      toggleIsActive();
       handleCancel();
       setLoading(false);  
   }
   };
+
+
+  function toggleIsActive() {
+    if(isActiveFlag)
+    {
+      setIsActiveFlag(false);
+    }
+    else{
+      setIsActiveFlag(true);
+    }
+    
+  }
+
 
   const handleEdit = (brandId, brandName, description) => {
     setEditIndex(brandId);
@@ -224,6 +239,7 @@ const Managebrand = () => {
   const handleStatus = async (index, brandId) => {
     try {
       setLoading(true);
+      
       console.log(`brand id is ${brandId}, ${index}`);
       const response = await updateBrandStatus({ brandId: brandId });
       console.log(`status resposne : ${response.data.message}`);

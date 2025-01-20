@@ -267,7 +267,7 @@ const Managestate = () => {
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
-
+    setIsSearching(false);
     setParams((prevParams) => ({
       ...prevParams,
       pageIndex: newPage.toString(),
@@ -277,6 +277,7 @@ const Managestate = () => {
 
   const handleStatus = async (_id) => {
     try {
+      
       setLoading(true);
       const response = await updateStateStatus({ id: _id });
       console.log(`status resposne : ${response.data.message}`);
@@ -436,6 +437,7 @@ const Managestate = () => {
                     if (!value) {
                       setZoneId(null);
                       setZoneName(null);
+                      setfilteredzones([]);
                     }
                     setCountryError(false); // Clear error on valid selection
                   }}

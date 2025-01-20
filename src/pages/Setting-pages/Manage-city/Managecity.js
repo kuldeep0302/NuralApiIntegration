@@ -128,6 +128,7 @@ const Managecity = () => {
   const [isSearching, setIsSearching] = useState(false);
 const [flag, setFlag] = useState(false);
   const handlePageChange = (newPage) => {
+    setIsSearching(false);
     setPage(newPage);
     setParams((prevParams) => ({
       ...prevParams,
@@ -172,7 +173,7 @@ const [flag, setFlag] = useState(false);
       const response = await getStateList(stateName, 1, limit, countryId, zoneId, status);
       setStates(response.data.states);
       console.log("response.data", response.data);
-      setTotalRecords(response.data.totalStates);
+      // setTotalRecords(response.data.totalStates);
       // setTableData(response.data.totalStates);
       // setFilteredZones(response.data.zones);
       // setFilteredCountries(response.data.countries);
@@ -324,6 +325,7 @@ const [flag, setFlag] = useState(false);
 
   const handleStatus = async (_id) => {
     try {
+      
       setLoading(true);
       const response = await updateCityStatus({ id: _id });
       console.log(`status resposne : ${response.data.message}`);
@@ -516,6 +518,8 @@ const [flag, setFlag] = useState(false);
                 setZoneName(null);
                 setstateId(null);
                 setstateName(null);
+                setfilteredzones([]);
+                setStates([]);
               }
               setCountryError(false); // Clear error on valid selection
             }}
@@ -556,6 +560,7 @@ const [flag, setFlag] = useState(false);
               if (!value) {
                 setstateId(null);
                 setstateName(null);
+                setStates([]);
               }
               setZoneError(false); // Clear error on valid selection
             }}

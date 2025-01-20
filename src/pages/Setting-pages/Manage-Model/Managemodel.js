@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import TextField from "@material-ui/core/TextField";
 import Button from "@mui/material/Button";
 import { useEffect, useState } from "react";
-import { createModel, fetchBrandList, fetchCategoryList, fetchSubCategoryList, fetchModelList, updateModelStatus, updateModel, fetchSubCategoryListActive } from "../../../API Service/apiService";
+import { createModel, fetchBrandList, fetchCategoryList, fetchSubCategoryList, fetchModelList, updateModelStatus, updateModel, fetchSubCategoryListActive, filterHsnCode } from "../../../API Service/apiService";
 import ProductTabs from "../../../Componants/Common/product tabs/ProductTabs";
 import {
   Autocomplete,
@@ -101,7 +101,8 @@ const ManageModel = () => {
   const [status, setStatus] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
   const [flag, setFlag] = useState(false);
-  
+  const [error, setError] = useState(null);
+  const [hsnCodes, setHsnCodes] = useState([]);
   const dummyGetList = {
     serialNo: "",
     brandName: "",
@@ -116,6 +117,7 @@ const ManageModel = () => {
     ...dummyGetList
   });
   const handlePageChange = (newPage) => {
+    setIsSearching(false);
     setPage(newPage);
     setParams((prevParams) => ({
       ...prevParams,
@@ -145,6 +147,24 @@ const ManageModel = () => {
   }, []);
 
 
+  const fetchHsnCodes = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await filterHsnCode(); // Call the API
+      setHsnCodes(data.taxes); // Use `data.taxes` from API response
+      console.log(data.taxes);
+    } catch (err) {
+      setError("Failed to fetch HSN codes");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchHsnCodes();
+  }, []);
 
   const handleFetchCategories = async () => {
     if (selectedBrandId && !isEditing) { // Only proceed if selectedBrand has a value
@@ -413,7 +433,7 @@ const ManageModel = () => {
         subcategoryId: subcategoryId,
         modelName: modelName,
         modelCode: modelCode,
-        hsnCode: hsnCode,
+        hsnCode: hsnCode.hsnCode,
         isSerialized: isSerialized,
       };
       console.log("Data to post/update:", requestData);
@@ -465,7 +485,8 @@ const ManageModel = () => {
     setSubCategoryId(subcategoryId);
     setModelName(modelName);
     setModelCode(modelCode);
-    setHsnCode(hsnCode);
+    const selectedHsnObject = hsnCodes.find((code) => code.hsnCode === hsnCode);
+    setHsnCode(selectedHsnObject || null); // Set the entire object or null if not found
     setIsSerialized(isSerialized);
   };
 
@@ -492,7 +513,7 @@ const ManageModel = () => {
         <Grid item container>
           <ProductTabs selectedTab='four' />
         </Grid>
-        {/* {brandId}{categoryId}{subcategoryId} {modelName} {modelCode} {hsnCode} {isSerialized? "true" :"false"} */}
+        {/* {brandId}{categoryId}{subcategoryId} {modelName} {modelCode} {hsnCode.hsncode} {isSerialized? "true" :"false"} */}
         <Grid container gap={5}>
           <Grid item>
             {!editIndex && (
@@ -514,6 +535,8 @@ const ManageModel = () => {
                     setCategoryId("");
                     setSubcategoryName("");
                     setSubCategoryId("");
+                    setfilteredSubCat([]);
+                    setfilteredCat([]);
                   }
                 }}
                 renderInput={(params) => (
@@ -555,6 +578,7 @@ const ManageModel = () => {
                   if (!newValue) {
                     setSubcategoryName("");
                     setSubCategoryId("");
+                    setfilteredSubCat([]);
                   }
                 }}
                 renderInput={(params) => (
@@ -650,6 +674,35 @@ const ManageModel = () => {
             />
           </Grid>
           <Grid item>
+            
+            <Autocomplete
+              options={hsnCodes}
+              getOptionLabel={(option) => option.hsnCode || ""} // Display the HSN Code in the dropdown
+              value={hsnCodes.find((code) => code.hsnCode === hsnCode?.hsnCode) || null} // Match the object
+              onChange={(event, value) => {
+                setHsnCode(value); // Set the full object
+                setHsnCodeError(false); // Clear error if any
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  style={{ width: "11rem" }}
+                  label="HSN Code"
+                  variant="standard"
+                  error={hsnCodeError}
+                  helperText={hsnCodeError ? "HSN Code is required." : ""}
+                />
+              )}
+            />
+          
+           
+            
+          </Grid>
+          {/* {hsnCode ? hsnCode.hsnCode : "No HSN Code selected"} */}
+
+       
+
+          {/* <Grid item>
             <TextField
               style={{ width: "100%" }}
               id="hsn-code"
@@ -663,7 +716,7 @@ const ManageModel = () => {
               error={hsnCodeError}
               helperText={hsnCodeError ? "HSN Code is required." : ""}
             />
-          </Grid>
+          </Grid> */}
           <Grid item>
             <Autocomplete
               id="disable-close-on-select"
@@ -779,6 +832,9 @@ const ManageModel = () => {
                             setSubcategoryId2(null);
                             setSubcategoryName2(null);
                             setModelName2(null);
+                            setfilteredSubCat2([]);
+                            setfilteredCat2([]);
+                            setFilteredMod([]);
                           }
                         }}
                         renderInput={(params) => (
@@ -811,6 +867,9 @@ const ManageModel = () => {
                             setSubcategoryId2(null);
                             setSubcategoryName2(null);
                             setModelName2(null);
+                            setfilteredCat2([])
+                            setfilteredSubCat2([]);
+                            setFilteredMod([]);
                           }
                         }}
                         renderInput={(params) => (
@@ -840,7 +899,9 @@ const ManageModel = () => {
 
                           if(!newValue)
                           {
+                            setfilteredSubCat2([]);
                             setModelName2(null);
+                            setFilteredMod([]);
                           }
                         }}
                         renderInput={(params) => (

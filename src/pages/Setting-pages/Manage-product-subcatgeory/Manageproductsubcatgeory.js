@@ -88,6 +88,7 @@ const Manageproductsubcatgeory = () => {
 
 
   const handlePageChange = (newPage) => {
+    setIsSearching(false);
     setPage(newPage);
     setParams((prevParams) => ({
       ...prevParams,
@@ -447,6 +448,8 @@ const Manageproductsubcatgeory = () => {
                   if (!value) {
                     setSelectedCategory("");
                     setCategoryId("");
+                    setfilteredCat([]);
+                    setSubCategoryList([]);
                   }
                   setBrandError(false); // Clear error on selection
                 }}
@@ -488,6 +491,7 @@ const Manageproductsubcatgeory = () => {
                   // Clear Sub-Category if Category is cleared
                   if (!newValue) {
                     setSubCategory("");
+                    setSubCategoryList([]);
                   }
                   setCategoryError(false); // Clear error on selection
                 }}
@@ -639,6 +643,8 @@ const Manageproductsubcatgeory = () => {
                   setselectedBrandId2("")
                   setCategoryId2("");
                   setSubcategoryName2("");
+                  setfilteredCat2([]);
+                  setfilteredSubCat2([]);
                 }
               }}
               renderInput={(params) => (
@@ -668,6 +674,7 @@ const Manageproductsubcatgeory = () => {
                 // Clear Sub-Category if Category is cleared
                 if (!newValue) {
                   setSubcategoryName2("");
+                  setfilteredSubCat2([]);
                 }
               }}
               renderInput={(params) => (

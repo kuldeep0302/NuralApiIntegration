@@ -58,6 +58,7 @@ const Manageproductcatgeory = () => {
   const [tableData, setTableData] = useState([]);
   const [filteredCat, setfilteredCat] = useState([]);
   const [searchBrand, setSearchBrand] = useState("");
+  const [selectedCategory2, setselectedCategory2] = useState("")
   const [categoryList2, setCategoryList2] = useState([]);
   const [BrandName2, setBrandName2] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -168,6 +169,7 @@ const Manageproductcatgeory = () => {
   };
 
   const handlePageChange = (newPage) => {
+    setIsSearching(false);
     setPage(newPage);
     setParams((prevParams) => ({
       ...prevParams,
@@ -259,7 +261,7 @@ const Manageproductcatgeory = () => {
       setLoading(true);
       setPage(1);
       setIsSearching(true);
-      const response = await fetchCategoryList(searchBrand2, selectedCategory, 1, limit);
+      const response = await fetchCategoryList(searchBrand2, selectedCategory2, 1, limit);
       setTableData(response.data.categories);
       setTotalRecords(response.data.totalCategories);
       if (totalRecords > 10) {
@@ -278,6 +280,7 @@ const Manageproductcatgeory = () => {
 
   const handleStatus = async (index, categoryId) => {
     try {
+      
       setLoading(true);
       console.log(`category id is ${categoryId}`);
       const response = await updateCategoryStatus({ _id: categoryId });
@@ -375,7 +378,7 @@ const Manageproductcatgeory = () => {
               variant="standard"
               value={categorydescription}
               onChange={(e) => {
-                setSelectedCategory(e.target.value)
+                setselectedCategory2(e.target.value)
                 setCategoryDescription(e.target.value);
                 setCategoryError(false); // Clear error on typing
               }}
@@ -503,13 +506,13 @@ const Manageproductcatgeory = () => {
     disableCloseOnSelect
     options={categoryList2} // Handle null/empty filteredCat gracefully
     getOptionLabel={(option) => option.categoryName || ""}
-    value={selectedCategory ? { categoryName: selectedCategory } : null} // Clear value if selectedCategory is empty
+    value={categoryList2.find((item)=> item.categoryName === selectedCategory2)|| null}
     onChange={(event, newValue) => {
       // If category is cleared, reset the selected category
       if (!newValue) {
-        setSelectedCategory(""); // Clear selected category
+        setselectedCategory2(""); // Clear selected category
       } else {
-        setSelectedCategory(newValue ? newValue.categoryName : "");
+        setselectedCategory2(newValue ? newValue.categoryName : "");
       }
     }}
     renderInput={(params) => (
