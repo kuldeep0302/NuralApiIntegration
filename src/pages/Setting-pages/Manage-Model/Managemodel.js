@@ -239,51 +239,52 @@ const ManageModel = () => {
     handleFetchSubCategories();
   }, [categoryId]);
 
-   const handleFetchSubCategories2 = async () => {
-      if (categoryId2) {
-        try {
-          console.log('Fetching subcategories with:', { categoryId2, subcategoryName, selectedBrandId2 });
-          setLoading(true);
-          const response = await fetchSubCategoryList(subcategoryName, 1, limit, selectedBrandId2, categoryId2);
-          if (response.data && response.data.subcategory) {
-            setfilteredSubCat2(response.data.subcategory);
-          } else {
-            console.warn('No subcategories found');
-            setfilteredSubCat2([]);
-          }
-        } catch (error) {
-          console.error('Error fetching subcategories:', error.response?.data || error.message);
-        } finally {
-          setLoading(false);
+  const handleFetchSubCategories2 = async () => {
+    if (categoryId2) {
+      try {
+        console.log('Fetching subcategories with:', { categoryId2, subcategoryName, selectedBrandId2 });
+        setLoading(true);
+        const response = await fetchSubCategoryList(subcategoryName, 1, limit, selectedBrandId2, categoryId2);
+        if (response.data && response.data.subcategory) {
+          setfilteredSubCat2(response.data.subcategory);
+        } else {
+          console.warn('No subcategories found');
+          setfilteredSubCat2([]);
         }
-      } else {
-        console.log('Category ID is not set. Skipping fetch.');
+      } catch (error) {
+        console.error('Error fetching subcategories:', error.response?.data || error.message);
+      } finally {
+        setLoading(false);
       }
-    };
-  
-    useEffect(() => {
-      handleFetchSubCategories2();
-    }, [categoryId2]);
-  
-
-  const handleSearch = async () => {
-    try {
-      setLoading(true);
-      setPage(1);
-      setIsSearching(true);
-      const response = await fetchModelList(modelName2, 1, limit, selectedBrandId2, categoryId2, subcategoryId2);
-      setTableData(response.data.models);
-      setTotalRecords(response.data.totalModels);
-      if (totalRecords > 10) {
-        setFlag(true);
-      }
-      // console.log(`response table  is `, response.data.brandList);
-
-    } catch (error) {
-      console.log(`Error in filter List`);
+    } else {
+      console.log('Category ID is not set. Skipping fetch.');
     }
-    setLoading(false);
   };
+
+  useEffect(() => {
+    handleFetchSubCategories2();
+  }, [categoryId2]);
+
+  
+
+  // const handleSearch = async () => {
+  //   try {
+  //     setLoading(true);
+  //     setIsSearching(true);
+  //     const newPage = 1;
+  //     setPage(newPage);
+  //     const response = await fetchModelList(modelName2, newPage, limit, selectedBrandId2, categoryId2, subcategoryId2);
+  //     setTableData(response.data.models);
+  //     setTotalRecords(response.data.totalModels);
+  //     if (response.data.totalModels > 10) {
+  //       setFlag(true);
+  //     }
+  //   } catch (error) {
+  //     console.log(`Error in filter List`);
+  //   }
+  //   setLoading(false);
+  // };
+
 
   const handleStatus = async (modelId) => {
 
@@ -316,32 +317,59 @@ const ManageModel = () => {
   const getAllModelList = async () => {
     try {
       if (!isSearching || flag) {
-      setLoading(true);
-      const response = await fetchModelList("", page, limit); // API call to fetch subcategories
-      console.log("Fetched Modellist:", response);
-      setModelList(response.data.models || []);
-      setTotalRecords(response.data.totalModels);
-      setTableData(response.data.models);
-    }}
-    catch (error) {
+        setLoading(true);
+        const response = await fetchModelList("", page, limit); // API call to fetch subcategories
+        console.log("Fetched Modellist:", response);
+        setModelList(response.data.models || []);
+        setTotalRecords(response.data.totalModels);
+        setTableData(response.data.models);
+      }
+    } catch (error) {
       console.error("Error fetching Modellist:", error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
+
+  const handleSearch = async () => {
+    try {
+      setLoading(true);
+      setPage(1); // Reset to the first page when searching
+      setIsSearching(true);
+      const response = await fetchModelList(modelName2, 1, limit, selectedBrandId2, categoryId2, subcategoryId2);
+      setTableData(response.data.models);
+      setTotalRecords(response.data.totalModels);
+      if (response.data.totalModels > 10) {
+        setFlag(true);
+      }
+    } catch (error) {
+      console.log(`Error in filter List`, error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isSearching) {
+      getAllModelList();
+    }
+  }, [page]); // Fetch data on page change only when not searching
+
 
   const handlemodelfetch = async () => {
     try {
-      if (subcategoryId2)
-      { 
-      setLoading(true);
-      const response = await fetchModelList(modelName, 1, limit, selectedBrandId2, categoryId2, subcategoryId2); // API call to fetch subcategories
-      console.log("Fetched Modellist:", response);
-      setFilteredMod(response.data.models || []);
-      console.log("filtered models are", filteredMod)
-      if (modelName) {
-      setTotalRecords(response.data.totalModels);
-      setTableData(response.data.models);}
-      }}
+      if (subcategoryId2) {
+        setLoading(true);
+        const response = await fetchModelList(modelName, 1, limit, selectedBrandId2, categoryId2, subcategoryId2); // API call to fetch subcategories
+        console.log("Fetched Modellist:", response);
+        setFilteredMod(response.data.models || []);
+        console.log("filtered models are", filteredMod)
+        if (modelName) {
+          setTotalRecords(response.data.totalModels);
+          setTableData(response.data.models);
+        }
+      }
+    }
     catch (error) {
       console.error("Error fetching Modellist:", error);
     }
@@ -356,9 +384,9 @@ const ManageModel = () => {
   // Fetch categories when the component loads
 
 
-  useEffect(() => {
-    getAllModelList();
-  }, [page]);
+  // useEffect(() => {
+  //   getAllModelList();
+  // }, [page]);
 
 
   const handleCancel = async () => {
@@ -468,9 +496,9 @@ const ManageModel = () => {
           handleSearch();
         }
       }
-    handleCancel();
-    setIsEditing(false);
-    setLoading(false);
+      handleCancel();
+      setIsEditing(false);
+      setLoading(false);
     }
   };
 
@@ -530,14 +558,15 @@ const ManageModel = () => {
                   setSelectedBrandId(brandId);
                   setBrandError(false); // Clear error on selection
                   setIsEditing(false);
-                  if (!value) {
-                    setSelectedCategory("");
-                    setCategoryId("");
-                    setSubcategoryName("");
-                    setSubCategoryId("");
-                    setfilteredSubCat([]);
-                    setfilteredCat([]);
-                  }
+
+                  // Clear category and subcategory when brand changes
+                  setSelectedCategory("");
+                  setCategoryId("");
+                  setSelectedCategoryName(""); // Reset displayed category name
+                  setSubcategoryName("");
+                  setSubCategoryId("");
+                  setfilteredSubCat([]); // Clear filtered subcategories
+                  setfilteredCat([]); // Clear filtered categories
                 }}
                 renderInput={(params) => (
                   <TextField
@@ -550,7 +579,7 @@ const ManageModel = () => {
                   />
                 )}
               />
-               )}
+            )}
             {editIndex && (
               <TextField
                 disabled
@@ -562,37 +591,35 @@ const ManageModel = () => {
               />
             )}
           </Grid>
-
-          <Grid item>
+<Grid item>
             {!editIndex && (
-              <Autocomplete
-                options={filteredCat}
-                value={selectedCategory} // Controlled value
-                getOptionLabel={(option) => option.categoryName || ""}
-                onChange={(event, newValue) => {
-                  setSelectedCategory(newValue); // Update selected category state
-                  setSelectedCategoryName(newValue ? newValue.categoryName: "")
-                  setCategoryId(newValue ? newValue._id : "");
-                  setCategoryError(false); // Clear error on selection
+          <Autocomplete
+            options={filteredCat}
+            value={selectedCategory} // Controlled value
+            getOptionLabel={(option) => option.categoryName || ""}
+            onChange={(event, newValue) => {
+              setSelectedCategory(newValue); // Update selected category state
+              setSelectedCategoryName(newValue ? newValue.categoryName : "");
+              setCategoryId(newValue ? newValue._id : "");
+              setCategoryError(false); // Clear error on selection
 
-                  if (!newValue) {
-                    setSubcategoryName("");
-                    setSubCategoryId("");
-                    setfilteredSubCat([]);
-                  }
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Category"
-                    variant="standard"
-                    style={{ width: "10rem" }}
-                    error={categoryError}
-                    helperText={categoryError ? "Category is required." : ""}
-                  />
-                )}
+              // Clear subcategory when category changes
+              setSubcategoryName("");
+              setSubCategoryId("");
+              setfilteredSubCat([]); // Clear filtered subcategories
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Category"
+                variant="standard"
+                style={{ width: "10rem" }}
+                error={categoryError}
+                helperText={categoryError ? "Category is required." : ""}
               />
-              )}
+            )}
+          />
+          )}
             {editIndex && (
               <TextField
                 disabled
@@ -612,7 +639,7 @@ const ManageModel = () => {
                 value={subcategoryName} // Controlled value
                 getOptionLabel={(option) => option.subcategoryName || ""}
                 onChange={(event, newValue) => {
-                  setSubcategoryName(newValue );
+                  setSubcategoryName(newValue);
                   setSubCategoryId(newValue ? newValue._id : "");
                   setSubCategoryError(false); // Clear error on selection
                 }}
@@ -649,8 +676,9 @@ const ManageModel = () => {
               value={modelName}
               focused={!!editIndex}
               onChange={(e) => {
-                if(categoryId2 && subcategoryId2){
-                setModelName2(e.target.value);}
+                if (categoryId2 && subcategoryId2) {
+                  setModelName2(e.target.value);
+                }
                 setModelName(e.target.value);
                 setModelNameError(false); // Clear error on input
               }}
@@ -674,7 +702,7 @@ const ManageModel = () => {
             />
           </Grid>
           <Grid item>
-            
+
             <Autocomplete
               options={hsnCodes}
               getOptionLabel={(option) => option.hsnCode || ""} // Display the HSN Code in the dropdown
@@ -694,13 +722,13 @@ const ManageModel = () => {
                 />
               )}
             />
-          
-           
-            
+
+
+
           </Grid>
           {/* {hsnCode ? hsnCode.hsnCode : "No HSN Code selected"} */}
 
-       
+
 
           {/* <Grid item>
             <TextField
@@ -808,119 +836,120 @@ const ManageModel = () => {
         </Grid>
 
         <Grid container gap={5}>
-                    <Grid item>
-                      <Autocomplete
-                        id="brand-autocomplete"
-                        closeOnSelect
-                        options={brandList}
-                        getOptionLabel={(option) => option.brandName}
-                        value={brandName2 ? { brandName:brandName2 } : null} // Controlled value for Brand
-                        onChange={(event, value) => {
-                          const brandId = value?._id || null;
-                          const brandName = value ? value.brandName : "";
-          
-                          // Update brand-related states
-                          setBrandName2(brandName);
-                          setselectedBrandId2(brandId);
-          
-                          // Clear dependent fields if Brand is cleared
-                          if (!value) {
-                            setselectedCategory2("");
-                            setselectedBrandId2("")
-                            setCategoryId2("");
-                            setSubcategoryName2("");
-                            setSubcategoryId2(null);
-                            setSubcategoryName2(null);
-                            setModelName2(null);
-                            setfilteredSubCat2([]);
-                            setfilteredCat2([]);
-                            setFilteredMod([]);
-                          }
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            label="Brand"
-                            variant="standard"
-                            style={{ width: "10rem" }}
-                          />
-                        )}
-                      />
-                    </Grid>
-          
-                    <Grid item>
-                      <Autocomplete
-                        options={filteredCat2}
-                        getOptionLabel={(option) => option.categoryName || ""}
-                        value={selectedCategory2 ? { categoryName: selectedCategory2 } : null} // Controlled value for Category
-                        onChange={(event, newValue) => {
-                          const categoryName = newValue ? newValue.categoryName : "";
-                          const categoryId = newValue ? newValue._id : "";
-          
-                          // Update Category-related states
-                          setselectedCategory2(categoryName);
-                          setCategoryId2(categoryId);
-          
-                          // Clear Sub-Category if Category is cleared
-                          if (!newValue) {
-                            setSubcategoryName2("");
-                            setSubcategoryId2(null);
-                            setSubcategoryName2(null);
-                            setModelName2(null);
-                            setfilteredCat2([])
-                            setfilteredSubCat2([]);
-                            setFilteredMod([]);
-                          }
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            label="Category"
-                            variant="standard"
-                            style={{ width: "10rem" }}
-                          />
-                        )}
-                      />
-                    </Grid>
-          
-                    <Grid item>
-                      <Autocomplete
-                        options={filteredSubCat2}
-                        getOptionLabel={(option) => option.subcategoryName || ""} // Display the subcategory name
-                        value={
-                          filteredSubCat2.find((item) => item.subcategoryName === subcategoryName2) || null
-                        } // Ensure the value matches an object from options
-                        onChange={(event, newValue) => {
-                          // Update Sub-Category-related state
-                          const selectedSubcategoryName = newValue ? newValue.subcategoryName : "";
-                          const selectedSubcategoryId = newValue ? newValue._id : "";
-                          setSubcategoryName2(selectedSubcategoryName); // Use the setter function to update the state
-                          setSubcategoryId2(selectedSubcategoryId);
+          <Grid item>
+            <Autocomplete
+              id="brand-autocomplete"
+              closeOnSelect
+              options={brandList}
+              getOptionLabel={(option) => option.brandName || ""}
+              value={brandName2 ? { brandName: brandName2 } : null} // Controlled value for Brand
+              onChange={(event, value) => {
+                const brandId = value ? value._id : "";
+                const brandName = value ? value.brandName : "";
 
-                          if(!newValue)
-                          {
-                            setfilteredSubCat2([]);
+                // Update brand-related states
+                setBrandName2(brandName);
+                setselectedBrandId2(brandId);
+
+                // Clear dependent fields and options
+                setselectedCategory2("");
+                setCategoryId2("");
+                setfilteredCat2([]);
+                            setSubcategoryName2("");
+                            setSubcategoryName2("");
+                            setSubcategoryId2(null);
+                            setSubcategoryName2(null);
                             setModelName2(null);
-                            setFilteredMod([]);
-                          }
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            label="Subcategory"
-                            variant="standard"
-                            style={{ width: "10rem" }}
-                          />
-                        )}
-                      />
-                    </Grid>
-          
+                setSubcategoryName2("");
+                            setSubcategoryId2(null);
+                            setSubcategoryName2(null);
+                            setModelName2(null);
+                setfilteredSubCat2([]);
+                setModelName2("");
+                setFilteredMod([]);
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Brand"
+                  variant="standard"
+                  style={{ width: "10rem" }}
+                />
+              )}
+            />
+          </Grid>
+
+          <Grid item>
+            <Autocomplete
+              options={filteredCat2} // Dynamically updated category options
+              getOptionLabel={(option) => option.categoryName || ""}
+              value={selectedCategory2 ? { categoryName: selectedCategory2 } : null} // Controlled value for Category
+              onChange={(event, newValue) => {
+                const categoryName = newValue ? newValue.categoryName : "";
+                const categoryId = newValue ? newValue._id : "";
+
+                // Update category-related states
+                setselectedCategory2(categoryName);
+                setCategoryId2(categoryId);
+
+                // Clear subcategory and model if category is cleared or changed
+                setSubcategoryName2("");
+                setfilteredSubCat2([]);
+                setModelName2("");
+                setFilteredMod([]);// Clear model options
+                
+                
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Category"
+                  variant="standard"
+                  style={{ width: "10rem" }}
+                />
+              )}
+            />
+          </Grid>
+
+          <Grid item>
+            <Autocomplete
+              options={filteredSubCat2}
+              getOptionLabel={(option) => option.subcategoryName || ""} // Display the subcategory name
+              value={
+                filteredSubCat2.find((item) => item.subcategoryName === subcategoryName2) || null
+              } // Ensure the value matches an object from options
+              onChange={(event, newValue) => {
+                // Update Sub-Category-related state
+                const selectedSubcategoryName = newValue ? newValue.subcategoryName : "";
+                const selectedSubcategoryId = newValue ? newValue._id : "";
+                setSubcategoryName2(selectedSubcategoryName); // Use the setter function to update the state
+                setSubcategoryId2(selectedSubcategoryId);
+
+                if (!newValue) {
+                  setSubcategoryName2("");
+                  setModelName2(null);
+                  setSubcategoryId2("");
+                  setFilteredMod([]);
+                }
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Subcategory"
+                  variant="standard"
+                  style={{ width: "10rem" }}
+                />
+              )}
+            />
+          </Grid>
+
           <Grid item>
             <Autocomplete
               options={filteredMod}
               getOptionLabel={(option) => option.modelName || ""}
               value={filteredMod.find((mod) => mod.modelName === modelName2) || null} // Set the value correctly
               onChange={(event, newValue) => {
+                // Update the model name state
                 setModelName2(newValue ? newValue.modelName : "");
               }}
               renderInput={(params) => (
@@ -932,8 +961,8 @@ const ManageModel = () => {
                 />
               )}
             />
-
           </Grid>
+
           <Grid item>
             <CommonButton name={"Search"} handleOnClick={handleSearch} />
           </Grid>

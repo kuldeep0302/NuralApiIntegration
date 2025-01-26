@@ -125,7 +125,6 @@ const Manageproductsubcatgeory = () => {
       const response = await fetchBrandList();
       //  setTableData(response.data.brandList);
       setBrandList(response.data.brandList);
-      setBrandList(response.data.brandList);
       const filteredActiveBrands = response.data.brandList.filter(
         (brand) => brand.active === true
       );
@@ -434,24 +433,29 @@ const Manageproductsubcatgeory = () => {
                 id="brand-autocomplete"
                 closeOnSelect
                 options={activeBrandList}
-                getOptionLabel={(option) => option.brandName}
+                getOptionLabel={(option) => option.brandName || ""}
                 value={brandName ? { brandName } : null} // Controlled value for Brand
                 onChange={(event, value) => {
-                  const brandId = value?._id || null;
+                  const brandId = value ? value._id : null;
                   const brandName = value ? value.brandName : "";
-                  setIsEditing(false);
+
                   // Update brand-related states
                   setBrandName(brandName);
                   setSelectedBrandId(brandId);
 
                   // Clear dependent fields if Brand is cleared
-                  if (!value) {
-                    setSelectedCategory("");
-                    setCategoryId("");
-                    setfilteredCat([]);
-                    setSubCategoryList([]);
-                  }
-                  setBrandError(false); // Clear error on selection
+                  setSelectedCategory("");
+                  setCategoryId("");
+                  setfilteredCat([]);
+                  setSubCategory("");
+                  setSubCategoryList([]);
+
+                  // Clear error states
+                  setBrandError(false);
+                  setCategoryError(false);
+
+                  // Optionally log to confirm the change
+                  console.log("Brand changed to:", brandName);
                 }}
                 renderInput={(params) => (
                   <TextField
@@ -485,6 +489,8 @@ const Manageproductsubcatgeory = () => {
                 onChange={(event, newValue) => {
                   const categoryName = newValue ? newValue.categoryName : "";
                   const categoryId = newValue ? newValue._id : "";
+
+                  // Update category-related states
                   setSelectedCategory(categoryName);
                   setCategoryId(categoryId);
 
@@ -493,7 +499,12 @@ const Manageproductsubcatgeory = () => {
                     setSubCategory("");
                     setSubCategoryList([]);
                   }
-                  setCategoryError(false); // Clear error on selection
+
+                  // Clear error state
+                  setCategoryError(false);
+
+                  // Optionally log to confirm the change
+                  console.log("Category changed to:", categoryName);
                 }}
                 renderInput={(params) => (
                   <TextField
@@ -517,6 +528,7 @@ const Manageproductsubcatgeory = () => {
               />
             )}
           </Grid>
+
 
           <Grid item>
             <TextField
@@ -627,25 +639,22 @@ const Manageproductsubcatgeory = () => {
               id="brand-autocomplete"
               closeOnSelect
               options={brandList}
-              getOptionLabel={(option) => option.brandName}
-              value={brandName2 ? { brandName:brandName2 } : null} // Controlled value for Brand
+              getOptionLabel={(option) => option.brandName || ""}
+              value={brandName2 ? { brandName: brandName2 } : null} // Controlled value for Brand
               onChange={(event, value) => {
-                const brandId = value?._id || null;
+                const brandId = value ? value._id : "";
                 const brandName = value ? value.brandName : "";
 
                 // Update brand-related states
                 setBrandName2(brandName);
                 setselectedBrandId2(brandId);
 
-                // Clear dependent fields if Brand is cleared
-                if (!value) {
-                  setselectedCategory2("");
-                  setselectedBrandId2("")
-                  setCategoryId2("");
-                  setSubcategoryName2("");
-                  setfilteredCat2([]);
-                  setfilteredSubCat2([]);
-                }
+                // Clear dependent fields and options
+                setselectedCategory2("");
+                setCategoryId2("");
+                setfilteredCat2([]);
+                setSubcategoryName2("");
+                setfilteredSubCat2([]);
               }}
               renderInput={(params) => (
                 <TextField
@@ -660,18 +669,18 @@ const Manageproductsubcatgeory = () => {
 
           <Grid item>
             <Autocomplete
-              options={filteredCat2}
+              options={filteredCat2} // Dynamically updated category options
               getOptionLabel={(option) => option.categoryName || ""}
               value={selectedCategory2 ? { categoryName: selectedCategory2 } : null} // Controlled value for Category
               onChange={(event, newValue) => {
                 const categoryName = newValue ? newValue.categoryName : "";
                 const categoryId = newValue ? newValue._id : "";
 
-                // Update Category-related states
+                // Update category-related states
                 setselectedCategory2(categoryName);
                 setCategoryId2(categoryId);
 
-                // Clear Sub-Category if Category is cleared
+                // Clear subcategory if category is cleared
                 if (!newValue) {
                   setSubcategoryName2("");
                   setfilteredSubCat2([]);
@@ -690,15 +699,15 @@ const Manageproductsubcatgeory = () => {
 
           <Grid item>
             <Autocomplete
-              options={filteredSubCat2}
-              getOptionLabel={(option) => option.subcategoryName || ""} // Display the subcategory name
+              options={filteredSubCat2} // Dynamically updated subcategory options
+              getOptionLabel={(option) => option.subcategoryName || ""}
               value={
                 filteredSubCat2.find((item) => item.subcategoryName === subcategoryName2) || null
               } // Ensure the value matches an object from options
               onChange={(event, newValue) => {
-                // Update Sub-Category-related state
+                // Update subcategory-related state
                 const selectedSubcategoryName = newValue ? newValue.subcategoryName : "";
-                setSubcategoryName2(selectedSubcategoryName); // Use the setter function to update the state
+                setSubcategoryName2(selectedSubcategoryName);
               }}
               renderInput={(params) => (
                 <TextField
@@ -710,8 +719,6 @@ const Manageproductsubcatgeory = () => {
               )}
             />
           </Grid>
-
-        
 
 
           <Grid item>

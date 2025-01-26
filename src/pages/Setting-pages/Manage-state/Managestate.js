@@ -434,12 +434,17 @@ const Managestate = () => {
                     setIsEditing(false);
                     setCountryId(value?._id || null);
                     setSelectedCountry(value || null);
+
+                    // Clear zone-related states when the country changes
+                    setZoneId(null);
+                    setZoneName(null);
+                    setfilteredzones([]);
+
                     if (!value) {
-                      setZoneId(null);
-                      setZoneName(null);
-                      setfilteredzones([]);
+                      setCountryError(true); // Display error if country is not selected
+                    } else {
+                      setCountryError(false); // Clear error on valid selection
                     }
-                    setCountryError(false); // Clear error on valid selection
                   }}
                   renderInput={(params) => (
                     <TextField
@@ -495,7 +500,7 @@ const Managestate = () => {
                   id="outlined-basic"
                   label="Zone"
                   variant="standard"
-                  value={zoneName } // Display zoneName if available
+                  value={zoneName} // Display zoneName if available
                 />
               )}
             </div>
@@ -552,14 +557,12 @@ const Managestate = () => {
                 setselCountry2(value || null);
 
                 // Reset dependent fields if Country is cleared
-                if (!value) {
-                  setselZoneId2(null);
-                  setselZoneName2(null);
-                  setstateId2(null);
-                  setselstateName2(null);
-                  setfilteredzones2([]); // Clear zones
-                  setFilStates2([]); // Clear states
-                }
+                setselZoneId2(null);
+                setselZoneName2(null);
+                setstateId2(null);
+                setselstateName2(null);
+                setfilteredzones2([]); // Clear zones
+                setFilStates2([]); // Clear states
               }}
               renderInput={(params) => (
                 <TextField {...params} label="Country" variant="standard" />
@@ -580,11 +583,9 @@ const Managestate = () => {
                 setselZoneName2(value || null);
 
                 // Reset dependent fields if Zone is cleared
-                if (!value) {
-                  setstateId2(null);
-                  setselstateName2(null);
-                  setFilStates2([]); // Clear states
-                }
+                setstateId2(null);
+                setselstateName2(null);
+                setFilStates2([]); // Clear states
               }}
               renderInput={(params) => (
                 <TextField
@@ -618,8 +619,8 @@ const Managestate = () => {
                 />
               )}
             />
-
           </div>
+
 
 
           {/* {selstateName?.stateName} {page} {limit} {countryId} {selZoneId} */}

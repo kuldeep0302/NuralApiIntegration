@@ -573,7 +573,6 @@ const Managebrand = () => {
           />
         </div>
       </Grid>
-     
     </Grid>
   );
 };

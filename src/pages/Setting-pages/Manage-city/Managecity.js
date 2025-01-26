@@ -503,125 +503,131 @@ const [flag, setFlag] = useState(false);
         <div className="textbox-main-Managecity">
           <div className="line-Managecity">
             <div className="textinput-Managecity">
-        {!editIndex && (
-          <Autocomplete
-            id="country-autocomplete"
-            clearOnEscape
-            options={countriesActive}
-            getOptionLabel={(option) => option.countryName}
-            value={selectedCountry || null} // Controlled value
-            onChange={(event, value) => {
-              setCountryId(value?._id || null);
-              setSelectedCountry(value || null);
-              if (!value) {
-                setZoneId(null);
-                setZoneName(null);
-                setstateId(null);
-                setstateName(null);
-                setfilteredzones([]);
-                setStates([]);
-              }
-              setCountryError(false); // Clear error on valid selection
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Country"
-                variant="standard"
-                required
-                error={countryError}
-                helperText={countryError ? "Country is required." : null}
-              />
-            )}
-          />
-        )}
-        {editIndex && (
-          <TextField
-            disabled
-            id="outlined-basic"
-            label="Country"
-            variant="standard"
-            value={selectedCountry}
-          />
-        )}
-      </div>
+              {!editIndex && (
+                <Autocomplete
+                  id="country-autocomplete"
+                  clearOnEscape
+                  options={countriesActive}
+                  getOptionLabel={(option) => option.countryName}
+                  value={selectedCountry || null} // Controlled value
+                  onChange={(event, value) => {
+                    setCountryId(value?._id || null);
+                    setSelectedCountry(value || null);
 
-      <div className="textinput-Managecity">
-        {!editIndex && (
-          <Autocomplete
-            id="zone-autocomplete"
-            clearOnEscape
-            options={filteredzones}
-            value={zoneName || null} // Controlled value
-            getOptionLabel={(option) => option.zoneName || ""}
-            onChange={(event, value) => {
-              setZoneId(value?._id || null);
-              setZoneName(value || null);
-              if (!value) {
-                setstateId(null);
-                setstateName(null);
-                setStates([]);
-              }
-              setZoneError(false); // Clear error on valid selection
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Zone"
-                variant="standard"
-                required
-                error={zoneError}
-                helperText={zoneError ? "Zone is required." : null}
-              />
-            )}
-          />
-        )}
-        {editIndex && (
-          <TextField
-            disabled
-            id="outlined-basic"
-            label="Zone"
-            variant="standard"
-            value={zoneName}
-          />
-        )}
-      </div>
+                    // Clear child fields when country changes
+                    setZoneId(null);
+                    setZoneName(null);
+                    setstateId(null);
+                    setstateName(null);
+                    setfilteredzones(value ? value.zones || [] : []); // Update zones based on the selected country
+                    setStates([]); // Clear states when country changes
 
-      <div className="textinput-Managecity">
-        {!editIndex && (
-          <Autocomplete
-            clearOnEscape
-            id="state-autocomplete"
-            options={states}
-            value={stateName || null} // Controlled value
-            getOptionLabel={(option) => option.stateName || ""}
-            onChange={(event, value) => {
-              setstateId(value?._id || null);
-              setstateName(value || null);
-              setStateError(false); // Clear error on valid selection
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="State Name"
-                variant="standard"
-                required
-                error={stateError}
-                helperText={stateError ? "State is required." : null}
-              />
-            )}
-          />
-        )}
-        {editIndex && (
-          <TextField
-            disabled
-            id="outlined-basic"
-            label="State Name"
-            variant="standard"
-            value={stateName}
-          />
-        )}
-      </div>
+                    setCountryError(false); // Clear error on valid selection
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Country"
+                      variant="standard"
+                      required
+                      error={countryError}
+                      helperText={countryError ? "Country is required." : null}
+                    />
+                  )}
+                />
+              )}
+              {editIndex && (
+                <TextField
+                  disabled
+                  id="outlined-basic"
+                  label="Country"
+                  variant="standard"
+                  value={selectedCountry}
+                />
+              )}
+            </div>
+
+            <div className="textinput-Managecity">
+              {!editIndex && (
+                <Autocomplete
+                  id="zone-autocomplete"
+                  clearOnEscape
+                  options={filteredzones}
+                  value={zoneName || null} // Controlled value
+                  getOptionLabel={(option) => option.zoneName || ""}
+                  onChange={(event, value) => {
+                    setZoneId(value?._id || null);
+                    setZoneName(value || null);
+
+                    // Clear child fields when zone changes
+                    setstateId(null);
+                    setstateName(null);
+                    setStates(value ? value.states || [] : []); // Update states based on the selected zone
+
+                    setZoneError(false); // Clear error on valid selection
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Zone"
+                      variant="standard"
+                      required
+                      error={zoneError}
+                      helperText={zoneError ? "Zone is required." : null}
+                    />
+                  )}
+                />
+              )}
+              {editIndex && (
+                <TextField
+                  disabled
+                  id="outlined-basic"
+                  label="Zone"
+                  variant="standard"
+                  value={zoneName}
+                />
+              )}
+            </div>
+
+            <div className="textinput-Managecity">
+              {!editIndex && (
+                <Autocomplete
+                  clearOnEscape
+                  id="state-autocomplete"
+                  options={states}
+                  value={stateName || null} // Controlled value
+                  getOptionLabel={(option) => option.stateName || ""}
+                  onChange={(event, value) => {
+                    setstateId(value?._id || null);
+                    setstateName(value || null);
+
+                    // Clear child fields when state changes (if required)
+                    // Currently, no child fields depend on state
+
+                    setStateError(false); // Clear error on valid selection
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="State Name"
+                      variant="standard"
+                      required
+                      error={stateError}
+                      helperText={stateError ? "State is required." : null}
+                    />
+                  )}
+                />
+              )}
+              {editIndex && (
+                <TextField
+                  disabled
+                  id="outlined-basic"
+                  label="State Name"
+                  variant="standard"
+                  value={stateName}
+                />
+              )}
+            </div>
 
             <TextField
               id="standard-basic"
@@ -671,17 +677,15 @@ const [flag, setFlag] = useState(false);
                 setCountryId2(value?._id || null);
                 setselCountry2(value || null);
 
-                // Reset dependent fields if Country is cleared
-                if (!value) {
-                  setselZoneId2(null);
-                  setselZoneName2(null);
-                  setstateId2(null);
-                  setselstateName2(null);
-                  setfilteredzones2([]); // Clear zones
-                  setFilStates2([]); // Clear states
-                  setSelectedCity(null);
-                  setFilteredCityList([]);
-                }
+                // Reset all dependent fields when the country is changed
+                setselZoneId2(null);
+                setselZoneName2(null);
+                setstateId2(null);
+                setselstateName2(null);
+                setfilteredzones2([]); // Clear zones
+                setFilStates2([]); // Clear states
+                setSelectedCity(null);
+                setFilteredCityList([]);
               }}
               renderInput={(params) => (
                 <TextField {...params} label="Country" variant="standard" />
@@ -697,19 +701,16 @@ const [flag, setFlag] = useState(false);
               getOptionLabel={(option) => option.zoneName || ""}
               value={selZoneName2 || null} // Controlled value for second API
               onChange={(event, value) => {
-                // Update zone-related states for second API
+                // Update zone-related states for the second API
                 setselZoneId2(value?._id || null);
                 setselZoneName2(value || null);
 
-                // Reset dependent fields if Zone is cleared
-                if (!value) {
-                  setstateId2(null);
-                  setselstateName2(null);
-                  setSelectedCity(null);
-                  setFilStates2([]); // Clear states
-                  setFilteredCityList([]);
-                  setSelectedCity(null);
-                }
+                // Reset all dependent fields when the zone is changed
+                setstateId2(null);
+                setselstateName2(null);
+                setSelectedCity(null);
+                setFilStates2([]); // Clear states
+                setFilteredCityList([]);
               }}
               renderInput={(params) => (
                 <TextField
@@ -733,11 +734,10 @@ const [flag, setFlag] = useState(false);
                 // Update state-related states for the second API
                 setstateId2(value?._id || null); // Set the selected state ID
                 setselstateName2(value ? value.stateName : null); // Set the selected state name
-                if(!value){
-                  setSelectedCity(null);
-                  setFilteredCityList([]);
-                }
 
+                // Reset city-related fields when the state is changed
+                setSelectedCity(null);
+                setFilteredCityList([]);
               }}
               renderInput={(params) => (
                 <TextField
@@ -748,7 +748,6 @@ const [flag, setFlag] = useState(false);
                 />
               )}
             />
-
           </div>
 
           <div className="textinput-Managecity">
@@ -756,8 +755,7 @@ const [flag, setFlag] = useState(false);
               id="city-autocomplete"
               options={FilteredCityList}
               getOptionLabel={(option) => option.cityName}
-              value={FilteredCityList.find((city)=> city.cityName ===selectedCity) || null }
-              // value={filStates2.find((state) => state.stateName === selstateName2) || null} // Ensure the value matches an option
+              value={FilteredCityList.find((city) => city.cityName === selectedCity) || null}
               onChange={(event, newValue) => {
                 // Update city-related states
                 setSelectedCity(newValue ? newValue.cityName : null);
