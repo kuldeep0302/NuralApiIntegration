@@ -3,7 +3,6 @@ import axios from "axios";
 // Set base URL for API requests
 const API_BASE_URL = "http://localhost:8090/api/v1";
 
-
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -14,10 +13,9 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
-    console.log("token",token)
+    console.log("token", token);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-     
     }
 
     return config;
@@ -64,7 +62,7 @@ export const createCountry = async (data) => {
 };
 export const getCountryListActive = async (search, page, limit, status) => {
   try {
-    const queryParams = { search, page, limit,  status };
+    const queryParams = { search, page, limit, status };
     const response = await api.get("/countries", {
       params: queryParams,
     });
@@ -75,11 +73,12 @@ export const getCountryListActive = async (search, page, limit, status) => {
   }
 };
 
-export const getCountryList = async (body={}) => {
+export const getCountryList = async (body = {}) => {
   try {
-    const queryString = body && Object.keys(body).length > 0
-      ? `?${new URLSearchParams(body).toString()}`
-      : "";
+    const queryString =
+      body && Object.keys(body).length > 0
+        ? `?${new URLSearchParams(body).toString()}`
+        : "";
     const response = await api.get(`/countries${queryString}`);
     return response.data;
   } catch (error) {
@@ -103,7 +102,7 @@ export const updateCountryStatus = async (body) => {
   try {
     // const jsonBody = JSON.stringify(hsnCode, status);
 
-    const response = await api.post('/country/toggle', body);
+    const response = await api.post("/country/toggle", body);
     return response.data;
   } catch (error) {
     console.log(`Error updating country status ${error}`);
@@ -135,10 +134,11 @@ export const createZone = async (data) => {
 
 export const getZoneList = async (body = {}) => {
   try {
-    const queryString = body && Object.keys(body).length > 0
-      ? `?${new URLSearchParams(body).toString()}`
-      : "";
-    
+    const queryString =
+      body && Object.keys(body).length > 0
+        ? `?${new URLSearchParams(body).toString()}`
+        : "";
+
     const response = await api.get(`/zones${queryString}`);
     return response.data;
   } catch (error) {
@@ -147,9 +147,9 @@ export const getZoneList = async (body = {}) => {
   }
 };
 
- export const getfilteredZoneList = async (page, limit, countryId, status) => {
+export const getfilteredZoneList = async (page, limit, countryId, status) => {
   try {
-    const queryParams = {page, limit, countryId, status}
+    const queryParams = { page, limit, countryId, status };
     const response = await api.get("/zones", {
       params: queryParams,
     });
@@ -158,13 +158,13 @@ export const getZoneList = async (body = {}) => {
     console.error("Error fetching zones API:", error);
     throw error;
   }
-}
+};
 
 export const updateZoneStatus = async (body) => {
   try {
     // const jsonBody = JSON.stringify(hsnCode, status);
 
-    const response = await api.post('/zone/toggle', body);
+    const response = await api.post("/zone/toggle", body);
     return response.data;
   } catch (error) {
     console.log(`Error updating zone status ${error}`);
@@ -185,9 +185,16 @@ export const updateZone = async (data) => {
 
 // --------------------------------Manage State API ----------------------------------------------------------
 
-export const getStateList = async (stateName, page, limit, countryId, zoneId, status) => {
+export const getStateList = async (
+  stateName,
+  page,
+  limit,
+  countryId,
+  zoneId,
+  status
+) => {
   try {
-    const queryParams = {stateName, page, limit,countryId, zoneId, status};
+    const queryParams = { stateName, page, limit, countryId, zoneId, status };
     const response = await api.get("/states", {
       params: queryParams,
     });
@@ -197,7 +204,13 @@ export const getStateList = async (stateName, page, limit, countryId, zoneId, st
     throw error;
   }
 };
-export const getStateList2 = async (stateName, page, limit, countryId, zoneId) => {
+export const getStateList2 = async (
+  stateName,
+  page,
+  limit,
+  countryId,
+  zoneId
+) => {
   try {
     const queryParams = { stateName, page, limit, countryId, zoneId };
     const response = await api.get("/states", {
@@ -305,17 +318,23 @@ export const createDistrict = async (data) => {
 
 // --------------------------------Manage City API ----------------------------------------------------------
 
-export const getCityList = async (countryId, zoneId, stateId, page, limit, cityName) => {
+export const getCityList = async (
+  countryId,
+  zoneId,
+  stateId,
+  page,
+  limit,
+  cityName
+) => {
   try {
     const queryParams = { countryId, zoneId, stateId, page, limit, cityName };
-    const response = await api.get("/cities", {params: queryParams});
+    const response = await api.get("/cities", { params: queryParams });
     return response.data;
   } catch (error) {
     console.error("Error fetching cities API:", error);
     throw error;
   }
 };
-
 
 export const deleteCityList = async (Id) => {
   try {
@@ -365,11 +384,10 @@ export const updateCityStatus = async (city) => {
   }
 };
 
-
 // --------------------------------Manage Brand API ----------------------------------------------------------
 export const fetchBrandList = async (page, limit, search) => {
   try {
-    const queryParams = {page, limit, search};
+    const queryParams = { page, limit, search };
     console.log(queryParams);
     const response = await api.get("/brands", {
       params: queryParams,
@@ -384,7 +402,7 @@ export const fetchBrandList = async (page, limit, search) => {
 export const fetchAllBrandList = async () => {
   try {
     const queryParams = {};
-    const response = await api.get("/brands",{
+    const response = await api.get("/brands", {
       params: queryParams,
     });
     return response.data;
@@ -439,15 +457,18 @@ export const deleteBrand = async (brandId) => {
   }
 };
 
-
-
 //---------------------------------Manage Category API ----------------------------------------------------------
 
-
-export const fetchCategoryList = async (brandId, categoryName, page, limit, status) => {
+export const fetchCategoryList = async (
+  brandId,
+  categoryName,
+  page,
+  limit,
+  status
+) => {
   try {
     const queryParams = { brandId, categoryName, page, limit, status };
-    const response = await api.get("/categories" , {
+    const response = await api.get("/categories", {
       params: queryParams,
     });
     return response.data;
@@ -456,7 +477,12 @@ export const fetchCategoryList = async (brandId, categoryName, page, limit, stat
     throw error;
   }
 };
-export const fetchCategoryList2 = async (brandId,categoryName,page,limit) => {
+export const fetchCategoryList2 = async (
+  brandId,
+  categoryName,
+  page,
+  limit
+) => {
   try {
     const queryParams = { brandId, categoryName, page, limit };
     const response = await api.get("/categories", {
@@ -470,7 +496,7 @@ export const fetchCategoryList2 = async (brandId,categoryName,page,limit) => {
 };
 export const fetchAllCategoryList = async (page, limit) => {
   try {
-    const queryParams = {  page, limit };
+    const queryParams = { page, limit };
     const response = await api.get("/categories", {
       params: queryParams,
     });
@@ -486,8 +512,7 @@ export const createCategory = async (category) => {
     const jsonBody = JSON.stringify(category);
     const response = await api.post("/category", jsonBody);
     return response.data;
-  }
-  catch (error) {
+  } catch (error) {
     console.log(`Error creating category ${error}`);
     throw error;
   }
@@ -498,8 +523,7 @@ export const updateCategory = async (data) => {
     const jsonBody = JSON.stringify(data);
     const response = await api.put("/category", jsonBody);
     return response.data;
-  }
-  catch (error) {
+  } catch (error) {
     console.log(`Error updating category ${error}`);
     throw error;
   }
@@ -518,12 +542,10 @@ export const updateCategoryStatus = async (category) => {
 
 export const deleteCategory = async (categoryId) => {
   try {
-    const jsonBody = JSON.stringify({ categoryId: categoryId
-    });
+    const jsonBody = JSON.stringify({ categoryId: categoryId });
     const response = await api.post("/category/delete", jsonBody);
     return response.data;
-  }
-  catch (error) {
+  } catch (error) {
     console.log(`Error deleting category ${error}`);
     throw error;
   }
@@ -531,8 +553,13 @@ export const deleteCategory = async (categoryId) => {
 
 // --------------------------------Manage SubCategory API ----------------------------------------------------------
 
-
-export const fetchSubCategoryList = async (subcategoryName,page, limit, brandId, categoryId ) => {
+export const fetchSubCategoryList = async (
+  subcategoryName,
+  page,
+  limit,
+  brandId,
+  categoryId
+) => {
   try {
     const queryParams = { subcategoryName, page, limit, brandId, categoryId };
     const response = await api.get("/subcategories", {
@@ -543,10 +570,24 @@ export const fetchSubCategoryList = async (subcategoryName,page, limit, brandId,
     console.error("Error fetching subcategory list:", error);
     throw error;
   }
-}
-export const fetchSubCategoryListActive = async (subcategoryName, page, limit, brandId, categoryId, status) => {
+};
+export const fetchSubCategoryListActive = async (
+  subcategoryName,
+  page,
+  limit,
+  brandId,
+  categoryId,
+  status
+) => {
   try {
-    const queryParams = { subcategoryName, page, limit, brandId, categoryId, status };
+    const queryParams = {
+      subcategoryName,
+      page,
+      limit,
+      brandId,
+      categoryId,
+      status,
+    };
     const response = await api.get("/subcategories", {
       params: queryParams,
     });
@@ -555,30 +596,28 @@ export const fetchSubCategoryListActive = async (subcategoryName, page, limit, b
     console.error("Error fetching subcategory list:", error);
     throw error;
   }
-}
+};
 export const createSubCategory = async (subCategory) => {
   try {
     const jsonBody = JSON.stringify(subCategory);
     const response = await api.post("/subcategory", jsonBody);
     return response.data;
-  }
-  catch (error) {
+  } catch (error) {
     console.log(`Error creating subcategory ${error}`);
     throw error;
   }
-}
+};
 
 export const updateSubCategory = async (data) => {
   try {
     const jsonBody = JSON.stringify(data);
     const response = await api.put("/subcategory", jsonBody);
     return response.data;
-  }
-  catch (error) {
+  } catch (error) {
     console.log(`Error updating subcategory ${error}`);
     throw error;
   }
-}
+};
 
 export const updateSubCategoryStatus = async (subcategoryId) => {
   try {
@@ -589,60 +628,70 @@ export const updateSubCategoryStatus = async (subcategoryId) => {
     console.log(`Error updating subcategory status ${error}`);
     throw error;
   }
-}
+};
 
 // --------------------------------Manage Model API ----------------------------------------------------------
 
-export const fetchModelList = async (modelName , page, limit, brandId, categoryId, subcategoryId) => {
+export const fetchModelList = async (
+  modelName,
+  page,
+  limit,
+  brandId,
+  categoryId,
+  subcategoryId
+) => {
   try {
-    const queryParams = { modelName, page, limit, brandId, categoryId, subcategoryId };
+    const queryParams = {
+      modelName,
+      page,
+      limit,
+      brandId,
+      categoryId,
+      subcategoryId,
+    };
     const response = await api.get("/models", {
       params: queryParams,
     });
     return response.data;
-  }
-  catch (error) {
+  } catch (error) {
     console.error("Error fetching model list:", error);
     throw error;
   }
-  }
-  
-  export const createModel = async (model) => {
-    try {
-      const jsonBody = JSON.stringify(model);
-      const response = await api.post("/model", jsonBody);
-      return response.data;
-    }
-    catch (error) {
-      console.log(`Error creating model ${error}`);
-      throw error;
-    }
-  }
+};
 
-  export const updateModel = async (data) => {
-    try {
-      const jsonBody = JSON.stringify(data);
-      const response = await api.put("/model", jsonBody);
-      return response.data;
-    }
-    catch (error) {
-      console.log(`Error updating model ${error}`);
-      throw error;
-    }
+export const createModel = async (model) => {
+  try {
+    const jsonBody = JSON.stringify(model);
+    const response = await api.post("/model", jsonBody);
+    return response.data;
+  } catch (error) {
+    console.log(`Error creating model ${error}`);
+    throw error;
   }
+};
 
-  export const updateModelStatus = async (model) => {
-    try {
-      const jsonBody = JSON.stringify(model);
-      const response = await api.post("/model/toggle", jsonBody);
-      return response.data;
-    }
-    catch (error) {
-      console.log(`Error updating model status ${error}`);
-      throw error;
-    }
-  };
-  
+export const updateModel = async (data) => {
+  try {
+    const jsonBody = JSON.stringify(data);
+    const response = await api.put("/model", jsonBody);
+    return response.data;
+  } catch (error) {
+    console.log(`Error updating model ${error}`);
+    throw error;
+  }
+};
+
+export const updateModelStatus = async (model) => {
+  try {
+    const jsonBody = JSON.stringify(model);
+    const response = await api.post("/model/toggle", jsonBody);
+    return response.data;
+  } catch (error) {
+    console.log(`Error updating model status ${error}`);
+    throw error;
+  }
+};
+
 // --------------------------------TAX API ----------------------------------------------------------
 
 export const createTax = async (data) => {
@@ -654,7 +703,7 @@ export const createTax = async (data) => {
     console.log(`Error creating brand ${error}`);
     throw error;
   }
-}
+};
 
 export const updateTax = async (data) => {
   try {
@@ -695,7 +744,7 @@ export const updateTaxStatus = async (body) => {
   try {
     // const jsonBody = JSON.stringify(hsnCode, status);
 
-    const response = await api.post('/tax-status', body);
+    const response = await api.post("/tax-status", body);
     return response.data;
   } catch (error) {
     console.log(`Error updating tax status ${error}`);
@@ -713,10 +762,14 @@ export const deleteTax = async (taxId) => {
   }
 };
 
-
 //----------------------------------Manage Spare Part -------------------------------------------------------//
 
-export const fetchSparePartList = async (sparePartName, sparePartCode, page, limit) => {
+export const fetchSparePartList = async (
+  sparePartName,
+  sparePartCode,
+  page,
+  limit
+) => {
   try {
     const queryParams = {
       sparePartName,
@@ -745,7 +798,6 @@ export const fetchSparePartList2 = async () => {
     throw error;
   }
 };
-
 
 export const createSparePart = async (data) => {
   try {
@@ -782,68 +834,96 @@ export const updateSparePartStatus = async (sparePartId) => {
   }
 };
 
-
 // ----------------------------------------------------Manage Spare Part mapping --------------------------------------------//
 
 export const mapSparePartToModel = async (data) => {
-  try{
+  try {
     const jsonBody = JSON.stringify(data);
     const response = await api.post("/spare-part/model", jsonBody);
     return response.data;
-    } catch (error) {
-      console.log(`Error mapping spare part to model ${error}`);
-      throw error;
-  }
-}
-
-export const getSparePartByModel = async () => {
-      try{
-        const response = await api.get("/model/spare-parts");
-    return response.data;
   } catch (error) {
-    console.log(`Error in gettin spare part by model ${error}`);
+    console.log(`Error mapping spare part to model ${error}`);
     throw error;
   }
-      
-}
+};
+
+export const getSparePartByModel = async (params) => {
+  try {
+    const response = await api.get("/model/spare-parts", { params });
+    return response.data;
+  } catch (error) {
+    console.log(`Error in getting spare part by model: ${error}`);
+    throw error;
+  }
+};
 
 //---------------------------------------------------------user master--------------------------------------------------//
 
 export const createUser = async (data) => {
   try {
     // const jsonBody = JSON.stringify(data);
-    const response = await api.post("/user/create",data);
+    const response = await api.post("/user/create", data);
     return response.data;
-    } catch (error) {
-      console.log(`Error creating user ${error}`);
-      throw error;
-      }
+  } catch (error) {
+    console.log(`Error creating user ${error}`);
+    throw error;
   }
+};
 
+//---------------------------------------------------AMC Master -------------------------------------------------------//
 
-  //---------------------------------------------------AMC Master -------------------------------------------------------//
-
-  export const fetchAmcMaster = async () => {
-    try {
-      
-      const response = await api.get("/amcs");
-      return response.data;
-      } catch (error) {
-        console.log(`Error in fetching amc master ${error}`);
-        throw error;
-        }
+export const fetchAmcMaster = async (filters) => {
+  try {
+    const response = await api.get("/amcs", { params: filters });
+    return response.data;
+  } catch (error) {
+    console.log(`Error in fetching AMC master: ${error}`);
+    throw error;
   }
+};
 
-  export const createAmcMaster = async (data) => {
-    try{
-      const jsonBody = JSON.stringify(data);
-      const response = await api.post("/amc", jsonBody);
-      return response.data;
-      } catch (error) {
-        console.log(`Error in creating amc master ${error}`);
-        throw error;
-        }
+export const createAmcMaster = async (data) => {
+  try {
+    const jsonBody = JSON.stringify(data);
+    const response = await api.post("/amc", jsonBody);
+    return response.data;
+  } catch (error) {
+    console.log(`Error in creating amc master ${error}`);
+    throw error;
   }
+};
+export const amcStatusUpdate = async (data) => {
+  try {
+    const jsonBody = JSON.stringify(data);
+    const response = await api.post("/amc-status", jsonBody);
+    return response.data;
+  } catch (error) {
+    console.log(`Error in creating amc master ${error}`);
+    throw error;
+  }
+};
+
+export const addAmc = async (data) => {
+  try {
+    const jsonBody = JSON.stringify(data);
+    const response = await api.post("/amc", jsonBody);
+    return response.data;
+  } catch (error) {
+    console.log(`Error in creating amc master ${error}`);
+    throw error;
+  }
+};
+
+export const updateAmc = async (data) => {
+  try {
+    const jsonBody = JSON.stringify(data);
+    const response = await api.put("/amc", jsonBody);
+    return response.data;
+  } catch (error) {
+    console.log(`Error in creating amc master ${error}`);
+    throw error;
+  }
+};
 
 //--------------------------------------------Customers-------------------------------------------------------------------//
 
@@ -851,9 +931,11 @@ export const createCustomers = async (data) => {
   try {
     const response = await api.post("/customer", data);
     return response.data;
-    } catch (error) {
-      console.log(`Error creating customer ${error}`);
-    }
-}
+  } catch (error) {
+    console.log(`Error creating customer ${error}`);
+  }
+};
+
+//-----------------------spare part  mapping ---------------------------------------------------------------------------------------
 
 export default api;
