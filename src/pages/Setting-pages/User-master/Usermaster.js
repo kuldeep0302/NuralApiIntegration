@@ -12,7 +12,11 @@ const calltype = [];
 const Usermaster = () => {
   const [entityType, setEntityType] = useState("serviceCenter");
   const [selectedValue, setSelectedValue] = useState("ui"); // Default is "UI"
-
+  const [isChecked1, setChecked1] = useState(false);
+  const [isChecked2, setChecked2] = useState(false);
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [selectedState, setSelectedState] = useState([]);
   const handleEntityChange = (e, val) => {
     if (val) {
       setEntityType(val.title); // Set the entityType separately if needed
@@ -41,9 +45,7 @@ const Usermaster = () => {
     { title: "serviceCenter", Value: 2 },
   ];
 
-  const [isChecked1, setChecked1] = useState(false);
-  const [isChecked2, setChecked2] = useState(false);
-
+ 
 
   const handleCheckboxChange1 = () => {
     setChecked1(!isChecked1);
@@ -108,7 +110,6 @@ const Usermaster = () => {
 
   const handleSave = async () => {
     
-
     const data = {
       entityType: value.entityType,
       firstName: value.firstName,
@@ -123,6 +124,7 @@ const Usermaster = () => {
       landmark: value.landmark || "",
       pincode: value.pincode,
     };
+
     const requiredFields = [
       { field: "entityType", message: "Entity type is required." },
       { field: "firstName", message: "First name is required." },
@@ -172,10 +174,7 @@ const Usermaster = () => {
     }
   };
 
-const [states, setStates] = useState([]);
-const [cities, setCities] = useState([]);
-
-  const [selectedState, setSelectedState] = useState([]); // Track the selected state
+ // Track the selected state
 
   const fetchState = async () => {
         try {
@@ -186,6 +185,7 @@ const [cities, setCities] = useState([]);
           console.error("Error fetching countries:", error);
         }
       };
+
     const fetchCities= async () => {
       try {
         setLoading(true);
@@ -200,6 +200,7 @@ const [cities, setCities] = useState([]);
         console.error("Error fetching countries:", error);
       }
     };
+
     useEffect(() => {
       
       fetchState();

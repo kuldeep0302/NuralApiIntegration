@@ -26,9 +26,17 @@ import inactiveIcon from "../../../Assests/inactiveIcon.svg";
 import editIcon from "../../../Assests/editIcon.svg";
 import deleteIcon from "../../../Assests/deleteIcon.svg";
 import HeaderNavigation from "../../../Componants/Common/header Navigation/HeaderNavigation";
-import { fontWeight } from '@mui/system';
-import { fetchModelList, fetchSparePartList, getSparePartByModel, mapSparePartToModel } from "../../../API Service/apiService";
-import toast from "react-hot-toast";
+import { fontWeight } from "@mui/system";
+import {
+  fetchModelList,
+  fetchSparePartList,
+  getSparePartByModel,
+  mapSparePartToModel,
+} from "../../../API Service/apiService";
+import toast, { Toaster } from "react-hot-toast";
+import Loader from "../../../Componants/Loader/Loader";
+import Paginate from "../../../Componants/Common/Paginate";
+import config from "../../../Componants/Common/config";
 
 const callsource = [];
 
@@ -105,15 +113,21 @@ const rows = [
 ];
 
 const ManageModel = () => {
- const [modelList,setModelList] = useState([]);
- const [modelName, setModelName] = useState("");
- const [modelId, setModelId] = useState("");
+  const pageSize = config.pageSize;
+
+  const [modelList, setModelList] = useState([]);
+  const [modelName, setModelName] = useState("");
+  const [modelId, setModelId] = useState("");
   const [sparePartList, setSparePartList] = useState([]);
   const [spareParts, setSpareParts] = useState([]);
   const [sparePartName, setSparePartName] = useState("");
   const [sparePartId, setSparePartId] = useState("");
-  const [selectedSparePartName,setSelectedSparePartName] = useState("");
-  const [selectedSparePartId,setSelectedSparePartId] = useState("");
+  const [dataSize, setDataSize] = useState(pageSize);
+  const [totalRecords, setTotalRecords] = useState(1);
+  const [flag, setFlag] = useState(false);
+  const [page, setPage] = useState(1);
+  const [selectedSparePartName, setSelectedSparePartName] = useState("");
+  const [selectedSparePartId, setSelectedSparePartId] = useState("");
   const [models, setModels] = useState([]);
   const [loading, setLoading] = useState([]);
   const [error, setError] = useState("");
@@ -121,33 +135,71 @@ const ManageModel = () => {
   const [relatedCodes, setRelatedCodes] = useState("");
   const [selectedModelCode, setSelectedModelCode] = useState("");
   const [modelCodeOptions, setModelCodeOptions] = useState([]);
-
+  const [selectedCode2, setSelectedCode2] = useState([]);
+  const [searchParams, setSearchParams] = useState({
+    modelId: "",
+    modelCode: "",
+    page: page,
+    pageSize: pageSize,
+  });
   function handleClick() {
     const saveButton = document.getElementById("save-button");
     saveButton.textContent = "Saved";
     saveButton.classList.add("saved");
     alert("Data saved successfully!");
   }
+
+  useEffect(() => {
+    getModelList();
+    fetchSpareParts();
+  }, []);
+
+  useEffect(() => {
+    sparePartByModel();
+  }, [page, flag]);
+
   const handleSearch = () => {
     // logic of search
+    setPage(1);
+    console.log("searchParams", searchParams);
+    setSearchParams((p) => ({
+      ...p,
+      page: 1,
+      pageSize: 10,
+    }));
+    setFlag(!flag);
+  };
+
+  const handleCancelSearch = () => {
+    setPage(1);
+    setFlag(!flag);
+    setSearchParams({
+      modelId: "",
+      page: 1,
+      pageSize: 10,
+    });
   };
 
   const getModelList = async () => {
-      try {
-        const response = await fetchModelList(); // API call to fetch subcategories
-        console.log("Fetched Modellist:", response);
-        // Set the subcategory list
-        setModelList(response.data.models || []);
-      }
-      catch (error) {
-        console.error("Error fetching Modellist:", error);
-      }
-    };
+    try {
+      const response = await fetchModelList(); // API call to fetch subcategories
+      console.log("Fetched Modellist:", response);
+      // Set the subcategory list
+      setModelList(response.data.models || []);
+    } catch (error) {
+      console.error("Error fetching Modellist:", error);
+    }
+  };
 
   const sparePartByModel = async () => {
+    let params = {
+      ...searchParams,
+      modelId: searchParams.modelId || "",
+    };
+
     try {
       setLoading(true);
-      const response = await getSparePartByModel(); // API call without modelId
+      const response = await getSparePartByModel(params); // API call with query params
       const flatData = response.data.flatMap((item) =>
         item.spareParts.map((sparePart) => ({
           ...sparePart,
@@ -163,24 +215,18 @@ const ManageModel = () => {
     }
   };
 
-     const fetchSpareParts = async() => {
-        // API call to fetch spare part list
-        try {
-          setLoading(true);
-          const response = await fetchSparePartList();
-          setSparePartList(response.data.spareParts);
-          setLoading(false);
-        }
-        catch (error) {
-          console.log("Error in fetching spare part list", error);
-        }
-      };
-
-  useEffect(() => {
-    sparePartByModel();
-    getModelList();
-    fetchSpareParts();
-  }, []); 
+  const fetchSpareParts = async () => {
+    // API call to fetch spare part list
+    try {
+      setLoading(true);
+      const response = await fetchSparePartList();
+      setSparePartList(response.data.spareParts);
+      console.log(response.data.spareParts);
+      setLoading(false);
+    } catch (error) {
+      console.log("Error in fetching spare part list", error);
+    }
+  };
 
   document.addEventListener("DOMContentLoaded", function () {
     const saveButton = document.getElementById("save-button");
@@ -188,39 +234,70 @@ const ManageModel = () => {
   });
 
   const [value, setValue] = React.useState({});
-  
-  const handleSubmit = async () =>{
-    if(!modelId || !selectedSparePartId ||!modelName)
-    {
-      alert("Please fill all the fields");
-    }
-    else{
-    try {
-      setLoading(true);
-      const data= 
-        {
-          modelId: modelId,
-          sparePartId: selectedSparePartId
-        }
-      const respose = await mapSparePartToModel(data);
-      console.log("Mapped data:", respose);
-      
-      alert("Spare part mapped successfully");
-      } catch (error) {
-        console.log("Error in mapping spare part to model", error);
-    }
 
-    modelId("");
-    selectedSparePartId("");
-    modelName("");
-    setLoading(false);
+  const handleSubmit = async () => {
+    if (!modelId || !selectedSparePartId || !modelName) {
+      alert("Please fill all the fields");
+    } else {
+      try {
+        setLoading(true);
+        const data = {
+          modelId: modelId,
+          sparePartId: selectedSparePartId,
+        };
+        const respose = await mapSparePartToModel(data);
+        console.log("Mapped data:", respose);
+        fetchSpareParts();
+        alert("Spare part mapped successfully");
+        setModelId("");
+        setSelectedSparePartId("");
+        setSelectedSparePartName("");
+        setModelName("");
+        setSelectedCode2("");
+      } catch (error) {
+        toast.error(error.response.data.message);
+        console.log("Error in mapping spare part to model", error);
+      } finally {
+        setLoading(false);
+      }
     }
-    };
+  };
+
+  const handleCancel = () => {
+    setModelId("");
+    setSelectedSparePartId("");
+    setSelectedSparePartName("");
+    setModelName("");
+    setSelectedCode2("");
+  };
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+
+    setSearchParams((prevParams) => ({
+      ...prevParams,
+      page: newPage.toString(),
+      pageSize: page,
+    }));
+  };
+
+  const handleSearchChange = (fieldName, value) => {
+    setSearchParams((p) => ({
+      ...p,
+      [fieldName]: value,
+    }));
+  };
+
+  const handleEdit=()=>{
+
+  }
 
   return (
     <Grid container>
       <HeaderNavigation value={"Spare Part Mapping"} />
       {/* create Category */}
+      <Toaster />
+      {loading && <Loader />}
       <Grid
         container
         sx={{
@@ -242,18 +319,27 @@ const ManageModel = () => {
               CloseOnSelect
               options={sparePartList}
               getOptionLabel={(option) => option.sparePartName}
+              value={
+                sparePartList.find(
+                  (option) => option._id === selectedSparePartId
+                ) || null
+              }
               onChange={(event, newValue) => {
                 // Update the selected spare part name
-                setSelectedSparePartName(newValue ? newValue.sparePartName : "");
-                setSelectedSparePartId(newValue ? newValue._id : "");
+                setSelectedSparePartName(
+                  newValue ? newValue.sparePartName : ""
+                );
+                setSelectedSparePartId(newValue ? newValue._id : null);
                 // Filter and update related codes based on the selected spare part name
                 const filteredCodes = newValue
                   ? sparePartList
-                    .filter((item) => item.sparePartName === newValue.sparePartName)
-                    .map((item) => ({
-                      label: item.sparePartCode,
-                      id: item._id,
-                    }))
+                      .filter(
+                        (item) => item.sparePartName === newValue.sparePartName
+                      )
+                      .map((item) => ({
+                        label: item.sparePartCode,
+                        id: item._id,
+                      }))
                   : [];
                 setRelatedCodes(filteredCodes);
                 setSelectedCode(null); // Reset the code selection
@@ -272,10 +358,14 @@ const ManageModel = () => {
           <Grid item>
             <Autocomplete
               id="spare-part-code"
-              options={relatedCodes} // Dynamically filtered codes
-              getOptionLabel={(option) => option.label}
-              value={selectedCode}
-              onChange={(event, newValue) => setSelectedCode(newValue)
+              options={sparePartList} // Dynamically filtered codes
+              getOptionLabel={(option) => option.sparePartCode}
+              value={
+                sparePartList.find((option) => option._id === selectedCode2) ||
+                null
+              }
+              onChange={(event, newValue) =>
+                setSelectedCode2(newValue._id || null)
               }
               renderInput={(params) => (
                 <TextField
@@ -289,18 +379,21 @@ const ManageModel = () => {
           </Grid>
           <Grid container>
             <Grid item container>
-              <h4 sx={{fontWeight:'500', color:'blue'}}>Map With Model</h4>
+              <h4 sx={{ fontWeight: "500", color: "blue" }}>Map With Model</h4>
             </Grid>
             <Grid item>
               <Autocomplete
                 id="disable-close-on-select"
                 closeOnSelect
                 options={modelList}
+                value={
+                  modelList.find((option) => option._id === modelId) || null
+                }
                 getOptionLabel={(option) => option.modelName}
                 onChange={(event, newValue) => {
                   // Set the model name and model id when an option is selected
-                  setModelName(newValue ? newValue.modelName : "");  // Set the model name
-                  setModelId(newValue ? newValue._id : null);        // Set the model id
+                  setModelName(newValue ? newValue.modelName : ""); // Set the model name
+                  setModelId(newValue ? newValue._id : null); // Set the model id
                 }}
                 renderInput={(params) => (
                   <TextField
@@ -316,10 +409,10 @@ const ManageModel = () => {
         </Grid>
         <Grid container gap={2} spacing={5} sx={{ marginTop: "1rem" }}>
           <Grid item>
-            <CommonButton name={"Cancel"} />
+            <CommonButton name={"Cancel"} handleOnClick={handleCancel} />
           </Grid>
           <Grid item>
-            <CommonButton name={"Save"} handleOnClick={handleSubmit}/>
+            <CommonButton name={"Save"} handleOnClick={handleSubmit} />
           </Grid>
 
           <Grid container></Grid>
@@ -383,22 +476,16 @@ const ManageModel = () => {
             <Autocomplete
               id="model-name"
               options={modelList}
+              value={
+                modelList.find(
+                  (option) => option._id === searchParams.modelId
+                ) || null
+              }
               getOptionLabel={(option) => option.modelName}
               onChange={(event, newValue) => {
                 // Set selected model ID and name
-                setModelId(newValue ? newValue._id : null);
-                setModelName(newValue ? newValue.modelName : "");
-
+                handleSearchChange("modelId", newValue._id || "");
                 // Filter model codes based on selected model name
-                const filteredModelCodes = newValue
-                  ? modelList
-                    .filter((item) => item.modelName === newValue.modelName)
-                    .map((item) => ({ label: item.modelCode, id: item._id }))
-                  : [];
-                setModelCodeOptions(filteredModelCodes);
-
-                // Clear selected model code
-                setSelectedModelCode("");
               }}
               renderInput={(params) => (
                 <TextField
@@ -415,11 +502,19 @@ const ManageModel = () => {
           <Grid item>
             <Autocomplete
               id="model-code"
-              options={modelCodeOptions} // Dynamically filtered codes
-              getOptionLabel={(option) => option.label}
+              options={modelList}
+              value={
+                modelList.find(
+                  (option) => option._id === searchParams.modelCode
+                ) || null
+              }
+              getOptionLabel={(option) => option.modelCode}
               onChange={(event, newValue) => {
-                // Set selected model code
-                setSelectedModelCode(newValue ? newValue.label : "");
+                // Set selected model ID and name
+                // handleSearchChange("modelId", newValue._id || "");
+                handleSearchChange("modelCode", newValue._id || "");
+
+                // Filter model codes based on selected model name
               }}
               renderInput={(params) => (
                 <TextField
@@ -431,9 +526,15 @@ const ManageModel = () => {
               )}
             />
           </Grid>
-         
-          <Grid item>
+
+          <Grid item >
             <CommonButton name={"Search"} handleOnClick={handleSearch} />
+          </Grid>
+          <Grid  >
+            <CommonButton
+              name={"Show All"}
+              handleOnClick={handleCancelSearch}
+            />
           </Grid>
         </Grid>
 
@@ -533,9 +634,14 @@ const ManageModel = () => {
                   </TableRow>
                 ))}
               </TableBody>
-
             </Table>
           </TableContainer>
+          <Paginate
+            page={page}
+            totalRecords={totalRecords}
+            onPageChange={handlePageChange}
+            dataSize={dataSize}
+          />
         </Grid>
       </Grid>
     </Grid>
