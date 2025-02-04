@@ -37,62 +37,80 @@
 
 // export default Paginate;
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, IconButton, InputBase, Typography } from "@mui/material";
 import { ArrowBack, ArrowForward } from "@mui/icons-material";
 import config from "./config";
 
 const Paginate = ({ page, totalRecords, onPageChange, dataSize }) => {
   const pageSize = config.pageSize;
-  const totalRecord = Math.ceil(totalRecords / pageSize);
-  const [inputPage, setInputPage] = useState(page);
+  const totalPages = Math.ceil(totalRecords / pageSize);
+  const [inputPage, setInputPage] = useState(page.toString());
+
+  // Update input when page prop changes
+  useEffect(() => {
+    setInputPage(page.toString());
+  }, [page]);
 
   const handlePrevious = () => {
     if (page > 1) {
       onPageChange(page - 1);
-      setInputPage(page - 1);
     }
   };
 
   const handleNext = () => {
-    if (page < totalRecord) {
+    if (page < totalPages) {
       onPageChange(page + 1);
-      setInputPage(page + 1);
     }
   };
 
   const handleInputChange = (event) => {
     const value = event.target.value;
-
-    // Allow only numbers
+    // Allow only numbers and empty string
     if (/^\d*$/.test(value)) {
       setInputPage(value);
     }
   };
 
   const handleInputBlur = () => {
-    const numericPage = Number(inputPage);
+    let numericPage = parseInt(inputPage, 10);
 
-    // Validate and set the page only if it's within the valid range
-    if (numericPage >= 1 && numericPage <= totalRecord) {
+    // If empty or invalid, reset to current page
+    if (!numericPage || isNaN(numericPage)) {
+      setInputPage(page.toString());
+      return;
+    }
+
+    // Clamp the value between 1 and totalPages
+    numericPage = Math.max(1, Math.min(numericPage, totalPages));
+    
+    // Only trigger page change if the page actually changed
+    if (numericPage !== page) {
       onPageChange(numericPage);
-    } else {
-      setInputPage(page); // Reset to the current page if invalid
+    }
+    
+    // Update input to reflect actual page
+    setInputPage(numericPage.toString());
+  };
+
+  const handleKeyPress = (event) => {
+    if (event.key === 'Enter') {
+      handleInputBlur();
     }
   };
 
-  const isPreviousDisabled = page === 1;
-  const isNextDisabled = page === totalRecord;
+  const isPreviousDisabled = page <= 1;
+  const isNextDisabled = page >= totalPages;
 
   return (
     <Box
       display="flex"
       alignItems="center"
       justifyContent="center"
-      padding={0}
+      padding={1}
       bgcolor="#33499F"
       color="white"
-      sx={{ width: { lg: "100%", xs: "100%" } }}m
+      sx={{ width: "100%" }}
     >
       <IconButton
         onClick={handlePrevious}
@@ -112,19 +130,28 @@ const Paginate = ({ page, totalRecords, onPageChange, dataSize }) => {
         value={inputPage}
         onChange={handleInputChange}
         onBlur={handleInputBlur}
-        inputProps={{ style: { textAlign: "center", color: "white" } }}
+        onKeyPress={handleKeyPress}
+        inputProps={{ 
+          style: { 
+            textAlign: "center", 
+            color: "white",
+            width: "30px"
+          }
+        }}
         sx={{
-          width: "50px",
           height: 35,
           border: "1px solid #ccc",
           borderRadius: 1,
           padding: "0 8px",
           backgroundColor: "#33499F",
           color: "white",
+          '&:hover': {
+            backgroundColor: '#3f57b3'
+          }
         }}
       />
       <Typography variant="body1" mx={2} sx={{ color: "white !important" }}>
-        Out of {totalRecord}
+        Out of {totalPages}
       </Typography>
       <IconButton
         onClick={handleNext}

@@ -857,6 +857,17 @@ export const getSparePartByModel = async (params) => {
   }
 };
 
+export const getSparePartByModelToggle = async (id) => {
+  try {
+    const response = await api.put(`/spare-part/model/toggle-status/${id}`);
+    return response.data;
+  } catch (error) {
+    console.log(`Error in getting status update spare part by model: ${error}`);
+    throw error;
+  }
+
+};
+
 //---------------------------------------------------------user master--------------------------------------------------//
 
 export const createUser = async (data) => {
@@ -937,5 +948,14 @@ export const createCustomers = async (data) => {
 };
 
 //-----------------------spare part  mapping ---------------------------------------------------------------------------------------
+export const getServiceCenterList = async () => {
+  try {
+    const response = await api.get("/organization/service-centers");
+    return response.data;
+  } catch (error) {
+    console.error(`Error in creating getServiceCenterList: ${error}`);
+    throw error;
+  }
+};
 
 export default api;

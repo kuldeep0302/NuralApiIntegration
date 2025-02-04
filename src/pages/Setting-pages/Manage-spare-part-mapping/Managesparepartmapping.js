@@ -31,6 +31,7 @@ import {
   fetchModelList,
   fetchSparePartList,
   getSparePartByModel,
+  getSparePartByModelToggle,
   mapSparePartToModel,
 } from "../../../API Service/apiService";
 import toast, { Toaster } from "react-hot-toast";
@@ -142,6 +143,17 @@ const ManageModel = () => {
     page: page,
     pageSize: pageSize,
   });
+  const [errors, setErrors] = useState({
+    sparePartName: false,
+    sparePartCode: false,
+    modelName: false
+  });
+  const [errorMessages, setErrorMessages] = useState({
+    sparePartName: "",
+    sparePartCode: "",
+    modelName: ""
+  });
+
   function handleClick() {
     const saveButton = document.getElementById("save-button");
     saveButton.textContent = "Saved";
@@ -159,25 +171,24 @@ const ManageModel = () => {
   }, [page, flag]);
 
   const handleSearch = () => {
-    // logic of search
     setPage(1);
-    console.log("searchParams", searchParams);
-    setSearchParams((p) => ({
-      ...p,
+    setSearchParams(prev => ({
+      ...prev,
       page: 1,
-      pageSize: 10,
+      pageSize: pageSize
     }));
     setFlag(!flag);
   };
 
   const handleCancelSearch = () => {
     setPage(1);
-    setFlag(!flag);
     setSearchParams({
       modelId: "",
+      modelCode: "",
       page: 1,
-      pageSize: 10,
+      pageSize: pageSize
     });
+    setFlag(!flag);
   };
 
   const getModelList = async () => {
@@ -195,21 +206,30 @@ const ManageModel = () => {
     let params = {
       ...searchParams,
       modelId: searchParams.modelId || "",
+      page: page,
+      pageSize: pageSize,
     };
 
     try {
       setLoading(true);
-      const response = await getSparePartByModel(params); // API call with query params
-      const flatData = response.data.flatMap((item) =>
-        item.spareParts.map((sparePart) => ({
-          ...sparePart,
-          modelName: item.modelName,
-          modelCode: item.modelCode,
-        }))
-      );
-      setSpareParts(flatData);
+      const response = await getSparePartByModel(params);
+      if (response.data && response.data[0]) {
+        setSpareParts(response.data[0].data || []);
+        setTotalRecords(response.data[0].totalCount || 0);
+        // Reset page if current page is greater than total pages
+        const totalPages = Math.ceil((response.data[0].totalCount || 0) / pageSize);
+        if (page > totalPages) {
+          setPage(1);
+          setSearchParams(prev => ({...prev, page: 1}));
+        }
+      } else {
+        setSpareParts([]);
+        setTotalRecords(0);
+      }
     } catch (error) {
       console.error("Error fetching spare parts:", error);
+      setSpareParts([]);
+      setTotalRecords(0);
     } finally {
       setLoading(false);
     }
@@ -235,31 +255,52 @@ const ManageModel = () => {
 
   const [value, setValue] = React.useState({});
 
+  const validateFields = () => {
+    const newErrors = {
+      sparePartName: !selectedSparePartId,
+      sparePartCode: !selectedCode2 || selectedCode2.length === 0,
+      modelName: !modelId
+    };
+
+    const newErrorMessages = {
+      sparePartName: !selectedSparePartId ? "Please select a spare part" : "",
+      sparePartCode: !selectedCode2 ? "Please select a spare part code" :
+        selectedCode2.length === 0 ? "Spare part code is required" : "",
+      modelName: !modelId ? "Please select a model" : ""
+    };
+
+    setErrors(newErrors);
+    setErrorMessages(newErrorMessages);
+
+    return !Object.values(newErrors).some(error => error);
+  };
+
   const handleSubmit = async () => {
-    if (!modelId || !selectedSparePartId || !modelName) {
-      alert("Please fill all the fields");
-    } else {
-      try {
-        setLoading(true);
-        const data = {
-          modelId: modelId,
-          sparePartId: selectedSparePartId,
-        };
-        const respose = await mapSparePartToModel(data);
-        console.log("Mapped data:", respose);
-        fetchSpareParts();
-        alert("Spare part mapped successfully");
-        setModelId("");
-        setSelectedSparePartId("");
-        setSelectedSparePartName("");
-        setModelName("");
-        setSelectedCode2("");
-      } catch (error) {
-        toast.error(error.response.data.message);
-        console.log("Error in mapping spare part to model", error);
-      } finally {
-        setLoading(false);
+    try {
+      if (!validateFields()) {
+        return;
       }
+
+      setLoading(true);
+      const data = {
+        modelId: modelId,
+        sparePartId: selectedSparePartId,
+      };
+
+      const response = await mapSparePartToModel(data);
+      console.log("Mapped data:", response);
+
+      toast.success("Spare part mapped successfully");
+      fetchSpareParts();
+
+      // Reset form and errors
+      handleCancel();
+
+    } catch (error) {
+      console.log("Error in mapping spare part to model", error);
+      toast.error(error.response?.data?.message || "Failed to map spare part to model");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -269,15 +310,25 @@ const ManageModel = () => {
     setSelectedSparePartName("");
     setModelName("");
     setSelectedCode2("");
+    // Reset errors
+    setErrors({
+      sparePartName: false,
+      sparePartCode: false,
+      modelName: false
+    });
+    setErrorMessages({
+      sparePartName: "",
+      sparePartCode: "",
+      modelName: ""
+    });
   };
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
-
-    setSearchParams((prevParams) => ({
-      ...prevParams,
-      page: newPage.toString(),
-      pageSize: page,
+    setSearchParams(prev => ({
+      ...prev,
+      page: newPage,
+      pageSize: pageSize
     }));
   };
 
@@ -288,9 +339,16 @@ const ManageModel = () => {
     }));
   };
 
-  const handleEdit=()=>{
-
+  const handleStatus = async (row) => {
+    try {
+      const response = await getSparePartByModelToggle(row.modelSparePartsId);
+      console.log("Status updated:", response);
+      sparePartByModel();
+    } catch (error) {
+      console.log("Error in updating status:", error);
+    }
   }
+
 
   return (
     <Grid container>
@@ -319,30 +377,33 @@ const ManageModel = () => {
               CloseOnSelect
               options={sparePartList}
               getOptionLabel={(option) => option.sparePartName}
-              value={
-                sparePartList.find(
-                  (option) => option._id === selectedSparePartId
-                ) || null
-              }
+              value={sparePartList.find((option) => option._id === selectedSparePartId) || null}
               onChange={(event, newValue) => {
-                // Update the selected spare part name
-                setSelectedSparePartName(
-                  newValue ? newValue.sparePartName : ""
-                );
+                setSelectedSparePartName(newValue ? newValue.sparePartName : "");
                 setSelectedSparePartId(newValue ? newValue._id : null);
-                // Filter and update related codes based on the selected spare part name
+                // Reset spare part code when spare part name changes
+                setSelectedCode2(null);
                 const filteredCodes = newValue
                   ? sparePartList
-                      .filter(
-                        (item) => item.sparePartName === newValue.sparePartName
-                      )
-                      .map((item) => ({
-                        label: item.sparePartCode,
-                        id: item._id,
-                      }))
+                    .filter((item) => item.sparePartName === newValue.sparePartName)
+                    .map((item) => ({
+                      label: item.sparePartCode,
+                      id: item._id,
+                    }))
                   : [];
                 setRelatedCodes(filteredCodes);
-                setSelectedCode(null); // Reset the code selection
+                setSelectedCode(null);
+                // Clear error when value is selected
+                setErrors(prev => ({
+                  ...prev,
+                  sparePartName: false,
+                  sparePartCode: false // Reset spare part code error
+                }));
+                setErrorMessages(prev => ({
+                  ...prev,
+                  sparePartName: "",
+                  sparePartCode: "" // Reset spare part code error message
+                }));
               }}
               renderInput={(params) => (
                 <TextField
@@ -350,6 +411,9 @@ const ManageModel = () => {
                   label="Spare Part Name"
                   variant="standard"
                   style={{ width: "10rem" }}
+                  error={errors.sparePartName}
+                  helperText={errorMessages.sparePartName}
+                  required
                 />
               )}
             />
@@ -358,21 +422,25 @@ const ManageModel = () => {
           <Grid item>
             <Autocomplete
               id="spare-part-code"
-              options={sparePartList} // Dynamically filtered codes
+              options={sparePartList}
               getOptionLabel={(option) => option.sparePartCode}
-              value={
-                sparePartList.find((option) => option._id === selectedCode2) ||
-                null
-              }
-              onChange={(event, newValue) =>
-                setSelectedCode2(newValue._id || null)
-              }
+              value={sparePartList.find((option) => option._id === selectedCode2) || null}
+              onChange={(event, newValue) => {
+                setSelectedCode2(newValue ? newValue._id : null);
+                // Clear error when value is selected
+                setErrors(prev => ({ ...prev, sparePartCode: false }));
+                setErrorMessages(prev => ({ ...prev, sparePartCode: "" }));
+              }}
+              disabled={!selectedSparePartId} // Disable if no spare part name is selected
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="Spare Part Code"
                   variant="standard"
                   style={{ width: "10rem" }}
+                  error={errors.sparePartCode}
+                  helperText={errorMessages.sparePartCode}
+                  required
                 />
               )}
             />
@@ -386,14 +454,14 @@ const ManageModel = () => {
                 id="disable-close-on-select"
                 closeOnSelect
                 options={modelList}
-                value={
-                  modelList.find((option) => option._id === modelId) || null
-                }
+                value={modelList.find((option) => option._id === modelId) || null}
                 getOptionLabel={(option) => option.modelName}
                 onChange={(event, newValue) => {
-                  // Set the model name and model id when an option is selected
-                  setModelName(newValue ? newValue.modelName : ""); // Set the model name
-                  setModelId(newValue ? newValue._id : null); // Set the model id
+                  setModelName(newValue ? newValue.modelName : "");
+                  setModelId(newValue ? newValue._id : null);
+                  // Clear error when value is selected
+                  setErrors(prev => ({ ...prev, modelName: false }));
+                  setErrorMessages(prev => ({ ...prev, modelName: "" }));
                 }}
                 renderInput={(params) => (
                   <TextField
@@ -401,6 +469,8 @@ const ManageModel = () => {
                     label="Model"
                     variant="standard"
                     style={{ width: "10rem" }}
+                    error={errors.modelName}
+                    helperText={errorMessages.modelName}
                   />
                 )}
               />
@@ -558,13 +628,13 @@ const ManageModel = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {spareParts.map((row, index) => (
+                {spareParts && spareParts.map((row, index) => (
                   <TableRow key={index}>
                     {/* Spare Part Name */}
-                    <TableCell align="center">{row.sparePartName}</TableCell>
+                    <TableCell align="center">{row.spareParts[0].sparePartName}</TableCell>
 
                     {/* Spare Part Code */}
-                    <TableCell align="center">{row.sparePartCode}</TableCell>
+                    <TableCell align="center">{row.spareParts[0].sparePartCode}</TableCell>
 
                     {/* Model Name */}
                     <TableCell align="center">{row.modelName}</TableCell>
@@ -583,22 +653,23 @@ const ManageModel = () => {
                     >
                       {/* Activate/Deactivate Button */}
                       <IconButton
-                        // onClick={() => handleStatus(row)}
+                        onClick={() => handleStatus(row)}
                         sx={{
                           outline: "none",
                           "&:focus": { outline: "none" },
                         }}
                       >
                         <img
-                          src={row.status ? activeIcon : inactiveIcon}
-                          alt={row.status ? "Active" : "Inactive"}
+                          src={row.status === "active" ? activeIcon : inactiveIcon}
+                          alt={row.status === "active" ? "Active" : "Inactive"}
                           height="20px"
                           width="20px"
+
                         />
                       </IconButton>
 
                       {/* Edit Button */}
-                      <IconButton
+                      {/* <IconButton
                         // onClick={() =>
                         //   handleEdit(row.sparePartName, row.sparePartCode, row.modelName, row.modelCode)
                         // }
@@ -613,23 +684,10 @@ const ManageModel = () => {
                           height="20px"
                           width="20px"
                         />
-                      </IconButton>
+                      </IconButton> */}
 
                       {/* Delete Button */}
-                      <IconButton
-                        // onClick={() => handleDelete(row)}
-                        sx={{
-                          outline: "none",
-                          "&:focus": { outline: "none" },
-                        }}
-                      >
-                        <img
-                          src={deleteIcon}
-                          alt="Delete"
-                          height="20px"
-                          width="20px"
-                        />
-                      </IconButton>
+
                     </TableCell>
                   </TableRow>
                 ))}
@@ -640,7 +698,7 @@ const ManageModel = () => {
             page={page}
             totalRecords={totalRecords}
             onPageChange={handlePageChange}
-            dataSize={dataSize}
+            dataSize={pageSize}
           />
         </Grid>
       </Grid>
