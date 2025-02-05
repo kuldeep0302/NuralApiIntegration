@@ -124,6 +124,12 @@ const SparePartCreation = () => {
   const [selectedCode, setSelectedCode] = useState(null);
   const [filteredData, setFilteredData] = useState(sparePartList);
   const [filteredSpareParts, setFilteredSpareParts] = useState(sparePartList);
+  const [errors, setErrors] = useState({
+    sparePartName: "",
+    sparePartCode: "",
+    hsnCode: "",
+    isSerialized: ""
+  });
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
@@ -134,35 +140,67 @@ const SparePartCreation = () => {
   };
 
   const handleSearchCancel = async () => {
-    setSelectedSparePartName2("");
-    setSelectedCode2("");
-    setPage(1);
     try {
       setLoading(true);
+      setSelectedSparePartName2("");
+      setSelectedCode2("");
+      setPage(1);
 
-      const response = await fetchSparePartList("", "", 1, limit);
-      setSparePartList(response.data.spareParts);
-      setTableDate(response.data.spareParts);
-      setTotalRecords(response.data.totalRecords);
-      setLoading(false);
+      const response = await fetchSparePartList("", "", 1, pageSize);
+      
+      if (response.data) {
+        setSparePartList(response.data.spareParts || []);
+        setTableDate(response.data.spareParts || []);
+        setTotalRecords(response.data.totalRecords || 0);
+      } else {
+        setSparePartList([]);
+        setTableDate([]);
+        setTotalRecords(0);
+      }
     } catch (error) {
       console.log("Error in fetching spare part list", error);
+      toast.error("Failed to reset search");
+      setSparePartList([]);
+      setTableDate([]);
+      setTotalRecords(0);
     } finally {
       setLoading(false);
     }
   };
 
   const fetchSpareParts = async () => {
-    // API call to fetch spare part list
     try {
       setLoading(true);
-      const response = await fetchSparePartList("", "", page, limit);
-      setSparePartList(response.data.spareParts);
-      setTableDate(response.data.spareParts);
-      setTotalRecords(response.data.totalRecords);
-      setLoading(false);
+      const response = await fetchSparePartList(
+        selectedSparePartName2 || "",
+        selectedCode2 || "",
+        page,
+        pageSize
+      );
+      
+      if (response.data) {
+        setSparePartList(response.data.spareParts || []);
+        setTableDate(response.data.spareParts || []);
+        setTotalRecords(response.data.totalRecords || 0);
+        
+        // Reset to page 1 if current page is beyond total pages
+        const totalPages = Math.ceil((response.data.totalRecords || 0) / pageSize);
+        if (page > totalPages) {
+          setPage(1);
+        }
+      } else {
+        setSparePartList([]);
+        setTableDate([]);
+        setTotalRecords(0);
+      }
     } catch (error) {
       console.log("Error in fetching spare part list", error);
+      toast.error("Failed to fetch spare parts");
+      setSparePartList([]);
+      setTableDate([]);
+      setTotalRecords(0);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -249,100 +287,125 @@ const SparePartCreation = () => {
   };
 
   const handleSearch = async () => {
-    setPage(1);
-    setParams((prevParams) => ({
-      ...prevParams,
-      pageIndex: 10,
-    }));
     try {
       setLoading(true);
-
+      setPage(1); // Reset to first page when searching
+      
       const response = await fetchSparePartList(
-        selectedSparePartName2,
-        selectedCode2,
-        1,
-        limit
+        selectedSparePartName2 || "",
+        selectedCode2 || "",
+        1, // Start from first page
+        pageSize
       );
-      setSparePartList(response.data.spareParts);
-      setTableDate(response.data.spareParts);
-      setTotalRecords(response.data.totalRecords);
-      setLoading(false);
+      
+      if (response.data) {
+        setSparePartList(response.data.spareParts || []);
+        setTableDate(response.data.spareParts || []);
+        setTotalRecords(response.data.totalRecords || 0);
+      } else {
+        setSparePartList([]);
+        setTableDate([]);
+        setTotalRecords(0);
+      }
     } catch (error) {
       console.log("Error in fetching spare part list", error);
+      toast.error("Failed to fetch search results");
+      setSparePartList([]);
+      setTableDate([]);
+      setTotalRecords(0);
     } finally {
       setLoading(false);
     }
   };
 
-  // Prepare the data object
-  const handleSubmit = async () => {
-    // Validation
-    if (
-      !sparePartName ||
-      !sparePartCode ||
-      !selectedHsn ||
-      isSerialized === null
-    ) {
-      alert("All fields are required!");
-      return;
+  // Add validation function
+  const validateFields = () => {
+    let tempErrors = {
+      sparePartName: "",
+      sparePartCode: "",
+      hsnCode: "",
+      isSerialized: ""
+    };
+    let isValid = true;
+
+    if (!sparePartName.trim()) {
+      tempErrors.sparePartName = "Spare Part Name is required";
+      isValid = false;
     }
 
-    // Prepare the data object
+    if (!sparePartCode.trim()) {
+      tempErrors.sparePartCode = "Spare Part Code is required";
+      isValid = false;
+    }
+
+    if (!selectedHsn) {
+      tempErrors.hsnCode = "HSN Code is required";
+      isValid = false;
+    }
+
+    if (isSerialized === null) {
+      tempErrors.isSerialized = "Serialization status is required";
+      isValid = false;
+    }
+
+    setErrors(tempErrors);
+    return isValid;
+  };
+
+  // Update handleSubmit with validation and better error handling
+  const handleSubmit = async () => {
+
     const data = {
       sparePartName,
       sparePartCode,
-      hsnCode: selectedHsn, // Pass `_id` of the HSN Code object
+      hsnCode: selectedHsn,
       isSerialized: isSerialized !== null ? isSerialized : false,
-    };
+    }
 
     try {
       setLoading(true);
 
       if (editIndex === null) {
-        // Create Spare Part
         const response = await createSparePart(data);
-        console.log("Data to post:", data);
-        console.log("Spare Part Created Successfully:", response);
-        alert("Spare Part Created Successfully!");
+        if (response.status === "success") {
+          toast.success("Spare Part Created Successfully!");
+          handleCancel();
+          fetchSpareParts();
+        } else {
+          toast.error(response.message || "Failed to create spare part");
+        }
       } else {
-        // Update Spare Part
-        const updateData = { sparePartId: editIndex, ...data }; // Flatten the structure
-        const response = await updateSparePart(updateData); // Call update API
-        console.log("Data to update:", updateData);
-        console.log("Spare Part Updated Successfully:", response);
-        alert("Spare Part Updated Successfully!");
+        const updateData = { sparePartId: editIndex, ...data };
+        const response = await updateSparePart(updateData);
+        if (response.status === "success") {
+          toast.success("Spare Part Updated Successfully!");
+          handleCancel();
+          fetchSpareParts();
+        } else {
+          toast.error(response.message || "Failed to update spare part");
+        }
       }
-
-      // Reset the form and refresh the list
-      setSparePartName("");
-      setSparePartCode("");
-      setSelectedHsn(null);
-      setIsSerialized(null);
-      setEditIndex(null); // Reset edit index to null
-      fetchSpareParts(); // Refresh the list
     } catch (error) {
-      console.error(
-        editIndex === null
-          ? "Error creating spare part:"
-          : "Error updating spare part:",
-        error
-      );
-      alert(
-        editIndex === null
-          ? "Failed to create spare part!"
-          : "Failed to update spare part!"
-      );
+      console.error("Error:", error);
+      toast.error(error.message || "An unexpected error occurred");
     } finally {
-      setLoading(false); // Stop the loading indicator
+      setLoading(false);
     }
   };
 
+  // Update handleCancel to also clear errors
   const handleCancel = () => {
     setSparePartName("");
     setSparePartCode("");
     setSelectedHsn(null);
     setIsSerialized(null);
     setEditIndex(null);
+    setErrors({
+      sparePartName: "",
+      sparePartCode: "",
+      hsnCode: "",
+      isSerialized: ""
+    });
   };
 
   // const handleSparePartNameChange = (event, newValue) => {
@@ -387,7 +450,12 @@ const SparePartCreation = () => {
               label="Spare Part Name"
               variant="standard"
               value={sparePartName}
-              onChange={(e) => setSparePartName(e.target.value)}
+              onChange={(e) => {
+                setSparePartName(e.target.value);
+                setErrors(prev => ({ ...prev, sparePartName: "" }));
+              }}
+              error={!!errors.sparePartName}
+              helperText={errors.sparePartName}
             />
           </Grid>
           <Grid item>
@@ -396,23 +464,31 @@ const SparePartCreation = () => {
               label="Spare Part Code"
               variant="standard"
               value={sparePartCode}
-              onChange={(e) => setSparePartCode(e.target.value)}
+              onChange={(e) => {
+                setSparePartCode(e.target.value);
+                setErrors(prev => ({ ...prev, sparePartCode: "" }));
+              }}
+              error={!!errors.sparePartCode}
+              helperText={errors.sparePartCode}
             />
           </Grid>
           <Grid item>
             <Autocomplete
               options={hsnCodes}
               getOptionLabel={(option) => option.hsnCode || ""}
-              value={
-                hsnCodes.find((code) => code.hsnCode === selectedHsn) || null
-              }
-              onChange={(event, value) => setSelectedHsn(value.hsnCode || null)} // Store the entire object in state
+              value={hsnCodes.find((code) => code.hsnCode === selectedHsn) || null}
+              onChange={(event, value) => {
+                setSelectedHsn(value?.hsnCode || null);
+                setErrors(prev => ({ ...prev, hsnCode: "" }));
+              }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   style={{ width: "11rem" }}
                   label="HSN Code"
                   variant="standard"
+                  error={!!errors.hsnCode}
+                  helperText={errors.hsnCode}
                 />
               )}
             />
@@ -423,12 +499,11 @@ const SparePartCreation = () => {
               id="is-serialized"
               disableCloseOnSelect
               options={serials}
-              getOptionLabel={(option) => option.label} // Display "Yes" or "No"
-              value={
-                serials.find((serial) => serial.key === isSerialized) || null
-              } // Preselect value if set
+              getOptionLabel={(option) => option.label}
+              value={serials.find((serial) => serial.key === isSerialized) || null}
               onChange={(event, value) => {
-                setIsSerialized(value ? value.key : false); // Set true/false based on selection
+                setIsSerialized(value ? value.key : false);
+                setErrors(prev => ({ ...prev, isSerialized: "" }));
               }}
               renderInput={(params) => (
                 <TextField
@@ -436,6 +511,8 @@ const SparePartCreation = () => {
                   style={{ width: "11rem" }}
                   label="Is Serialized"
                   variant="standard"
+                  error={!!errors.isSerialized}
+                  helperText={errors.isSerialized}
                 />
               )}
             />

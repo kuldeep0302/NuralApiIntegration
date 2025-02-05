@@ -78,9 +78,21 @@ const Amc = () => {
     brandId: "",
     categoryId: "",
     subcategoryId: "",
-    modelId: "", // Example model ID
-    noOfServices: 0,
-    costOfService: 0,
+    modelId: "",
+    noOfServices: "",
+    costOfService: "",
+    duration: "",
+    description: "",
+  });
+
+  const [formErrors, setFormErrors] = useState({
+    name: "",
+    brandId: "",
+    categoryId: "",
+    subcategoryId: "",
+    modelId: "",
+    noOfServices: "",
+    costOfService: "",
     duration: "",
     description: "",
   });
@@ -138,90 +150,119 @@ const Amc = () => {
   }, []);
 
   const handleChange = async (fieldName, value) => {
+    // Clear error for the field being changed
+    setFormErrors(prev => ({
+      ...prev,
+      [fieldName]: ""
+    }));
+
+    // Handle number validations
+    if (["noOfServices", "costOfService", "duration"].includes(fieldName)) {
+      // Allow empty string or valid numbers
+      if (value === "" || value === null) {
+        setFormData(prev => ({
+          ...prev,
+          [fieldName]: ""
+        }));
+        return;
+      }
+      
+      // Convert to number and validate
+      const numValue = Number(value);
+      if (!isNaN(numValue) && numValue >= 0) {
+        setFormData(prev => ({
+          ...prev,
+          [fieldName]: numValue
+        }));
+      }
+      return;
+    }
+
+    // Handle text fields
+    if (fieldName === "name") {
+      // Only allow letters, numbers, spaces and basic punctuation
+      const nameRegex = /^[a-zA-Z0-9\s\-_.]*$/;
+      if (value === "" || nameRegex.test(value)) {
+        setFormData(prev => ({
+          ...prev,
+          [fieldName]: value
+        }));
+      }
+      return;
+    }
+
+    // Handle description - no special validation needed
+    if (fieldName === "description") {
+      setFormData(prev => ({
+        ...prev,
+        [fieldName]: value
+      }));
+      return;
+    }
+
     if (fieldName === "brandId" && !value) {
       setCatDrop([]);
       setSubCatDrop([]);
       setModelDrop([]);
       setFormData((p) => ({
         ...p,
-        fieldName: null,
+        categoryId: "",
+        subcategoryId: "",
+        modelId: "",
+        [fieldName]: value
       }));
-    }
-
-    if (fieldName === "categoryId" && !value) {
+    } else if (fieldName === "categoryId" && !value) {
       setSubCatDrop([]);
       setModelDrop([]);
       setFormData((p) => ({
         ...p,
-        fieldName: null,
+        subcategoryId: "",
+        modelId: "",
+        [fieldName]: value
       }));
-    }
-
-    if (fieldName === "subcategoryId" && !value) {
+    } else if (fieldName === "subcategoryId" && !value) {
       setModelDrop([]);
       setFormData((p) => ({
         ...p,
-        fieldName: null,
+        modelId: "",
+        [fieldName]: value
+      }));
+    } else {
+      setFormData((p) => ({
+        ...p,
+        [fieldName]: value
       }));
     }
 
+    // Handle dropdown dependencies
     if (fieldName === "brandId" && value) {
       try {
         setLoading(true);
-        const response = await fetchCategoryList(
-          formData.brandId,
-          "",
-          1,
-          100,
-          true
-        );
+        const response = await fetchCategoryList(value, "", 1, 100, true);
         setCatDrop(response.data.categories);
-        // const activeCategories = response.data.categories.filter((category) => category.active);
-        // // Update the filtered category list
-        // setActiveFilteredCat(activeCategories);
-        // console.log(`response table is`, response.data.brandList);
       } catch (error) {
         console.error(`Error in filter list`, error);
       } finally {
-        setLoading(false); // Ensure loading is stopped in all cases
+        setLoading(false);
       }
     }
 
     if (fieldName === "categoryId" && value) {
       try {
         setLoading(true);
-        const response = await fetchSubCategoryListActive(
-          "",
-          1,
-          1000,
-          formData.brandId,
-          formData.categoryId,
-          true
-        );
+        const response = await fetchSubCategoryListActive("", 1, 1000, formData.brandId, value, true);
         setSubCatDrop(response.data.subcategory);
-
-        // const activeSubCategories = filteredSubCat.filter((subcat) => subcat.active);
-        // setActiveFilteredSubCat(activeSubCategories);
-
-        // console.log(`response table is`, response.data.brandList);
       } catch (error) {
         console.error(`Error in filter list`, error);
       } finally {
-        setLoading(false); // Ensure loading is stopped in all cases
+        setLoading(false);
       }
     }
 
     if (fieldName === "subcategoryId" && value) {
       try {
         setLoading(true);
-        const response = await fetchModelList(
-          "",
-          1,
-          1000,
-          formData.brandId,
-          formData.categoryId,
-          formData.subcategoryId
-        ); // API call to fetch subcategories
+        const response = await fetchModelList("", 1, 1000, formData.brandId, formData.categoryId, value);
         console.log("Fetched Modellist:", response);
         setModelDrop(response.data.models);
       } catch (error) {
@@ -230,8 +271,6 @@ const Amc = () => {
         setLoading(false);
       }
     }
-
-    setFormData({ ...formData, [fieldName]: value });
   };
 
   const handleSearchChange = async (fieldName, value) => {
@@ -269,14 +308,10 @@ const Amc = () => {
           true
         );
         setCatDropSearch(response.data.categories);
-        // const activeCategories = response.data.categories.filter((category) => category.active);
-        // // Update the filtered category list
-        // setActiveFilteredCat(activeCategories);
-        // console.log(`response table is`, response.data.brandList);
       } catch (error) {
         console.error(`Error in filter list`, error);
       } finally {
-        setLoading(false); // Ensure loading is stopped in all cases
+        setLoading(false);
       }
     }
 
@@ -292,15 +327,10 @@ const Amc = () => {
           true
         );
         setSubCatDropSearch(response.data.subcategory);
-
-        // const activeSubCategories = filteredSubCat.filter((subcat) => subcat.active);
-        // setActiveFilteredSubCat(activeSubCategories);
-
-        // console.log(`response table is`, response.data.brandList);
       } catch (error) {
         console.error(`Error in filter list`, error);
       } finally {
-        setLoading(false); // Ensure loading is stopped in all cases
+        setLoading(false);
       }
     }
 
@@ -314,7 +344,7 @@ const Amc = () => {
           searchParams.brandId,
           searchParams.categoryId,
           searchParams.subcategoryId
-        ); // API call to fetch subcategories
+        );
         console.log("Fetched Modellist:", response);
         setModelDropSearch(response.data.models);
       } catch (error) {
@@ -399,7 +429,114 @@ const Amc = () => {
     setLoading(false);
   };
 
+  const validateForm = () => {
+    let isValid = true;
+    const errors = {
+      name: "",
+      brandId: "",
+      categoryId: "",
+      subcategoryId: "",
+      modelId: "",
+      noOfServices: "",
+      costOfService: "",
+      duration: "",
+      description: "",
+    };
+
+    // Validate AMC Name
+    if (!formData.name.trim()) {
+      errors.name = "AMC Name is required";
+      isValid = false;
+    }
+
+    // Validate Brand
+    if (!formData.brandId) {
+      errors.brandId = "Brand is required";
+      isValid = false;
+    }
+
+    // Validate Category
+    if (!formData.categoryId) {
+      errors.categoryId = "Category is required";
+      isValid = false;
+    }
+
+    // Validate Sub Category
+    if (!formData.subcategoryId) {
+      errors.subcategoryId = "Sub Category is required";
+      isValid = false;
+    }
+
+    // Validate Model
+    if (!formData.modelId) {
+      errors.modelId = "Model is required";
+      isValid = false;
+    }
+
+    // Validate No. of Services
+    if (!formData.noOfServices || formData.noOfServices <= 0) {
+      errors.noOfServices = "Number of services must be greater than 0";
+      isValid = false;
+    }
+
+    // Validate AMC Cost
+    if (!formData.costOfService || formData.costOfService <= 0) {
+      errors.costOfService = "AMC cost must be greater than 0";
+      isValid = false;
+    }
+
+    // Validate Duration
+    if (!formData.duration || formData.duration <= 0) {
+      errors.duration = "Duration must be greater than 0";
+      isValid = false;
+    }
+
+    // Validate Description
+    if (!formData.description.trim()) {
+      errors.description = "Description is required";
+      isValid = false;
+    }
+
+    setFormErrors(errors);
+    return isValid;
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      brandId: "",
+      categoryId: "",
+      subcategoryId: "",
+      modelId: "",
+      noOfServices: "",
+      costOfService: "",
+      duration: "",
+      description: "",
+    });
+    setFormErrors({
+      name: "",
+      brandId: "",
+      categoryId: "",
+      subcategoryId: "",
+      modelId: "",
+      noOfServices: "",
+      costOfService: "",
+      duration: "",
+      description: "",
+    });
+    setEditIndex(null);
+    setAmcId(null);
+    setCatDrop([]);
+    setSubCatDrop([]);
+    setModelDrop([]);
+  };
+
   const handleSubmit = async () => {
+    if (!validateForm()) {
+      toast.error("Please fill all required fields correctly");
+      return;
+    }
+
     console.log("FormData", formData);
     if (editindex != null) {
       let body = {
@@ -410,40 +547,18 @@ const Amc = () => {
         let res = await updateAmc(body);
         toast.success(res.message);
         setFlag(!flag);
-        setFormData({
-          name: "",
-          brandId: "",
-          categoryId: "",
-          subcategoryId: "",
-          modelId: "",
-          noOfServices: 0,
-          costOfService: 0,
-          duration: "",
-          description: "",
-        });
-        setAmcId(null);
-        setEditIndex(null);
+        resetForm();
       } catch (error) {
-        toast("Amc Add Failed");
+        toast.error("AMC Update Failed");
       }
     } else {
       try {
         let res = await addAmc(formData);
         toast.success(res.message);
         setFlag(!flag);
-        setFormData({
-          name: "",
-          brandId: "",
-          categoryId: "",
-          subcategoryId: "",
-          modelId: "",
-          noOfServices: 0,
-          costOfService: 0,
-          duration: "",
-          description: "",
-        });
+        resetForm();
       } catch (error) {
-        toast("Amc Add Failed");
+        toast.error("AMC Add Failed");
       }
     }
   };
@@ -460,18 +575,7 @@ const Amc = () => {
   };
 
   const handleClear = () => {
-    setEditIndex(null);
-    setFormData({
-      name: "",
-      brandId: "",
-      categoryId: "",
-      subcategoryId: "",
-      modelId: "", // Example model ID
-      noOfServices: 0,
-      costOfService: 0,
-      duration: "",
-      description: "",
-    });
+    resetForm();
   };
 
   const handleEdit = async (ind) => {
@@ -491,14 +595,10 @@ const Amc = () => {
           true
         );
         setCatDrop(response.data.categories);
-        // const activeCategories = response.data.categories.filter((category) => category.active);
-        // // Update the filtered category list
-        // setActiveFilteredCat(activeCategories);
-        // console.log(`response table is`, response.data.brandList);
       } catch (error) {
         console.error(`Error in filter list`, error);
       } finally {
-        setLoading(false); // Ensure loading is stopped in all cases
+        setLoading(false);
       }
     }
 
@@ -514,15 +614,10 @@ const Amc = () => {
           true
         );
         setSubCatDrop(response.data.subcategory);
-
-        // const activeSubCategories = filteredSubCat.filter((subcat) => subcat.active);
-        // setActiveFilteredSubCat(activeSubCategories);
-
-        // console.log(`response table is`, response.data.brandList);
       } catch (error) {
         console.error(`Error in filter list`, error);
       } finally {
-        setLoading(false); // Ensure loading is stopped in all cases
+        setLoading(false);
       }
     }
 
@@ -536,7 +631,7 @@ const Amc = () => {
           editData.brandId,
           editData.categoryId,
           editData.subcategoryId
-        ); // API call to fetch subcategories
+        );
         console.log("Fetched Modellist:", response);
         setModelDrop(response.data.models);
       } catch (error) {
@@ -551,7 +646,7 @@ const Amc = () => {
       brandId: editData.brandId,
       categoryId: editData.categoryId,
       subcategoryId: editData.subcategoryId,
-      modelId: editData.modelId, // Example model ID
+      modelId: editData.modelId,
       noOfServices: editData.noOfServices,
       costOfService: editData.costOfService,
       duration: editData.duration,
@@ -576,6 +671,11 @@ const Amc = () => {
               onChange={(e) => {
                 handleChange("name", e.target.value);
               }}
+              error={!!formErrors.name}
+              helperText={formErrors.name}
+              inputProps={{
+                maxLength: 100
+              }}
             />
           </div>
 
@@ -587,10 +687,10 @@ const Amc = () => {
               value={
                 activeBrandList.find(
                   (option) => option._id === formData.brandId
-                ) || ""
-              } // Controlled value
+                ) || null
+              }
               onChange={(event, val) => {
-                handleChange("brandId", val._id || "");
+                handleChange("brandId", val?._id || "");
               }}
               getOptionLabel={(option) => option.brandName || ""}
               renderInput={(params) => (
@@ -599,21 +699,23 @@ const Amc = () => {
                   label="Brand"
                   variant="standard"
                   style={{ width: "10rem" }}
+                  error={!!formErrors.brandId}
+                  helperText={formErrors.brandId}
                 />
               )}
             />
           </div>
           <div className="textinput-Amc">
             <Autocomplete
-              id="brand-autocomplete"
+              id="category-autocomplete"
               closeOnSelect
               options={catDrop}
               value={
                 catDrop.find((option) => option._id === formData.categoryId) ||
-                ""
-              } // Controlled value
+                null
+              }
               onChange={(event, val) => {
-                handleChange("categoryId", val._id || "");
+                handleChange("categoryId", val?._id || "");
               }}
               getOptionLabel={(option) => option.categoryName || ""}
               renderInput={(params) => (
@@ -622,22 +724,24 @@ const Amc = () => {
                   label="Category"
                   variant="standard"
                   style={{ width: "10rem" }}
+                  error={!!formErrors.categoryId}
+                  helperText={formErrors.categoryId}
                 />
               )}
             />
           </div>
           <div className="textinput-Amc">
             <Autocomplete
-              id="brand-autocomplete"
+              id="subcategory-autocomplete"
               closeOnSelect
               options={subCatDrop}
               value={
                 subCatDrop.find(
                   (option) => option._id === formData.subcategoryId
-                ) || ""
-              } // Controlled value
+                ) || null
+              }
               onChange={(event, val) => {
-                handleChange("subcategoryId", val._id || "");
+                handleChange("subcategoryId", val?._id || "");
               }}
               getOptionLabel={(option) => option.subcategoryName || ""}
               renderInput={(params) => (
@@ -646,6 +750,8 @@ const Amc = () => {
                   label="Sub Category"
                   variant="standard"
                   style={{ width: "10rem" }}
+                  error={!!formErrors.subcategoryId}
+                  helperText={formErrors.subcategoryId}
                 />
               )}
             />
@@ -655,15 +761,15 @@ const Amc = () => {
         <div className="line-Amc">
           <div className="textinput-Amc">
             <Autocomplete
-              id="brand-autocomplete"
+              id="model-autocomplete"
               closeOnSelect
               options={modelDrop}
               value={
                 modelDrop.find((option) => option._id === formData.modelId) ||
-                ""
-              } // Controlled value
+                null
+              }
               onChange={(event, val) => {
-                handleChange("modelId", val._id || "");
+                handleChange("modelId", val?._id || "");
               }}
               getOptionLabel={(option) => option.modelName || ""}
               renderInput={(params) => (
@@ -672,6 +778,8 @@ const Amc = () => {
                   label="Model"
                   variant="standard"
                   style={{ width: "10rem" }}
+                  error={!!formErrors.modelId}
+                  helperText={formErrors.modelId}
                 />
               )}
             />
@@ -682,9 +790,16 @@ const Amc = () => {
               id="standard-basic"
               label="No. of Services"
               variant="standard"
+              type="number"
               value={formData.noOfServices}
               onChange={(e) => {
                 handleChange("noOfServices", e.target.value);
+              }}
+              error={!!formErrors.noOfServices}
+              helperText={formErrors.noOfServices}
+              inputProps={{
+                min: 0,
+                step: 1
               }}
             />
           </div>
@@ -699,29 +814,34 @@ const Amc = () => {
               onChange={(e) => {
                 handleChange("costOfService", e.target.value);
               }}
+              error={!!formErrors.costOfService}
+              helperText={formErrors.costOfService}
+              inputProps={{
+                min: 0,
+                step: "0.01"
+              }}
             />
           </div>
           <div className="textinput-Amc">
             <TextField
-              type="text"
+              type="number"
               label="Duration (in Months)"
               variant="standard"
               value={formData.duration}
               onChange={(e) => {
                 handleChange("duration", e.target.value);
               }}
+              error={!!formErrors.duration}
+              helperText={formErrors.duration}
+              inputProps={{
+                min: 0,
+                step: 1
+              }}
             />
           </div>
         </div>
         <div className="line-Amc">
           <div className="textinput-Amc">
-            {/* <TextField
-              id="outlined-multiline-static"
-              label="Description"
-              multiline
-              rows={4}
-              // defaultValue="Default Value"
-            /> */}
             <TextField
               label="Description"
               variant="outlined"
@@ -731,63 +851,72 @@ const Amc = () => {
               onChange={(e) => {
                 handleChange("description", e.target.value);
               }}
-              sx={{ width: "400px", mb: 2, backgroundColor: "#fff !important" }}
+              error={!!formErrors.description}
+              helperText={formErrors.description}
+              sx={{ 
+                width: "400px", 
+                mb: 2, 
+                backgroundColor: "#fff !important",
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: formErrors.description ? '#d32f2f' : 'rgba(0, 0, 0, 0.23)',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: formErrors.description ? '#d32f2f' : 'rgba(0, 0, 0, 0.23)',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: formErrors.description ? '#d32f2f' : '#1976d2',
+                  },
+                }
+              }}
+              inputProps={{
+                maxLength: 500
+              }}
             />
           </div>
         </div>
 
-        <div className="buttons-Amc">
-          <span className="buttons-Amc-span">
-            <Button
-              onClick={handleSubmit}
-              sx={{
-                backgroundColor: "#33499F",
-                color: "white",
-                boxShadow: " 4px 2px 4px rgb(110, 142, 237)",
-                marginTop: "10px",
-                marginBottom: "10px",
-                fontSize: "14px",
-                minWidth: "100px",
-                // width: "auto",
-                // height: "38px",
-                textTransform: "none",
-                "&:hover": {
-                  backgroundColor: "#33499F",
-                },
-                display: "flex",
-              }}
-              variant="contained"
-            >
-              {editindex == null ? "Create" : "Update"}
-            </Button>
+        <div className="buttons-Amc" style={{ display: 'flex', justifyContent: 'flex-start', gap: '10px',marginBottom: "10px" }}>
+          <Button
+            onClick={handleSubmit}
 
-            <Button
-              onClick={handleClear}
-              sx={{
+            sx={{
+              backgroundColor: "#33499F",
+              color: "white",
+              boxShadow: "4px 2px 4px rgb(110, 142, 237)",
+              fontSize: "14px",
+              minWidth: "100px",
+              textTransform: "none",
+              "&:hover": {
                 backgroundColor: "#33499F",
-                color: "white",
-                boxShadow: " 4px 2px 4px rgb(110, 142, 237)",
-                marginTop: "10px",
-                marginBottom: "10px",
-                fontSize: "14px",
-                minWidth: "100px",
-                // width: "auto",
-                // height: "38px",
-                textTransform: "none",
-                "&:hover": {
-                  backgroundColor: "#33499F",
-                },
-                display: "flex",
-              }}
-              variant="contained"
-            >
-              Clear
-            </Button>
-          </span>
+              },
+            }}
+            variant="contained"
+          >
+            {editindex == null ? "Create" : "Update"}
+          </Button>
+
+          <Button
+            onClick={handleClear}
+            sx={{
+              backgroundColor: "#33499F",
+              color: "white",
+              boxShadow: "4px 2px 4px rgb(110, 142, 237)",
+              fontSize: "14px",
+              minWidth: "100px",
+              textTransform: "none",
+              "&:hover": {
+                backgroundColor: "#33499F",
+              },
+            }}
+            variant="contained"
+          >
+            Clear
+          </Button>
         </div>
       </div>
 
-      <div className="Secoundtextbox-amc">
+      <div className="Secoundtextbox-amc" style={{ marginBottom: "20px" }}>
         <div className="line-Amc">
           <div className="textinput-Amc">
             <TextField
@@ -811,9 +940,9 @@ const Amc = () => {
                 activeBrandListSearch.find(
                   (option) => option._id === searchParams.brandId
                 ) || null
-              } // Controlled value
+              }
               onChange={(event, val) => {
-                handleSearchChange("brandId", val ? val._id : ""); // Set brandId to empty string if no selection
+                handleSearchChange("brandId", val ? val._id : "");
               }}
               getOptionLabel={(option) => option.brandName || ""}
               renderInput={(params) => (
@@ -835,7 +964,7 @@ const Amc = () => {
                 catDropSearch.find(
                   (option) => option._id === searchParams.categoryId
                 ) || null
-              } // Controlled value
+              }
               onChange={(event, val) => {
                 handleSearchChange("categoryId", val._id);
               }}
@@ -859,7 +988,7 @@ const Amc = () => {
                 subCatDropSearch.find(
                   (option) => option._id === searchParams.subcategoryId
                 ) || ""
-              } // Controlled value
+              }
               onChange={(event, val) => {
                 handleSearchChange("subcategoryId", val._id);
               }}
@@ -876,64 +1005,48 @@ const Amc = () => {
           </div>
         </div>
 
-        {/* <div className="line-Amc"></div> */}
-
-        <div className="buttons-Amc">
-          <span className="buttons-Amc-span">
-            <Button
-              onClick={handleSearch}
-              sx={{
+        <div className="buttons-Amc" style={{ display: 'flex', justifyContent: 'flex-start', gap: '10px' }}>
+          <Button
+            onClick={handleSearch}
+            sx={{
+              backgroundColor: "#33499F",
+              color: "white",
+              boxShadow: "4px 2px 4px rgb(110, 142, 237)",
+              fontSize: "14px",
+              minWidth: "100px",
+              textTransform: "none",
+              "&:hover": {
                 backgroundColor: "#33499F",
-                color: "white",
-                boxShadow: " 4px 2px 4px rgb(110, 142, 237)",
-                marginTop: "10px",
-                marginBottom: "10px",
-                fontSize: "14px",
-                minWidth: "100px",
-                // width: "auto",
-                // height: "38px",
-                textTransform: "none",
-                "&:hover": {
-                  backgroundColor: "#33499F",
-                },
-                display: "flex",
-              }}
-              variant="contained"
-            >
-              Search
-            </Button>
-            <Button
-              onClick={handleShowAll}
-              sx={{
+              },
+            }}
+            variant="contained"
+          >
+            Search
+          </Button>
+          <Button
+            onClick={handleShowAll}
+            sx={{
+              backgroundColor: "#33499F",
+              color: "white",
+              boxShadow: "4px 2px 4px rgb(110, 142, 237)",
+              fontSize: "14px",
+              minWidth: "100px",
+              textTransform: "none",
+              "&:hover": {
                 backgroundColor: "#33499F",
-                color: "white",
-                boxShadow: " 4px 2px 4px rgb(110, 142, 237)",
-                marginTop: "10px",
-                marginBottom: "10px",
-                fontSize: "14px",
-                minWidth: "100px",
-                // width: "auto",
-                // height: "38px",
-                textTransform: "none",
-                "&:hover": {
-                  backgroundColor: "#33499F",
-                },
-                display: "flex",
-              }}
-              variant="contained"
-            >
-              Show All
-            </Button>
-          </span>
+              },
+            }}
+            variant="contained"
+          >
+            Show All
+          </Button>
         </div>
         <div className="table-Amc">
           <div className="excelexport-Amc">
             <span className="buttons-Amc-span">
               <ExportToExcel
                 name="Export to Excel"
-                // data={formattedAMC}
                 fileName="AMC_Data"
-                // headers={amcHeaders}
               />
             </span>
           </div>
@@ -941,6 +1054,9 @@ const Amc = () => {
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
               <TableHead>
                 <TableRow>
+                  <TableCell sx={{ color: "#fff" }} align="center">
+                    S.No.
+                  </TableCell>
                   <TableCell sx={{ color: "#fff" }} align="left">
                     AMC Name
                   </TableCell>
@@ -965,14 +1081,13 @@ const Amc = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {amcs &&
-                  amcs.length > 0 &&
+                {amcs && amcs.length > 0 ? (
                   amcs.map((elem, ind) => {
                     return (
-                      <TableRow>
+                      <TableRow key={elem._id}>
+                        <TableCell align="center">{ind + 1 + (page - 1) * pageSize}</TableCell>
                         <TableCell align="left">
                           {elem.name}
-                          {/* {amc.amcName} */}
                         </TableCell>
                         <TableCell align="center">
                           {elem?.brandDetails?.[0]?.brandName || "--"}
@@ -1033,9 +1148,14 @@ const Amc = () => {
                         </TableCell>
                       </TableRow>
                     );
-                  })}
-
-                {/* ))} */}
+                  })
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={8} align="center" sx={{ py: 3 }}>
+                      No data available
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </TableContainer>
